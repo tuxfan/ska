@@ -133,7 +133,8 @@ int main () { $3; }
 
 			if test -z "$$2_FRAMEWORK" ; then
 				AC_SUBST($2_LDFLAGS, [$lib_LDFLAGS])
-				AC_SUBST($2_LIBS, [$$2_LIBS])
+				FOUND_LIBS="$$2_LIBS $5"
+				AC_SUBST($2_LIBS, [$FOUND_LIBS])
 			else
 				AC_SUBST($2_LIBS, [$$2_FRAMEWORK])
 			fi

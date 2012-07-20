@@ -19,11 +19,18 @@ AC_SUBST(VERSION_INFORMATION)
 AM_INIT_AUTOMAKE
 
 #------------------------------------------------------------------------------#
+# Machine file specification
+#------------------------------------------------------------------------------#
+
+CONFIG_WITH_MACHINE("$srcdir/machine")
+
+#------------------------------------------------------------------------------#
 # Configuration targets
 #------------------------------------------------------------------------------#
 
 AC_CONFIG_FILES([Makefile \
-	lib/Makefile
+	lib/Makefile \
+	bin/Makefile
 ])
 
 #------------------------------------------------------------------------------#
@@ -32,6 +39,7 @@ AC_CONFIG_FILES([Makefile \
 
 AC_PROG_CXX
 AC_PROG_LIBTOOL
+CONFIG_PROG_LLVM_CONFIG
 
 #------------------------------------------------------------------------------#
 # With options
@@ -49,7 +57,14 @@ AC_PROG_LIBTOOL
 # LLVM
 #------------------------------------------------------------------------------#
 
-CONFIG_GENERIC_LIB(llvm, LLVM, [clReleaseMemObject ((cl_mem) 0)], C++)
+if test "$HAS_LLVM_CONFIG" = "yes" ; then
+	LLVM_DEPENDS=`llvm-config --libs`" -lpthread -ldl"
+fi
+
+CPPFLAGS="$CPPFLAGS -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS"
+
+CONFIG_GENERIC_LIB(llvm, LLVM, [llvm::Pass::createPass((llvm::AnalysisID) 0)],
+	C++, [$LLVM_DEPENDS])
 
 EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS $LLVM_CPPFLAGS"
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LLVM_LDFLAGS"
@@ -83,7 +98,7 @@ AC_SUBST(EXTRA_LIBS)
 #	AC_CONFIG_COMMANDS([doc], [make doc])
 #fi
 
-#AC_CONFIG_COMMANDS([remind], [make reminder])
+AC_CONFIG_COMMANDS([links], [make links])
 
 #------------------------------------------------------------------------------#
 # Output

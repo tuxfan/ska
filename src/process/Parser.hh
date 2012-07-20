@@ -5,9 +5,6 @@
 #ifndef Parser_hh
 #define Parser_hh
 
-#define __STDC_LIMIT_MACROS
-#define __STDC_CONSTANT_MACROS
-
 #include <vector>
 
 #include <llvm/Module.h>
@@ -97,8 +94,10 @@ parser_t::parser_t(const char * ir_file)
 						case llvm::Type::DoubleTyID:
 							p.getval(int_val, "latency::fadd::double");
 							break;
+				// FIXME
+						default:
+							break;
 					} // switch
-
 
 					std::cerr << "Found fadd" << std::endl;
 					llvm::errs() << "latency: " << int_val << "\n";
@@ -106,11 +105,17 @@ parser_t::parser_t(const char * ir_file)
 					break;
 
 				case llvm::Instruction::Alloca:
+					{
 					std::cerr << "Found alloca" << std::endl;
 					inst = new instruction_t(1);
 					llvm::AllocaInst * ainst = llvm::cast<llvm::AllocaInst>(&*ita);
 					llvm::Value * asize = ainst->getArraySize();
 					llvm::errs() << "size: " << *asize << "\n";
+					} // scope
+					break;
+			
+				// FIXME
+				default:
 					break;
 			} // switch
 
