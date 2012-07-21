@@ -20,7 +20,7 @@ std::string rstrip(const char * file) {
 	return tmp.substr(tmp.rfind(C)+1);
 } // rstrip
 
-#define ExitOnError(s,e)			\
+#define ExitOnError(s, e)			\
 	std::cerr << s << std::endl;	\
    std::cerr << std::flush;		\
 	std::exit((e));

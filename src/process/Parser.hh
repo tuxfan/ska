@@ -45,6 +45,7 @@ parser_t::parser_t(const char * ir_file)
 	: llvm_module_(nullptr)
 {
 	parameters_t & p = parameters_t::instance();
+	machine_state_t & state = machine_state_t::instance();
 	instruction_map_t processed;
 
 	llvm_module_ = ParseIRFile(ir_file, llvm_err_, llvm_context_);
@@ -54,13 +55,14 @@ parser_t::parser_t(const char * ir_file)
 		mita != llvm_module_->end(); ++mita) {
 
 		llvm::inst_iterator ita = inst_begin(mita);
-
 		
 		int32_t int_val;
-		machine_state_t machine;
 		instruction_list_t active;
+		instruction_vector_t function;
 
-		while(ita != inst_end(mita)) {
+		state.reset();
+
+		while(ita != inst_end(mita) || active.size()) {
 
 			// update queued instructions
 			auto a = active.begin();
@@ -77,7 +79,14 @@ parser_t::parser_t(const char * ir_file)
 
 			// issue new instructions
 			llvm::Value * value = &*ita;
-			instruction_t * inst;
+			instruction_t * inst = nullptr;
+
+			llvm::errs() << *ita << "\n";
+
+			// get instruction information
+			std::string str;
+			llvm::raw_string_ostream rso(str);
+			rso << *ita;
 
 			switch(ita->getOpcode()) {
 
@@ -89,38 +98,77 @@ parser_t::parser_t(const char * ir_file)
 						case llvm::Type::DoubleTyID:
 							p.getval(int_val, "latency::fadd::double");
 							break;
-				// FIXME
 						default:
+							ExitOnError("FAdd Unhandled Type",
+								ErrCode::UnknownCase);
 							break;
 					} // switch
 
 					std::cerr << "Found fadd" << std::endl;
 					llvm::errs() << "latency: " << int_val << "\n";
-					inst = new instruction_t(int_val);
+					inst = new instruction_t(int_val, rso.str());
+					break;
+
+				case llvm::Instruction::FMul:
+					switch(ita->getType()->getTypeID()) {
+						case llvm::Type::FloatTyID:
+							p.getval(int_val, "latency::fmul::float");
+							break;
+						case llvm::Type::DoubleTyID:
+							p.getval(int_val, "latency::fmul::double");
+							break;
+						default:
+							ExitOnError("FMul Unhandled Type",
+								ErrCode::UnknownCase);
+							break;
+					} // switch
+
+					std::cerr << "Found fmul" << std::endl;
+					llvm::errs() << "latency: " << int_val << "\n";
+					inst = new instruction_t(int_val, rso.str());
 					break;
 
 				case llvm::Instruction::Alloca:
-					{
 					std::cerr << "Found alloca" << std::endl;
-					inst = new instruction_t(1);
-					llvm::AllocaInst * ainst = llvm::cast<llvm::AllocaInst>(&*ita);
-					llvm::Value * asize = ainst->getArraySize();
-					llvm::errs() << "size: " << *asize << "\n";
-					} // scope
+					p.getval(int_val, "latency::alloca");
+					inst = new instruction_t(int_val, rso.str());
 					break;
 
 				case llvm::Instruction::Load:
 					std::cerr << "Found load" << std::endl;
+					p.getval(int_val, "latency::load");
+					inst = new instruction_t(int_val, rso.str());
 					break;
 			
 				case llvm::Instruction::GetElementPtr:
 					std::cerr << "Found getelementptr" << std::endl;
+					p.getval(int_val, "latency::getelementptr");
+					inst = new instruction_t(int_val, rso.str());
+					break;
+			
+				case llvm::Instruction::Br:
+					std::cerr << "Found br" << std::endl;
+					p.getval(int_val, "latency::br");
+					inst = new instruction_t(int_val, rso.str());
+					break;
+			
+				case llvm::Instruction::PHI:
+					std::cerr << "Found phi" << std::endl;
+					p.getval(int_val, "latency::phi");
+					inst = new instruction_t(int_val, rso.str());
 					break;
 			
 				// FIXME
 				default:
+					++ita;
+					state.advance();
+					continue;
+					//ExitOnError("Unhandled Instruction", ErrCode::UnknownCase);
 					break;
 			} // switch
+
+			// FIXME
+			state.advance();
 
 			// add dependencies
 			unsigned operands = ita->getNumOperands();
@@ -131,10 +179,18 @@ parser_t::parser_t(const char * ir_file)
 				} // if
 			} // for
 			
-			processed[value] = inst;
+			// need issue logic
 			active.push_back(inst);
+
+			function.push_back(inst);
+
+			processed[value] = inst;
 			++ita;
 		} // while
+
+		for(auto ita = function.begin(); ita != function.end(); ++ita) {
+			std::cerr << (*ita)->string() << std::endl;
+		} // for
 	} // for
 } // parser_t::parser_t
 

@@ -6,6 +6,11 @@
 #define Instruction_hh
 
 #include <vector>
+#include <string>
+#include <sstream>
+#include <cstdio>
+
+#include <MachineState.hh>
 
 namespace atlas {
 
@@ -17,11 +22,22 @@ public:
 		pending,
 		executing,
 		stalled,
+		last,
 		retired
 	}; // enum state_t
 
-	instruction_t(size_t latency)
-		: state_(pending), latency_(latency), cycles_(0) {}
+	instruction_t(size_t latency, std::string & ir)
+		: state_(pending), latency_(latency), cycles_(0), ir_(ir),
+		m_(machine_state_t::instance()) {
+
+		char buffer[256];
+		sprintf(buffer, "%010d  ", int(m_.current()));
+		stream_ << buffer;
+
+		for(size_t i(0); i<m_.current(); ++i) {
+			stream_ << ' ';
+		} // for
+	}
 
 	void add_dependency(instruction_t * inst) {
 		depends_.push_back(inst);
@@ -34,13 +50,28 @@ public:
 		for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
 			if((*ita)->state() != retired) {
 				state_ = stalled;
+				stream_ << '-';
 				return state_;
 			} // if
 		} // for
 
-		state_ = ++cycles_ == latency_ ? retired : executing;
+		state_ = ++cycles_ == latency_ ? last :
+			cycles_ > latency_ ? retired : executing;
+
+		if(state_ != retired) {
+			stream_ << m_.counter();
+		} // if
+
 		return state_;
 	} // advance
+
+	std::string string() {
+		while(stream_.str().size() < m_.current()+10) {
+			stream_ << ' ';
+		} // while
+
+		return stream_.str() + ir_;
+	} // string
 
 private:
 
@@ -49,6 +80,10 @@ private:
 	size_t cycles_;
 
 	std::vector<instruction_t *> depends_;
+	std::stringstream stream_;
+	std::string ir_;
+
+	machine_state_t & m_;
 
 }; // class instruction_t
 
