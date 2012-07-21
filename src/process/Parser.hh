@@ -6,6 +6,7 @@
 #define Parser_hh
 
 #include <vector>
+#include <list>
 
 #include <llvm/Module.h>
 #include <llvm/Function.h>
@@ -16,11 +17,18 @@
 #include <llvm/Support/IRReader.h>
 #include <llvm/Support/InstIterator.h>
 
+#include <Instruction.hh>
+#include <MachineState.hh>
+
 namespace atlas {
 
 class parser_t
 {
 public:
+
+	typedef std::map<llvm::Value *, instruction_t *> instruction_map_t;
+	typedef std::vector<instruction_t *> instruction_vector_t;
+	typedef std::list<instruction_t *> instruction_list_t;
 
 	parser_t(const char * ir_file);
 	~parser_t() {}
@@ -33,42 +41,11 @@ private:
 
 }; // class parser_t
 
-class instruction_t
-{
-public:
-
-	enum state_t {
-		pending,
-		executing,
-		completed,
-		stalled
-	}; // enum state_t
-
-	instruction_t(size_t latency)
-		: state_(pending), latency_(latency), cycles_(0) {}
-
-	void add_dependency(instruction_t * inst) {
-		depends_.push_back(inst);
-	} // add_dependency
-
-	void operator ()(size_t cycle) {
-	} // operator
-
-private:
-
-	state_t state_;
-	size_t latency_;
-	size_t cycles_;
-
-	std::vector<instruction_t *> depends_;
-
-}; // class instruction_t
-
 parser_t::parser_t(const char * ir_file)
 	: llvm_module_(nullptr)
 {
 	parameters_t & p = parameters_t::instance();
-	std::map<llvm::Value *, instruction_t *> dependencies;
+	instruction_map_t processed;
 
 	llvm_module_ = ParseIRFile(ir_file, llvm_err_, llvm_context_);
 
@@ -80,10 +57,28 @@ parser_t::parser_t(const char * ir_file)
 
 		
 		int32_t int_val;
+		machine_state_t machine;
+		instruction_list_t active;
+
 		while(ita != inst_end(mita)) {
+
+			// update queued instructions
+			auto a = active.begin();
+			while(a != active.end()) {
+				(*a)->advance();
+
+				if((*a)->state() == instruction_t::retired) {
+					active.erase(a++);
+				}
+				else {
+					++a;
+				} // if
+			} // for
+
+			// issue new instructions
 			llvm::Value * value = &*ita;
 			instruction_t * inst;
-			
+
 			switch(ita->getOpcode()) {
 
 				case llvm::Instruction::FAdd:
@@ -101,7 +96,7 @@ parser_t::parser_t(const char * ir_file)
 
 					std::cerr << "Found fadd" << std::endl;
 					llvm::errs() << "latency: " << int_val << "\n";
-					inst = new instruction_t(4);
+					inst = new instruction_t(int_val);
 					break;
 
 				case llvm::Instruction::Alloca:
@@ -113,47 +108,34 @@ parser_t::parser_t(const char * ir_file)
 					llvm::errs() << "size: " << *asize << "\n";
 					} // scope
 					break;
+
+				case llvm::Instruction::Load:
+					std::cerr << "Found load" << std::endl;
+					break;
+			
+				case llvm::Instruction::GetElementPtr:
+					std::cerr << "Found getelementptr" << std::endl;
+					break;
 			
 				// FIXME
 				default:
 					break;
 			} // switch
 
-			dependencies[value] = inst;
-			++ita;
-		} //
-
-#if 0
-		// visit instructions
-		for (llvm::inst_iterator ita = inst_begin(mita), E = inst_end(mita);
-			ita != E; ++ita) {
-			llvm::Value * value = &*ita;
-
-			std::cerr << "value address: " << value << std::endl;
-
-			llvm::errs() << (*ita) << "\n";
-			llvm::errs() << ita->getNumOperands() << "\n";
-			
-			switch(ita->getOpcode()) {
-				case llvm::Instruction::FAdd:
-					std::cerr << "Found Add" << std::endl;
-					llvm::Value * opval = &*(ita->getOperand(0));
-					std::cerr << "operand address: " << opval << std::endl;
-					llvm::errs() << "Op 0: " << *(ita->getOperand(0)) << "\n";
-					llvm::errs() << "Op 1: " << *(ita->getOperand(1)) << "\n";
-					break;
-			} // switch
-
-#if 0
-			for(size_t i(0); i<ita->getNumOperands(); ++i) {
-				llvm::Value * op = ita->getOperand(i);
-				llvm::errs() << "OP " << *op << "\n";
+			// add dependencies
+			unsigned operands = ita->getNumOperands();
+			for(unsigned i(0); i<operands; ++i) {
+				auto op = processed.find(ita->getOperand(i));
+				if(op != processed.end()) {
+					inst->add_dependency(op->second);
+				} // if
 			} // for
-#endif
-		} // for
-#endif
+			
+			processed[value] = inst;
+			active.push_back(inst);
+			++ita;
+		} // while
 	} // for
-
 } // parser_t::parser_t
 
 } // namespace atlas

@@ -11,8 +11,9 @@ config/depcomp
 config/install-sh
 config/ltmain.sh
 config/missing
+config/version
 configure
 configure.ac
 machine/
 src/include
-
+*.swp
