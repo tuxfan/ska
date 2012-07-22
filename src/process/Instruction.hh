@@ -27,12 +27,8 @@ public:
 	}; // enum state_t
 
 	instruction_t(size_t latency, std::string & ir)
-		: state_(pending), latency_(latency), cycles_(0), ir_(ir),
-		m_(machine_state_t::instance()) {
-
-		char buffer[256];
-		sprintf(buffer, "%010d  ", int(m_.current()));
-		stream_ << buffer;
+		: state_(pending), latency_(latency), cycles_(0), issue_(0),
+		ir_(ir), m_(machine_state_t::instance()) {
 
 		for(size_t i(0); i<m_.current(); ++i) {
 			stream_ << ' ';
@@ -55,6 +51,8 @@ public:
 			} // if
 		} // for
 
+		if(cycles_ == 0) { issue_ = m_.current() - 1; }
+
 		state_ = ++cycles_ == latency_ ? last :
 			cycles_ > latency_ ? retired : executing;
 
@@ -70,7 +68,10 @@ public:
 			stream_ << ' ';
 		} // while
 
-		return stream_.str() + ir_;
+		char buffer[256];
+		sprintf(buffer, "%06d  ", int(issue_));
+
+		return buffer + stream_.str() + ir_;
 	} // string
 
 private:
@@ -78,6 +79,7 @@ private:
 	state_t state_;
 	size_t latency_;
 	size_t cycles_;
+	size_t issue_;
 
 	std::vector<instruction_t *> depends_;
 	std::stringstream stream_;

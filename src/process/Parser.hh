@@ -19,6 +19,7 @@
 
 #include <Instruction.hh>
 #include <MachineState.hh>
+#include <Metric.hh>
 
 namespace atlas {
 
@@ -46,6 +47,7 @@ parser_t::parser_t(const char * ir_file)
 {
 	parameters_t & p = parameters_t::instance();
 	machine_state_t & state = machine_state_t::instance();
+	metric_t & metric = metric_t::instance();
 	instruction_map_t processed;
 
 	llvm_module_ = ParseIRFile(ir_file, llvm_err_, llvm_context_);
@@ -64,7 +66,7 @@ parser_t::parser_t(const char * ir_file)
 
 		while(ita != inst_end(mita) || active.size()) {
 
-			// update queued instructions
+			// update executing instructions
 			auto a = active.begin();
 			while(a != active.end()) {
 				(*a)->advance();
@@ -80,8 +82,6 @@ parser_t::parser_t(const char * ir_file)
 			// issue new instructions
 			llvm::Value * value = &*ita;
 			instruction_t * inst = nullptr;
-
-			llvm::errs() << *ita << "\n";
 
 			// get instruction information
 			std::string str;
@@ -104,8 +104,9 @@ parser_t::parser_t(const char * ir_file)
 							break;
 					} // switch
 
+					metric["flops"]++;
+
 					std::cerr << "Found fadd" << std::endl;
-					llvm::errs() << "latency: " << int_val << "\n";
 					inst = new instruction_t(int_val, rso.str());
 					break;
 
@@ -123,8 +124,9 @@ parser_t::parser_t(const char * ir_file)
 							break;
 					} // switch
 
+					metric["flops"]++;
+
 					std::cerr << "Found fmul" << std::endl;
-					llvm::errs() << "latency: " << int_val << "\n";
 					inst = new instruction_t(int_val, rso.str());
 					break;
 
@@ -136,6 +138,9 @@ parser_t::parser_t(const char * ir_file)
 
 				case llvm::Instruction::Load:
 					std::cerr << "Found load" << std::endl;
+
+					metric["loads"]++;
+
 					p.getval(int_val, "latency::load");
 					inst = new instruction_t(int_val, rso.str());
 					break;
@@ -191,6 +196,9 @@ parser_t::parser_t(const char * ir_file)
 		for(auto ita = function.begin(); ita != function.end(); ++ita) {
 			std::cerr << (*ita)->string() << std::endl;
 		} // for
+
+		std::cerr << "flops: " << metric["flops"] << std::endl;
+		std::cerr << "loads: " << metric["loads"] << std::endl;
 	} // for
 } // parser_t::parser_t
 
