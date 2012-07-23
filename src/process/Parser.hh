@@ -107,7 +107,6 @@ parser_t::parser_t(const char * ir_file)
 					metric["flops"]++;
 
 					std::cerr << "Found fadd" << std::endl;
-					inst = new instruction_t(int_val, rso.str());
 					break;
 
 				case llvm::Instruction::FMul:
@@ -127,13 +126,11 @@ parser_t::parser_t(const char * ir_file)
 					metric["flops"]++;
 
 					std::cerr << "Found fmul" << std::endl;
-					inst = new instruction_t(int_val, rso.str());
 					break;
 
 				case llvm::Instruction::Alloca:
 					std::cerr << "Found alloca" << std::endl;
 					p.getval(int_val, "latency::alloca");
-					inst = new instruction_t(int_val, rso.str());
 					break;
 
 				case llvm::Instruction::Load:
@@ -142,25 +139,21 @@ parser_t::parser_t(const char * ir_file)
 					metric["loads"]++;
 
 					p.getval(int_val, "latency::load");
-					inst = new instruction_t(int_val, rso.str());
 					break;
 			
 				case llvm::Instruction::GetElementPtr:
 					std::cerr << "Found getelementptr" << std::endl;
 					p.getval(int_val, "latency::getelementptr");
-					inst = new instruction_t(int_val, rso.str());
 					break;
 			
 				case llvm::Instruction::Br:
 					std::cerr << "Found br" << std::endl;
 					p.getval(int_val, "latency::br");
-					inst = new instruction_t(int_val, rso.str());
 					break;
 			
 				case llvm::Instruction::PHI:
 					std::cerr << "Found phi" << std::endl;
 					p.getval(int_val, "latency::phi");
-					inst = new instruction_t(int_val, rso.str());
 					break;
 			
 				// FIXME
@@ -171,6 +164,8 @@ parser_t::parser_t(const char * ir_file)
 					//ExitOnError("Unhandled Instruction", ErrCode::UnknownCase);
 					break;
 			} // switch
+
+			inst = new instruction_t(int_val, rso.str());
 
 			// FIXME
 			state.advance();
