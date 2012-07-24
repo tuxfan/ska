@@ -12,7 +12,7 @@
 #include <DataBase.hh>
 #include <LogUtils.hh>
 
-namespace atlas {
+namespace ska {
 
 std::string transcoder(const XMLCh * const code) {
 	char * a = XERCES_CPP_NAMESPACE::XMLString::transcode(code);
@@ -156,6 +156,6 @@ private:
 
 }; // class XercesIO
 
-} // namespace atlas
+} // namespace ska
 
 #endif // XercesIO_h

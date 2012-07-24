@@ -14,7 +14,7 @@
 #include <LogUtils.hh>
 #include <DataBase.hh>
 
-namespace atlas {
+namespace ska {
 
 #ifndef real_t
 #define real_t float
@@ -348,14 +348,6 @@ private:
 	} // file_init
 
 	void default_init() {
-		db_["problem name"] =
-			db_tuple_t(db_element_t::string, "Test Problem");
-		db_["dt"] =
-			db_tuple_t(db_element_t::real, "0.000005");
-		db_["restart"] =
-			db_tuple_t(db_element_t::boolean, "false");
-		db_["restart cycle"] =
-			db_tuple_t(db_element_t::size, "0");
 	} // default_init
 
 	db_t db_;
@@ -368,7 +360,7 @@ std::ostream & operator << (std::ostream & stream,
 	return stream;
 } // operator <<
 
-} // namespace atlas
+} // namespace ska
 
 #endif // parameters_t_hh
 

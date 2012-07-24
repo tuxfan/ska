@@ -9,7 +9,7 @@
 #include <tuple>
 #include <string>
 
-namespace atlas {
+namespace ska {
 
 enum db_element_t {
 	boolean,
@@ -66,7 +66,7 @@ std::ostream & operator << (std::ostream & stream, const db_t & db) {
 	return stream;
 } // operator <<
 
-} // namespace atlas
+} // namespace ska
 
 #endif // DataBase_hh
 

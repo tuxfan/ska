@@ -12,19 +12,27 @@
 
 #include <MachineState.hh>
 
-namespace atlas {
+namespace ska {
 
 class instruction_t
 {
 public:
 
+	/*-------------------------------------------------------------------------*
+	 * Instruction state type.
+	 *-------------------------------------------------------------------------*/
+
 	enum state_t {
 		pending,
-		executing,
 		stalled,
+		executing,
 		last,
 		retired
 	}; // enum state_t
+
+	/*-------------------------------------------------------------------------*
+	 * Constructor.
+	 *-------------------------------------------------------------------------*/
 
 	instruction_t(size_t latency, std::string & ir)
 		: state_(pending), latency_(latency), cycles_(0), issue_(0),
@@ -33,15 +41,35 @@ public:
 		for(size_t i(0); i<m_.current(); ++i) {
 			stream_ << ' ';
 		} // for
-	}
+	} // instruction_t
+
+	/*-------------------------------------------------------------------------*
+	 * Destructor.
+	 *-------------------------------------------------------------------------*/
+
+	~instruction_t() {}
+
+	/*-------------------------------------------------------------------------*
+	 * Add instruction dependencies.
+	 *-------------------------------------------------------------------------*/
 
 	void add_dependency(instruction_t * inst) {
 		depends_.push_back(inst);
 	} // add_dependency
 
+	/*-------------------------------------------------------------------------*
+	 * Return current state.
+	 *-------------------------------------------------------------------------*/
+
 	state_t state() { return state_; }
 
+	/*-------------------------------------------------------------------------*
+	 * Advance instruction state.
+	 *-------------------------------------------------------------------------*/
+
 	state_t advance() {
+		// check for structural hazards
+
 		// check for active dependencies
 		for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
 			if((*ita)->state() != retired) {
@@ -62,6 +90,10 @@ public:
 
 		return state_;
 	} // advance
+
+	/*-------------------------------------------------------------------------*
+	 * Return execution history as a string.
+	 *-------------------------------------------------------------------------*/
 
 	std::string string() {
 		while(stream_.str().size() < m_.current()+10) {
@@ -89,6 +121,6 @@ private:
 
 }; // class instruction_t
 
-} // namespace atlas
+} // namespace ska
 
 #endif // Instruction_hh

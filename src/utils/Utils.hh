@@ -11,7 +11,7 @@
 #include <sstream>
 #include <typeinfo>
 
-namespace atlas {
+namespace ska {
 
 #if defined(DEBUG)
 #include <cassert>
@@ -201,7 +201,7 @@ bool stdMapKeyDoesNotExist(const std::map<Key, Value> & map, Key key)
 		return i == map.end() ? true : false;
 	} // stdMapKeyDoesNotExist
 
-} // namespace atlas
+} // namespace ska
 
 #endif // Utils_hh
 
