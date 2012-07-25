@@ -2,7 +2,6 @@ lib
 Makefile
 Makefile.in
 aclocal.m4
-architecture/
 autom4te.cache/
 build/
 config/config.guess

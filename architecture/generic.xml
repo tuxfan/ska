@@ -1,0 +1,365 @@
+<?xml version = "1.0" encoding = "iso-8859-1"?>
+<!DOCTYPE root [
+	<!ELEMENT root (value*)>
+	<!ATTLIST root label CDATA #REQUIRED>
+	<!ELEMENT value (boolean|real|string|integer|size|
+		boolean_vector|real_vector|string_vector|integer_vector|size_vector)+>
+		<!ATTLIST value	key CDATA #REQUIRED>
+		<!ELEMENT boolean (#PCDATA)>
+		<!ELEMENT real (#PCDATA)>
+		<!ELEMENT string (#PCDATA)>
+		<!ELEMENT integer (#PCDATA)>
+		<!ELEMENT size (#PCDATA)>
+		<!ELEMENT boolean_vector (#PCDATA)>
+		<!ELEMENT real_vector (#PCDATA)>
+		<!ELEMENT string_vector (#PCDATA)>
+		<!ELEMENT integer_vector (#PCDATA)>
+		<!ELEMENT size_vector (#PCDATA)>
+]>
+
+<root label="1.0">
+
+<value key="name">
+	<string>Generic</string>
+</value>
+
+<!--***************************************************************************
+ ******************************************************************************
+ * Core features
+ ******************************************************************************
+ ****************************************************************************-->
+
+<value key="core::max_issue">
+	<integer>2</integer>
+</value>
+
+<!--***************************************************************************
+ ******************************************************************************
+ * ALUs
+ ******************************************************************************
+ ****************************************************************************-->
+
+<value key="alus">
+	<integer>3</integer>
+</value>
+
+<value key="alu::0">
+	<string>add fadd sub fsub mul fmul udiv sdiv fdiv urem srem frem</string>
+</value>
+
+<value key="alu::1">
+	<string>alloca load store getelementptr br phi trunc icmp ret</string>
+</value>
+
+<value key="alu::2">
+	<string>sin cos tan rsqrt</string>
+</value>
+
+<!--***************************************************************************
+ ******************************************************************************
+ * Instructions
+ ******************************************************************************
+ ****************************************************************************-->
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Terminator Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ret -->
+<value key="latency::ret">
+	<integer>1</integer>
+</value>
+
+<!-- br -->
+<value key="latency::br">
+	<integer>1</integer>
+</value>
+
+<!-- switch -->
+<value key="latency::switch">
+	<integer>1</integer>
+</value>
+
+<!-- indirectbr -->
+<value key="latency::indirectbr">
+	<integer>1</integer>
+</value>
+
+<!-- invoke -->
+<value key="latency::invoke">
+	<integer>1</integer>
+</value>
+
+<!-- resume -->
+<value key="latency::resume">
+	<integer>1</integer>
+</value>
+
+<!-- unreachable -->
+<value key="latency::unreachable">
+	<integer>1</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Standard Binary Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- add -->
+<value key="latency::add">
+	<integer>4</integer>
+</value>
+
+<!-- fadd -->
+<value key="latency::fadd::float">
+	<integer>4</integer>
+</value>
+
+<value key="latency::fadd::double">
+	<integer>8</integer>
+</value>
+
+<!-- sub -->
+<value key="latency::sub">
+	<integer>4</integer>
+</value>
+
+<!-- fsub -->
+<value key="latency::fsub::float">
+	<integer>10</integer>
+</value>
+
+<value key="latency::fsub::double">
+	<integer>8</integer>
+</value>
+
+<!-- mul -->
+<value key="latency::mul">
+	<integer>2</integer>
+</value>
+
+<!-- fmul -->
+<value key="latency::fmul::float">
+	<integer>6</integer>
+</value>
+
+<value key="latency::fmul::double">
+	<integer>8</integer>
+</value>
+
+<!-- div -->
+<value key="latency::udiv">
+	<integer>4</integer>
+</value>
+
+<value key="latency::sdiv">
+	<integer>6</integer>
+</value>
+
+<value key="latency::fdiv::float">
+	<integer>4</integer>
+</value>
+
+<value key="latency::fdiv::double">
+	<integer>8</integer>
+</value>
+
+<!-- rem -->
+<value key="latency::urem">
+	<integer>4</integer>
+</value>
+
+<value key="latency::srem">
+	<integer>6</integer>
+</value>
+
+<value key="latency::frem::float">
+	<integer>4</integer>
+</value>
+
+<value key="latency::frem::double">
+	<integer>8</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Logical Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- shift -->
+<value key="latency::shl">
+	<integer>1</integer>
+</value>
+
+<value key="latency::lshr">
+	<integer>1</integer>
+</value>
+
+<value key="latency::ashr">
+	<integer>1</integer>
+</value>
+
+<!-- standard unary -->
+<value key="latency::and">
+	<integer>1</integer>
+</value>
+
+<value key="latency::or">
+	<integer>1</integer>
+</value>
+
+<value key="latency::xor">
+	<integer>1</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Memory Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- alloca -->
+<value key="latency::alloca">
+	<integer>1</integer>
+</value>
+
+<!-- load -->
+<value key="latency::load">
+	<integer>4</integer>
+</value>
+
+<!-- store -->
+<value key="latency::store">
+	<integer>4</integer>
+</value>
+
+<!-- getelementptr -->
+<value key="latency::getelementptr">
+	<integer>1</integer>
+</value>
+
+<!-- fence -->
+<value key="latency::fence">
+	<integer>1</integer>
+</value>
+
+<!-- atomiccmpxchg -->
+<value key="latency::atomiccmpxchg">
+	<integer>1</integer>
+</value>
+
+<!-- atomicrmw -->
+<value key="latency::atomicrmw">
+	<integer>1</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Cast Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<value key="latency::trunc">
+	<integer>1</integer>
+</value>
+
+<value key="latency::zext">
+	<integer>1</integer>
+</value>
+
+<value key="latency::sext">
+	<integer>1</integer>
+</value>
+
+<value key="latency::fptoui">
+	<integer>1</integer>
+</value>
+
+<value key="latency::fptosi">
+	<integer>1</integer>
+</value>
+
+<value key="latency::uitofp">
+	<integer>1</integer>
+</value>
+
+<value key="latency::sitofp">
+	<integer>1</integer>
+</value>
+
+<value key="latency::fptrunc">
+	<integer>1</integer>
+</value>
+
+<value key="latency::fpext">
+	<integer>1</integer>
+</value>
+
+<value key="latency::ptrtoint">
+	<integer>1</integer>
+</value>
+
+<value key="latency::inttoptr">
+	<integer>1</integer>
+</value>
+
+<value key="latency::bitcast">
+	<integer>1</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Other Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<value key="latency::icmp">
+	<integer>1</integer>
+</value>
+
+<value key="latency::fcmp">
+	<integer>1</integer>
+</value>
+
+<!-- phi -->
+<value key="latency::phi">
+	<integer>1</integer>
+</value>
+
+<value key="latency::call">
+	<integer>1</integer>
+</value>
+
+<value key="latency::select">
+	<integer>1</integer>
+</value>
+
+<value key="latency::userop1">
+	<integer>1</integer>
+</value>
+
+<value key="latency::userop2">
+	<integer>1</integer>
+</value>
+
+<value key="latency::vaarg">
+	<integer>1</integer>
+</value>
+
+<value key="latency::extractelement">
+	<integer>1</integer>
+</value>
+
+<value key="latency::insertelement">
+	<integer>1</integer>
+</value>
+
+<value key="latency::shufflevector">
+	<integer>1</integer>
+</value>
+
+<value key="latency::extractvalue">
+	<integer>1</integer>
+</value>
+
+<value key="latency::insertvalue">
+	<integer>1</integer>
+</value>
+
+<value key="latency::landingpad">
+	<integer>1</integer>
+</value>
+
+</root>
