@@ -125,14 +125,23 @@ parser_t::parser_t(const char * ir_file)
 			size_t issued(0);
 			bool issue(true);
 			while(issue && issued < core.max_issue()) {
+
+				std::string str;
+				llvm::raw_string_ostream rso(str);
+				rso << *ita;
+
+				std::cerr << rso.str() << std::endl;
+
 				if(core.accept(ita->getOpcode())) {
 					value = &*ita;			
 
+/*
 					std::string str;
 					llvm::raw_string_ostream rso(str);
 					rso << *ita;
 
 					std::cerr << rso.str() << std::endl;
+*/
 
 					int32_t latency = decode(&*ita);
 
