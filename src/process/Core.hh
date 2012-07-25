@@ -28,14 +28,14 @@ public:
 		units_.push_back(alu);
 	} // add_unit
 
-	bool accept(unsigned op) {
+	int32_t accept(unsigned op) {
 		for(auto unit = units_.begin(); unit != units_.end(); ++unit) {
 			if((*unit)->issue(op)) {
-				return true;
+				return (*unit)->id();
 			} // if
 		} // for
 
-		return false;
+		return -1;
 	} // accept
 
 #if 0

@@ -67,7 +67,7 @@ parser_t::parser_t(const char * ir_file)
 	arch.getval(alus, "alus");
 
 	for(int i(0); i<alus; ++i) {
-		alu_t * alu = new alu_t;
+		alu_t * alu = new alu_t(i);
 
 		char key[256];
 		sprintf(key, "alu::%d", i);
@@ -125,23 +125,13 @@ parser_t::parser_t(const char * ir_file)
 			size_t issued(0);
 			bool issue(true);
 			while(issue && issued < core.max_issue()) {
-
-				std::string str;
-				llvm::raw_string_ostream rso(str);
-				rso << *ita;
-
-				std::cerr << rso.str() << std::endl;
-
-				if(core.accept(ita->getOpcode())) {
+				int32_t id = core.accept(ita->getOpcode());
+				if(id >= 0) {
 					value = &*ita;			
 
-/*
 					std::string str;
 					llvm::raw_string_ostream rso(str);
 					rso << *ita;
-
-					std::cerr << rso.str() << std::endl;
-*/
 
 					int32_t latency = decode(&*ita);
 
@@ -156,7 +146,7 @@ parser_t::parser_t(const char * ir_file)
 					 * Create instruction and add dependencies
 					 *-------------------------------------------------------------*/
 
-					inst = new instruction_t(latency, rso.str());
+					inst = new instruction_t(id, latency, issued > 0, rso.str());
 
 					unsigned operands = ita->getNumOperands();
 					for(unsigned i(0); i<operands; ++i) {
@@ -184,6 +174,7 @@ parser_t::parser_t(const char * ir_file)
 					 * Advance LLVM instruction stream
 					 *-------------------------------------------------------------*/
 
+					++issued;
 					++ita;
 				}
 				else {
@@ -195,56 +186,6 @@ parser_t::parser_t(const char * ir_file)
 			// FIXME: consolidate
 			core.advance();
 			state.advance();
-#if 0			
-			//
-			llvm::Value * value = &*ita;
-			instruction_t * inst = nullptr;
-
-			/*-------------------------------------------------------------------*
-			 * Get string version of LLVM Value
-			 *-------------------------------------------------------------------*/
-
-			std::string str;
-			llvm::raw_string_ostream rso(str);
-			rso << *ita;
-
-			/*-------------------------------------------------------------------*
-			 * Create instruction
-			 *-------------------------------------------------------------------*/
-
-			int32_t latency = decode(&*ita);
-
-			if(latency == -1) {
-				++ita;
-				state.advance();
-				continue;
-			} // if
-
-			inst = new instruction_t(latency, rso.str());
-
-			// FIXME
-			state.advance();
-
-			/*-------------------------------------------------------------------*
-			 * Add dependencies to instruction
-			 *-------------------------------------------------------------------*/
-
-			unsigned operands = ita->getNumOperands();
-			for(unsigned i(0); i<operands; ++i) {
-				auto op = processed.find(ita->getOperand(i));
-				if(op != processed.end()) {
-					inst->add_dependency(op->second);
-				} // if
-			} // for
-			
-			// need issue logic
-			active.push_back(inst);
-
-			instructions.push_back(inst);
-
-			processed[value] = inst;
-			++ita;
-#endif
 		} // while
 
 		for(auto ita = instructions.begin(); ita != instructions.end(); ++ita) {
@@ -322,6 +263,16 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 
 				// add load to metric tracker
 				metric["loads"]++;
+				break;
+			} // scope
+	
+		case llvm::Instruction::Store:
+			{
+				// get the instruction latency
+				arch.getval(latency, "latency::store");
+
+				// add load to metric tracker
+				metric["stores"]++;
 				break;
 			} // scope
 	

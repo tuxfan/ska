@@ -19,8 +19,8 @@ public:
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
 
-	alu_t()
-		: state_(ready) {}
+	alu_t(int32_t id)
+		: state_(ready), id_(id) {}
 
 	/*-------------------------------------------------------------------------*
 	 * Destructor.
@@ -65,6 +65,8 @@ public:
 
 	state_t state() const { return state_; }
 
+	int32_t id() const { return id_; }
+
 	/*-------------------------------------------------------------------------*
 	 * Return true if this ALU can execute the given opcode, false otherwise.
 	 *-------------------------------------------------------------------------*/
@@ -76,6 +78,7 @@ public:
 private:
 
 	state_t state_;
+	int32_t id_;
 	std::set<unsigned> codes_;
 
 }; // class alu_t
