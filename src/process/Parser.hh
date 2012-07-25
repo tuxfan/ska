@@ -11,17 +11,19 @@
 #include <list>
 
 #include <llvm/Module.h>
+#include <llvm/Constants.h>
 #include <llvm/Function.h>
 #include <llvm/Instruction.h>
 #include <llvm/Instructions.h>
 #include <llvm/LLVMContext.h>
+#include <llvm/ADT/APInt.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/IRReader.h>
 #include <llvm/Support/InstIterator.h>
 
 #include <Instruction.hh>
 #include <MachineState.hh>
-#include <Metric.hh>
+#include <Statistics.hh>
 #include <OpCodes.hh>
 #include <Core.hh>
 
@@ -40,6 +42,8 @@ public:
 
 	int32_t decode(llvm::Instruction * instruction);
 
+	size_t alloca_bytes(llvm::Type * type);
+
 private:
 
 	llvm::SMDiagnostic llvm_err_;
@@ -53,7 +57,7 @@ parser_t::parser_t(const char * ir_file)
 {
 	parameters_t & arch = parameters_t::instance();
 	machine_state_t & state = machine_state_t::instance();
-	metric_t & metric = metric_t::instance();
+	statistics_t & stats = statistics_t::instance();
 	instruction_map_t processed;
 
 //////
@@ -192,14 +196,15 @@ parser_t::parser_t(const char * ir_file)
 			std::cerr << (*ita)->string() << std::endl;
 		} // for
 
-		std::cerr << "flops: " << metric["flops"] << std::endl;
-		std::cerr << "loads: " << metric["loads"] << std::endl;
+		std::cerr << "allocs: " << stats["allocs"] << std::endl;
+		std::cerr << "flops: " << stats["flops"] << std::endl;
+		std::cerr << "loads: " << stats["loads"] << std::endl;
 	} // for
 } // parser_t::parser_t
 
 int32_t parser_t::decode(llvm::Instruction * instruction) {
 	parameters_t & arch = parameters_t::instance();
-	metric_t & metric = metric_t::instance();
+	statistics_t & stats = statistics_t::instance();
 	int32_t latency(-1);
 
 	switch(instruction->getOpcode()) {
@@ -220,8 +225,8 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 						break;
 				} // switch
 
-				// add flop to metric tracker
-				metric["flops"]++;
+				// add flop to stats tracker
+				stats["flops"]++;
 				break;
 			} // scope
 
@@ -241,8 +246,8 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 						break;
 				} // switch
 
-				// add flop to metric tracker
-				metric["flops"]++;
+				// add flop to stats tracker
+				stats["flops"]++;
 				break;
 			} // scope
 
@@ -251,7 +256,10 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 				// get the instruction latency
 				arch.getval(latency, "latency::alloca");
 
-				// FIXME: add bytes allocated
+				// get the amount of stack memory allocated
+				llvm::AllocaInst * ainst =
+					llvm::cast<llvm::AllocaInst>(instruction);
+				stats["allocs"] += alloca_bytes(ainst->getType());
 
 				break;
 			} // scope
@@ -261,8 +269,8 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 				// get the instruction latency
 				arch.getval(latency, "latency::load");
 
-				// add load to metric tracker
-				metric["loads"]++;
+				// add load to stats tracker
+				stats["loads"]++;
 				break;
 			} // scope
 	
@@ -271,8 +279,8 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 				// get the instruction latency
 				arch.getval(latency, "latency::store");
 
-				// add load to metric tracker
-				metric["stores"]++;
+				// add load to stats tracker
+				stats["stores"]++;
 				break;
 			} // scope
 	
@@ -304,21 +312,76 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 				break;
 			} // scope
 	
-		// FIXME
 		default:
 			{
-#if 0
-				++ita;
-				state.advance();
-				continue;
-				//ExitOnError("Unhandled Instruction", ErrCode::UnknownCase);
-#endif
-				break;
+				ExitOnError("Unhandled Instruction", ErrCode::UnknownCase);
 			} // scope
 	} // switch
 
 	return latency;
 } // parser_t::decode
+
+size_t parser_t::alloca_bytes(llvm::Type * type) {
+	switch(type->getTypeID()) {
+
+		case llvm::Type::VoidTyID:
+			return sizeof(nullptr);
+
+		case llvm::Type::HalfTyID:
+			break;
+
+		case llvm::Type::FloatTyID:
+			return 4;
+
+		case llvm::Type::DoubleTyID:
+			return 8;
+
+		case llvm::Type::X86_FP80TyID:
+			break;
+
+		case llvm::Type::FP128TyID:
+			break;
+
+		case llvm::Type::PPC_FP128TyID:
+			break;
+
+		case llvm::Type::LabelTyID:
+			break;
+
+		case llvm::Type::MetadataTyID:
+			break;
+
+		case llvm::Type::X86_MMXTyID:
+			break;
+
+		case llvm::Type::IntegerTyID:
+			break;
+
+		case llvm::Type::FunctionTyID:
+			break;
+
+		case llvm::Type::StructTyID:
+			break;
+
+		case llvm::Type::ArrayTyID:
+			return type->getArrayNumElements() *
+				alloca_bytes(type->getArrayElementType());
+
+		case llvm::Type::PointerTyID:
+			return alloca_bytes(type->getPointerElementType());
+
+		case llvm::Type::VectorTyID:
+			break;
+
+		case llvm::Type::NumTypeIDs:
+			break;
+
+		default:
+			break;
+	} // switch
+
+	return 0;
+} // parser_t::alloca_bytes
 
 } // namespace ska
 
