@@ -3,6 +3,10 @@
 
 #include <set>
 
+#include <Instruction.hh>
+
+namespace ska {
+
 class alu_t
 {
 public:
@@ -20,7 +24,7 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	alu_t(int32_t id)
-		: state_(ready), id_(id) {}
+		: state_(ready), id_(id), current_(nullptr) {}
 
 	/*-------------------------------------------------------------------------*
 	 * Destructor.
@@ -37,13 +41,15 @@ public:
 	 * false otherwise.
 	 *-------------------------------------------------------------------------*/
 
-	bool issue(unsigned op) {
+	bool issue(unsigned op, instruction_t * inst) {
 		if(state_ == busy) {
 			return false;
 		}
 
 		if(codes_.find(op) != codes_.end()) {
 			state_ = busy;
+			current_ = inst;
+			current_->issue(id_);
 			return true;
 		} // if
 
@@ -55,7 +61,17 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	state_t advance() {
-		state_ = ready;
+		if(current_ == nullptr) {
+			state_ = ready;
+		}
+		else if(current_->state() != instruction_t::stalled) {
+			state_ = ready;
+			current_ = nullptr;
+		}
+		else {
+			state_ = busy;
+		} // if
+
 		return state_;
 	}
 
@@ -80,7 +96,10 @@ private:
 	state_t state_;
 	int32_t id_;
 	std::set<unsigned> codes_;
+	instruction_t * current_;
 
 }; // class alu_t
+
+} // namespace ska
 
 #endif // ALU_hh

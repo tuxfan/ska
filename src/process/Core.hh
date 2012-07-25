@@ -2,6 +2,9 @@
 #define Core_hh
 
 #include <ALU.hh>
+#include <MachineState.hh>
+
+namespace ska {
 
 class core_t
 {
@@ -28,9 +31,14 @@ public:
 		units_.push_back(alu);
 	} // add_unit
 
-	int32_t accept(unsigned op) {
+	/*-------------------------------------------------------------------------*
+	 * Test to see if the core can except an op.  If yes, the id of the ALU
+	 * that will execute the op is return, -1 otherwise.
+	 *-------------------------------------------------------------------------*/
+
+	int32_t accept(unsigned op, instruction_t * inst) {
 		for(auto unit = units_.begin(); unit != units_.end(); ++unit) {
-			if((*unit)->issue(op)) {
+			if((*unit)->issue(op, inst)) {
 				return (*unit)->id();
 			} // if
 		} // for
@@ -38,18 +46,16 @@ public:
 		return -1;
 	} // accept
 
-#if 0
-	bool accept_new() {
-	} // accept_new
-
-	void execute(instruction_t * inst) {
-	} // execute
-#endif
+	/*-------------------------------------------------------------------------*
+	 * Advance the core.
+	 *-------------------------------------------------------------------------*/
 
 	void advance() {
 		for(auto unit = units_.begin(); unit != units_.end(); ++unit) {
 			(*unit)->advance();
 		} // for
+
+		machine_state_t::instance().advance();
 	} // advance
 
 	size_t max_issue() const { return max_issue_; }
@@ -60,5 +66,7 @@ private:
 	size_t max_issue_;
 
 }; // class core_t
+
+} // namespace ska
 
 #endif // Core_hh

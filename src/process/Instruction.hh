@@ -24,6 +24,7 @@ public:
 
 	enum state_t {
 		pending,
+		issued,
 		stalled,
 		executing,
 		last,
@@ -34,8 +35,8 @@ public:
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
 
-	instruction_t(int32_t alu, size_t latency, bool multiple, std::string & ir)
-		: state_(pending), alu_(alu), latency_(latency), multiple_(multiple),
+	instruction_t(size_t latency, std::string & ir)
+		: state_(pending), alu_(-1), latency_(latency), multiple_(1),
 		cycles_(0), issue_(0), ir_(ir), m_(machine_state_t::instance()) {
 
 		for(size_t i(0); i<m_.current(); ++i) {
@@ -63,6 +64,13 @@ public:
 
 	state_t state() { return state_; }
 
+	void issue(int32_t alu) {
+		alu_ = alu;
+		cycles_ = 0;
+		issue_ = m_.current() - 1;
+		state_ = issued;
+	} // issue
+
 	/*-------------------------------------------------------------------------*
 	 * Advance instruction state.
 	 *-------------------------------------------------------------------------*/
@@ -77,8 +85,6 @@ public:
 			} // if
 		} // for
 
-		if(cycles_ == 0) { issue_ = m_.current() - 1; }
-
 		state_ = ++cycles_ == latency_ ? last :
 			cycles_ > latency_ ? retired : executing;
 
@@ -90,6 +96,16 @@ public:
 	} // advance
 
 	/*-------------------------------------------------------------------------*
+	 * Return dependency vector.
+	 *-------------------------------------------------------------------------*/
+
+	const std::vector<instruction_t *> & dependencies() {
+		return depends_;
+	} // dependencies
+
+	void set_multiple(int32_t m) { multiple_ = m; }
+
+	/*-------------------------------------------------------------------------*
 	 * Return execution history as a string.
 	 *-------------------------------------------------------------------------*/
 
@@ -99,8 +115,22 @@ public:
 		} // while
 
 		char buffer[256];
-		if(multiple_) {
-			sprintf(buffer, "%06d %dM ", int(issue_), alu_);
+		if(multiple_ > 1) {
+			char m;
+
+			switch(multiple_) {
+				case 2:
+					m = 'D';
+					break;
+				case 3:
+					m = 'T';
+					break;
+				case 4:
+					m = 'Q';
+					break;
+			} // switch
+
+			sprintf(buffer, "%06d %d%c ", int(issue_), alu_, m);
 		}
 		else {
 			sprintf(buffer, "%06d %d  ", int(issue_), alu_);
@@ -114,7 +144,7 @@ private:
 	state_t state_;
 	int32_t alu_;
 	size_t latency_;
-	bool multiple_;
+	int32_t multiple_;
 	size_t cycles_;
 	size_t issue_;
 
