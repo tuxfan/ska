@@ -35,8 +35,8 @@ public:
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
 
-	instruction_t(size_t latency, std::string & ir)
-		: state_(pending), alu_(-1), latency_(latency), multiple_(1),
+	instruction_t(size_t latency, unsigned op, std::string & ir)
+		: state_(pending), alu_(-1), latency_(latency), op_(op), multiple_(1),
 		cycles_(0), issue_(0), ir_(ir), m_(machine_state_t::instance()) {
 
 		for(size_t i(0); i<m_.current(); ++i) {
@@ -105,6 +105,8 @@ public:
 
 	void set_multiple(int32_t m) { multiple_ = m; }
 
+	unsigned op() const { return op_; }
+
 	/*-------------------------------------------------------------------------*
 	 * Return execution history as a string.
 	 *-------------------------------------------------------------------------*/
@@ -144,6 +146,7 @@ private:
 	state_t state_;
 	int32_t alu_;
 	size_t latency_;
+	unsigned op_;
 	int32_t multiple_;
 	size_t cycles_;
 	size_t issue_;

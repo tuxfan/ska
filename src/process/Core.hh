@@ -60,6 +60,10 @@ public:
 
 	size_t max_issue() const { return max_issue_; }
 
+	void release(int32_t id) {
+		units_[id]->flush();
+	} // release
+
 private:
 
 	std::vector<alu_t *> units_;	

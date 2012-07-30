@@ -42,18 +42,23 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	bool issue(unsigned op, instruction_t * inst) {
+//std::cerr << "ALU " << id_ << " issue called: ";
 		if(state_ == busy) {
+//std::cerr << "busy" << std::endl;
 			return false;
 		}
 
 		if(codes_.find(op) != codes_.end()) {
+//std::cerr << "issuing op " << inst->op() << std::endl;
 			state_ = busy;
 			current_ = inst;
 			current_->issue(id_);
 			return true;
+		}
+		else {
+//std::cerr << "can't handle op " << inst->op() << std::endl;
+			return false;
 		} // if
-
-		return false;
 	}
 
 	/*-------------------------------------------------------------------------*
@@ -61,14 +66,18 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	state_t advance() {
+//std::cerr << "ALU " << id_ << " advance: ";
 		if(current_ == nullptr) {
+//std::cerr << "ready" << std::endl;
 			state_ = ready;
 		}
-		else if(current_->state() != instruction_t::stalled) {
+		else if(current_->state() > instruction_t::stalled) {
+//std::cerr << "ready (instruction executing)" << std::endl;
 			state_ = ready;
 			current_ = nullptr;
 		}
 		else {
+//std::cerr << "busy" << std::endl;
 			state_ = busy;
 		} // if
 
@@ -80,6 +89,8 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	state_t state() const { return state_; }
+
+	void flush() { current_ = nullptr; state_ = ready; }
 
 	int32_t id() const { return id_; }
 

@@ -41,6 +41,7 @@ public:
 	~parser_t() {}
 
 	int32_t decode(llvm::Instruction * instruction);
+	void update_stats(llvm::Instruction * instruction);
 
 	size_t alloca_bytes(llvm::Type * type);
 
@@ -112,24 +113,12 @@ parser_t::parser_t(const char * ir_file)
 		instruction_t * inst = nullptr;
 
 		while(ita != inst_end(mita) || active.size()) {
-
-			// update executing instructions
-			auto a = active.begin();
-			while(a != active.end()) {
-				(*a)->advance();
-
-				if((*a)->state() == instruction_t::retired) {
-					active.erase(a++);
-				}
-				else {
-					++a;
-				} // if
-			} // for
-
 			size_t issued(0);
 			bool issue(true);
 			std::vector<instruction_t *> cycle_issue;
-			while(ita != inst_end(mita) && issue && issued < core.max_issue()) {
+
+			while(ita != inst_end(mita) && issue &&
+				issued < core.max_issue()) {
 
 				// get instruction latency
 				int32_t latency = decode(&*ita);
@@ -143,7 +132,8 @@ parser_t::parser_t(const char * ir_file)
 				 * Create instruction and add dependencies
 				 *----------------------------------------------------------------*/
 
-				inst = new instruction_t(latency, rso.str());
+//std::cerr << "Parser creating instruction: " << rso.str() << std::endl;
+				inst = new instruction_t(latency, ita->getOpcode(), rso.str());
 
 				unsigned operands = ita->getNumOperands();
 				for(unsigned i(0); i<operands; ++i) {
@@ -178,11 +168,25 @@ parser_t::parser_t(const char * ir_file)
 					} // for
 
 					if(issue == false) {
+						core.release(id);
 						delete inst;
 						inst = nullptr;
 						continue;
 					} // if
 			
+					/*##############################################################
+					 ###############################################################
+					 # Everything that makes it to this point actually gets
+					 # issued and executed.
+					 ###############################################################
+					 *#############################################################*/
+				
+					/*-------------------------------------------------------------*
+					 * Update statistics
+					 *-------------------------------------------------------------*/
+
+					update_stats(&*ita);
+				
 					/*-------------------------------------------------------------*
 					 * Add instruction to this issue
 					 *-------------------------------------------------------------*/
@@ -222,6 +226,19 @@ parser_t::parser_t(const char * ir_file)
 				} // if
 			} // while
 			
+			// update executing instructions
+			auto a = active.begin();
+			while(a != active.end()) {
+				(*a)->advance();
+
+				if((*a)->state() == instruction_t::retired) {
+					active.erase(a++);
+				}
+				else {
+					++a;
+				} // if
+			} // for
+
 			core.advance();
 		} // while
 
@@ -239,7 +256,6 @@ parser_t::parser_t(const char * ir_file)
 
 int32_t parser_t::decode(llvm::Instruction * instruction) {
 	parameters_t & arch = parameters_t::instance();
-	statistics_t & stats = statistics_t::instance();
 	int32_t latency(-1);
 
 	switch(instruction->getOpcode()) {
@@ -249,501 +265,462 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Ret:
-			{
-				arch.getval(latency, "latency::ret");
-				break;
-			} // scope
+			arch.getval(latency, "latency::ret");
+			break;
 
 		case llvm::Instruction::Br:
-			{
-				arch.getval(latency, "latency::br");
-				break;
-			} // scope
+			arch.getval(latency, "latency::br");
+			break;
 
 		case llvm::Instruction::Switch:
-			{
-				arch.getval(latency, "latency::switch");
-				break;
-			} // scope
+			arch.getval(latency, "latency::switch");
+			break;
 
 		case llvm::Instruction::IndirectBr:
-			{
-				arch.getval(latency, "latency::indirectbr");
-				break;
-			} // scope
+			arch.getval(latency, "latency::indirectbr");
+			break;
 
 		case llvm::Instruction::Invoke:
-			{
-				arch.getval(latency, "latency::invoke");
-				break;
-			} // scope
+			arch.getval(latency, "latency::invoke");
+			break;
 
 		case llvm::Instruction::Resume:
-			{
-				arch.getval(latency, "latency::resume");
-				break;
-			} // scope
+			arch.getval(latency, "latency::resume");
+			break;
 
 		case llvm::Instruction::Unreachable:
-			{
-				arch.getval(latency, "latency::unreachable");
-				break;
-			} // scope
+			arch.getval(latency, "latency::unreachable");
+			break;
 
 		/*----------------------------------------------------------------------*
 		 * Binary operators
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Add:
-			{
-				arch.getval(latency, "latency::add");
-				break;
-			} // scope
+			arch.getval(latency, "latency::add");
+			break;
 
 		case llvm::Instruction::FAdd:
-			{
-				// get the instruction latency
-				switch(instruction->getType()->getTypeID()) {
-					case llvm::Type::FloatTyID:
-						arch.getval(latency, "latency::fadd::float");
-						break;
-					case llvm::Type::DoubleTyID:
-						arch.getval(latency, "latency::fadd::double");
-						break;
-					default:
-						ExitOnError("FAdd Unhandled Type",
-							ErrCode::UnknownCase);
-						break;
-				} // switch
+			// get the instruction latency
+			switch(instruction->getType()->getTypeID()) {
+				case llvm::Type::FloatTyID:
+					arch.getval(latency, "latency::fadd::float");
+					break;
+				case llvm::Type::DoubleTyID:
+					arch.getval(latency, "latency::fadd::double");
+					break;
+				default:
+					ExitOnError("FAdd Unhandled Type",
+						ErrCode::UnknownCase);
+					break;
+			} // switch
 
-				// add flop to stats tracker
-				stats["flops"]++;
-				break;
-			} // scope
+			break;
 
 		case llvm::Instruction::Sub:
-			{
-				arch.getval(latency, "latency::sub");
-				break;
-			} // scope
+			arch.getval(latency, "latency::sub");
+			break;
 
 		case llvm::Instruction::FSub:
-			{
-				// get the instruction latency
-				switch(instruction->getType()->getTypeID()) {
-					case llvm::Type::FloatTyID:
-						arch.getval(latency, "latency::fsub::float");
-						break;
-					case llvm::Type::DoubleTyID:
-						arch.getval(latency, "latency::fsub::double");
-						break;
-					default:
-						ExitOnError("FSub Unhandled Type",
-							ErrCode::UnknownCase);
-						break;
-				} // switch
+			// get the instruction latency
+			switch(instruction->getType()->getTypeID()) {
+				case llvm::Type::FloatTyID:
+					arch.getval(latency, "latency::fsub::float");
+					break;
+				case llvm::Type::DoubleTyID:
+					arch.getval(latency, "latency::fsub::double");
+					break;
+				default:
+					ExitOnError("FSub Unhandled Type",
+						ErrCode::UnknownCase);
+					break;
+			} // switch
 
-				// add flop to stats tracker
-				stats["flops"]++;
-				break;
-			} // scope
+			break;
 
 		case llvm::Instruction::Mul:
-			{
-				arch.getval(latency, "latency::mul");
-				break;
-			} // scope
+			arch.getval(latency, "latency::mul");
+			break;
 
 		case llvm::Instruction::FMul:
-			{
-				// get the instruction latency
-				switch(instruction->getType()->getTypeID()) {
-					case llvm::Type::FloatTyID:
-						arch.getval(latency, "latency::fmul::float");
-						break;
-					case llvm::Type::DoubleTyID:
-						arch.getval(latency, "latency::fmul::double");
-						break;
-					default:
-						ExitOnError("FMul Unhandled Type",
-							ErrCode::UnknownCase);
-						break;
-				} // switch
+			// get the instruction latency
+			switch(instruction->getType()->getTypeID()) {
+				case llvm::Type::FloatTyID:
+					arch.getval(latency, "latency::fmul::float");
+					break;
+				case llvm::Type::DoubleTyID:
+					arch.getval(latency, "latency::fmul::double");
+					break;
+				default:
+					ExitOnError("FMul Unhandled Type",
+						ErrCode::UnknownCase);
+					break;
+			} // switch
 
-				// add flop to stats tracker
-				stats["flops"]++;
-				break;
-			} // scope
+			break;
 
 		case llvm::Instruction::UDiv:
-			{
-				arch.getval(latency, "latency::udiv");
-				break;
-			} // scope
+			arch.getval(latency, "latency::udiv");
+			break;
 
 		case llvm::Instruction::SDiv:
-			{
-				arch.getval(latency, "latency::sdiv");
-				break;
-			} // scope
+			arch.getval(latency, "latency::sdiv");
+			break;
 
 		case llvm::Instruction::FDiv:
-			{
-				// get the instruction latency
-				switch(instruction->getType()->getTypeID()) {
-					case llvm::Type::FloatTyID:
-						arch.getval(latency, "latency::fdiv::float");
-						break;
-					case llvm::Type::DoubleTyID:
-						arch.getval(latency, "latency::fdiv::double");
-						break;
-					default:
-						ExitOnError("FDiv Unhandled Type",
-							ErrCode::UnknownCase);
-						break;
-				} // switch
+			// get the instruction latency
+			switch(instruction->getType()->getTypeID()) {
+				case llvm::Type::FloatTyID:
+					arch.getval(latency, "latency::fdiv::float");
+					break;
+				case llvm::Type::DoubleTyID:
+					arch.getval(latency, "latency::fdiv::double");
+					break;
+				default:
+					ExitOnError("FDiv Unhandled Type",
+						ErrCode::UnknownCase);
+					break;
+			} // switch
 
-				// add flop to stats tracker
-				stats["flops"]++;
-				break;
-			} // scope
+			break;
 
 		case llvm::Instruction::URem:
-			{
-				arch.getval(latency, "latency::urem");
-				break;
-			} // scope
+			arch.getval(latency, "latency::urem");
+			break;
 
 		case llvm::Instruction::SRem:
-			{
-				arch.getval(latency, "latency::srem");
-				break;
-			} // scope
+			arch.getval(latency, "latency::srem");
+			break;
 
 		case llvm::Instruction::FRem:
-			{
-				// get the instruction latency
-				switch(instruction->getType()->getTypeID()) {
-					case llvm::Type::FloatTyID:
-						arch.getval(latency, "latency::frem::float");
-						break;
-					case llvm::Type::DoubleTyID:
-						arch.getval(latency, "latency::frem::double");
-						break;
-					default:
-						ExitOnError("FRem Unhandled Type",
-							ErrCode::UnknownCase);
-						break;
-				} // switch
+			// get the instruction latency
+			switch(instruction->getType()->getTypeID()) {
+				case llvm::Type::FloatTyID:
+					arch.getval(latency, "latency::frem::float");
+					break;
+				case llvm::Type::DoubleTyID:
+					arch.getval(latency, "latency::frem::double");
+					break;
+				default:
+					ExitOnError("FRem Unhandled Type",
+						ErrCode::UnknownCase);
+					break;
+			} // switch
 
-				// add flop to stats tracker
-				stats["flops"]++;
-				break;
-			} // scope
+			break;
 
 		/*----------------------------------------------------------------------*
 		 * Logical operators
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Shl:
-			{
-				arch.getval(latency, "latency::shl");
-				break;
-			} // scope
+			arch.getval(latency, "latency::shl");
+			break;
 
 		case llvm::Instruction::LShr:
-			{
-				arch.getval(latency, "latency::lshr");
-				break;
-			} // scope
+			arch.getval(latency, "latency::lshr");
+			break;
 
 		case llvm::Instruction::AShr:
-			{
-				arch.getval(latency, "latency::ashr");
-				break;
-			} // scope
+			arch.getval(latency, "latency::ashr");
+			break;
 
 		case llvm::Instruction::And:
-			{
-				arch.getval(latency, "latency::and");
-				break;
-			} // scope
+			arch.getval(latency, "latency::and");
+			break;
 
 		case llvm::Instruction::Or:
-			{
-				arch.getval(latency, "latency::or");
-				break;
-			} // scope
+			arch.getval(latency, "latency::or");
+			break;
 
 		case llvm::Instruction::Xor:
-			{
-				arch.getval(latency, "latency::xor");
-				break;
-			} // scope
+			arch.getval(latency, "latency::xor");
+			break;
 
 		/*----------------------------------------------------------------------*
 		 * Memory operators
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Alloca:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::alloca");
-
-				// get the amount of stack memory allocated
-				llvm::AllocaInst * ainst =
-					llvm::cast<llvm::AllocaInst>(instruction);
-				stats["allocs"] += alloca_bytes(ainst->getType());
-
-				break;
-			} // scope
+			arch.getval(latency, "latency::alloca");
+			break;
 
 		case llvm::Instruction::Load:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::load");
-
-				// add load to stats tracker
-				stats["loads"]++;
-				break;
-			} // scope
+			arch.getval(latency, "latency::load");
+			break;
 	
 		case llvm::Instruction::Store:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::store");
-
-				// add load to stats tracker
-				stats["stores"]++;
-				break;
-			} // scope
+			arch.getval(latency, "latency::store");
+			break;
 	
 		case llvm::Instruction::GetElementPtr:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::getelementptr");
-				break;
-			} // scope
+			arch.getval(latency, "latency::getelementptr");
+			break;
 	
 		case llvm::Instruction::Fence:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::fence");
-				break;
-			} // scope
+			arch.getval(latency, "latency::fence");
+			break;
 	
 		case llvm::Instruction::AtomicCmpXchg:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::atomiccmpxchg");
-				break;
-			} // scope
+			arch.getval(latency, "latency::atomiccmpxchg");
+			break;
 	
 		case llvm::Instruction::AtomicRMW:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::atomicrmw");
-				break;
-			} // scope
+			arch.getval(latency, "latency::atomicrmw");
+			break;
 	
 		/*----------------------------------------------------------------------*
 		 * Cast operators
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Trunc:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::trunc");
-				break;
-			} // scope
+			arch.getval(latency, "latency::trunc");
+			break;
 	
 		case llvm::Instruction::ZExt:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::zext");
-				break;
-			} // scope
+			arch.getval(latency, "latency::zext");
+			break;
 	
 		case llvm::Instruction::SExt:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::sext");
-				break;
-			} // scope
+			arch.getval(latency, "latency::sext");
+			break;
 	
 		case llvm::Instruction::FPToUI:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::fptoui");
-				break;
-			} // scope
+			arch.getval(latency, "latency::fptoui");
+			break;
 	
 		case llvm::Instruction::FPToSI:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::fptosi");
-				break;
-			} // scope
+			arch.getval(latency, "latency::fptosi");
+			break;
 	
 		case llvm::Instruction::UIToFP:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::uitofp");
-				break;
-			} // scope
+			arch.getval(latency, "latency::uitofp");
+			break;
 	
 		case llvm::Instruction::SIToFP:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::sitofp");
-				break;
-			} // scope
+			arch.getval(latency, "latency::sitofp");
+			break;
 	
 		case llvm::Instruction::FPTrunc:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::fptrunc");
-				break;
-			} // scope
+			arch.getval(latency, "latency::fptrunc");
+			break;
 	
 		case llvm::Instruction::FPExt:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::fpext");
-				break;
-			} // scope
+			arch.getval(latency, "latency::fpext");
+			break;
 	
 		case llvm::Instruction::PtrToInt:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::ptrtoint");
-				break;
-			} // scope
+			arch.getval(latency, "latency::ptrtoint");
+			break;
 	
 		case llvm::Instruction::IntToPtr:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::inttoptr");
-				break;
-			} // scope
+			arch.getval(latency, "latency::inttoptr");
+			break;
 	
 		case llvm::Instruction::BitCast:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::bitcast");
-				break;
-			} // scope
+			arch.getval(latency, "latency::bitcast");
+			break;
 	
 		/*----------------------------------------------------------------------*
 		 * Other operators
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::ICmp:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::icmp");
-				break;
-			} // scope
+			arch.getval(latency, "latency::icmp");
+			break;
 
 		case llvm::Instruction::FCmp:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::fcmp");
-				break;
-			} // scope
+			arch.getval(latency, "latency::fcmp");
+			break;
 
 		case llvm::Instruction::PHI:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::phi");
-				break;
-			} // scope
+			arch.getval(latency, "latency::phi");
+			break;
 
 		case llvm::Instruction::Call:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::call");
-				break;
-			} // scope
+			arch.getval(latency, "latency::call");
+			break;
 	
 		case llvm::Instruction::Select:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::select");
-				break;
-			} // scope
+			arch.getval(latency, "latency::select");
+			break;
 	
 		case llvm::Instruction::UserOp1:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::userop1");
-				break;
-			} // scope
+			arch.getval(latency, "latency::userop1");
+			break;
 	
 		case llvm::Instruction::UserOp2:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::userop2");
-				break;
-			} // scope
+			arch.getval(latency, "latency::userop2");
+			break;
 	
 		case llvm::Instruction::VAArg:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::vaarg");
-				break;
-			} // scope
+			arch.getval(latency, "latency::vaarg");
+			break;
 	
 		case llvm::Instruction::ExtractElement:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::extractelement");
-				break;
-			} // scope
+			arch.getval(latency, "latency::extractelement");
+			break;
 	
 		case llvm::Instruction::InsertElement:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::insertelement");
-				break;
-			} // scope
+			arch.getval(latency, "latency::insertelement");
+			break;
 	
 		case llvm::Instruction::ShuffleVector:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::shufflevector");
-				break;
-			} // scope
+			arch.getval(latency, "latency::shufflevector");
+			break;
 
 		case llvm::Instruction::ExtractValue:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::extractvalue");
-				break;
-			} // scope
+			arch.getval(latency, "latency::extractvalue");
+			break;
 	
 		case llvm::Instruction::InsertValue:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::insertvalue");
-				break;
-			} // scope
+			arch.getval(latency, "latency::insertvalue");
+			break;
 	
 		case llvm::Instruction::LandingPad:
-			{
-				// get the instruction latency
-				arch.getval(latency, "latency::landingpad");
-				break;
-			} // scope
+			arch.getval(latency, "latency::landingpad");
+			break;
 	
+		default:
+			ExitOnError("Unhandled Instruction", ErrCode::UnknownCase);
+
+	} // switch
+
+	return latency;
+} // parser_t::decode
+
+void parser_t::update_stats(llvm::Instruction * instruction) {
+	statistics_t & stats = statistics_t::instance();
+
+	switch(instruction->getOpcode()) {
+		case llvm::Instruction::Ret:
+			break;
+		case llvm::Instruction::Br:
+			break;
+		case llvm::Instruction::Switch:
+			break;
+		case llvm::Instruction::IndirectBr:
+			break;
+		case llvm::Instruction::Invoke:
+			break;
+		case llvm::Instruction::Resume:
+			break;
+		case llvm::Instruction::Unreachable:
+			break;
+		case llvm::Instruction::Add:
+			break;
+		case llvm::Instruction::FAdd:
+			stats["flops"]++;
+			break;
+		case llvm::Instruction::Sub:
+			break;
+		case llvm::Instruction::FSub:
+			stats["flops"]++;
+			break;
+		case llvm::Instruction::Mul:
+			break;
+		case llvm::Instruction::FMul:
+			stats["flops"]++;
+			break;
+		case llvm::Instruction::UDiv:
+			break;
+		case llvm::Instruction::SDiv:
+			break;
+		case llvm::Instruction::FDiv:
+			stats["flops"]++;
+			break;
+		case llvm::Instruction::URem:
+			break;
+		case llvm::Instruction::SRem:
+			break;
+		case llvm::Instruction::FRem:
+			stats["flops"]++;
+			break;
+		case llvm::Instruction::Shl:
+		case llvm::Instruction::LShr:
+		case llvm::Instruction::AShr:
+		case llvm::Instruction::And:
+		case llvm::Instruction::Or:
+		case llvm::Instruction::Xor:
+		case llvm::Instruction::Alloca:
+			{
+			llvm::AllocaInst * ainst =
+				llvm::cast<llvm::AllocaInst>(instruction);
+			stats["allocs"] += alloca_bytes(ainst->getType());
+			break;
+			} // scope
+		case llvm::Instruction::Load:
+			stats["loads"]++;
+			break;
+		case llvm::Instruction::Store:
+			stats["stores"]++;
+			break;
+		case llvm::Instruction::GetElementPtr:
+			break;
+		case llvm::Instruction::Fence:
+			break;
+		case llvm::Instruction::AtomicCmpXchg:
+			break;
+		case llvm::Instruction::AtomicRMW:
+			break;
+		case llvm::Instruction::Trunc:
+			break;
+		case llvm::Instruction::ZExt:
+			break;
+		case llvm::Instruction::SExt:
+			break;
+		case llvm::Instruction::FPToUI:
+			break;
+		case llvm::Instruction::FPToSI:
+			break;
+		case llvm::Instruction::UIToFP:
+			break;
+		case llvm::Instruction::SIToFP:
+			break;
+		case llvm::Instruction::FPTrunc:
+			break;
+		case llvm::Instruction::FPExt:
+			break;
+		case llvm::Instruction::PtrToInt:
+			break;
+		case llvm::Instruction::IntToPtr:
+			break;
+		case llvm::Instruction::BitCast:
+			break;
+		case llvm::Instruction::ICmp:
+			break;
+		case llvm::Instruction::FCmp:
+			break;
+		case llvm::Instruction::PHI:
+			break;
+		case llvm::Instruction::Call:
+			break;
+		case llvm::Instruction::Select:
+			break;
+		case llvm::Instruction::UserOp1:
+			break;
+		case llvm::Instruction::UserOp2:
+			break;
+		case llvm::Instruction::VAArg:
+			break;
+		case llvm::Instruction::ExtractElement:
+			break;
+		case llvm::Instruction::InsertElement:
+			break;
+		case llvm::Instruction::ShuffleVector:
+			break;
+		case llvm::Instruction::ExtractValue:
+			break;
+		case llvm::Instruction::InsertValue:
+			break;
+		case llvm::Instruction::LandingPad:
+			break;
 		default:
 			{
 				ExitOnError("Unhandled Instruction", ErrCode::UnknownCase);
 			} // scope
 	} // switch
-
-	return latency;
-} // parser_t::decode
+} // parser_t::update_stats
 
 size_t parser_t::alloca_bytes(llvm::Type * type) {
 	switch(type->getTypeID()) {

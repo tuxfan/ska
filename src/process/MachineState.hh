@@ -19,7 +19,9 @@ public:
 	} // advance
 
 	size_t reset() {
-		cycle_ = 0;
+		// this has to do with the ordering of updates to
+		// various states (machine, alus, instructions)
+		cycle_ = 1;
 		return cycle_;
 	} // reset
 
