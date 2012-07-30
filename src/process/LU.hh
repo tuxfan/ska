@@ -7,7 +7,7 @@
 
 namespace ska {
 
-class alu_t
+class lu_t
 {
 public:
 
@@ -23,14 +23,14 @@ public:
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
 
-	alu_t(int32_t id)
+	lu_t(int32_t id)
 		: state_(ready), id_(id), current_(nullptr) {}
 
 	/*-------------------------------------------------------------------------*
 	 * Destructor.
 	 *-------------------------------------------------------------------------*/
 
-	~alu_t() {}
+	~lu_t() {}
 
 	void add_op(unsigned op) {
 		codes_.insert(op);
@@ -109,7 +109,7 @@ private:
 	std::set<unsigned> codes_;
 	instruction_t * current_;
 
-}; // class alu_t
+}; // class lu_t
 
 } // namespace ska
 

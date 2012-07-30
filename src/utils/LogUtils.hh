@@ -13,6 +13,11 @@
 
 #include <ErrCodes.hh>
 
+#if defined(ENABLE_DEBUG)
+#define DEBUG(s) \
+	std::cerr << s << std::endl
+#endif
+
 // utility function
 template<char C>
 std::string rstrip(const char * file) {

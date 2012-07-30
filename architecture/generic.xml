@@ -39,21 +39,40 @@
  ******************************************************************************
  ****************************************************************************-->
 
-<value key="alus">
-	<integer>3</integer>
+<value key="lus">
+	<integer>6</integer>
 </value>
 
-<value key="alu::0">
-	<string>add fadd sub fsub mul fmul udiv sdiv fdiv urem srem frem</string>
+<!-- LSU: load/store unit -->
+<value key="lu::0">
+	<string>alloca load store getelementptr</string>
 </value>
 
-<value key="alu::1">
-	<string>alloca load store getelementptr br phi trunc icmp ret</string>
+<!-- ALU: integer arithmetic logic unit -->
+<value key="lu::1">
+	<string>add sub mul udiv sdiv urem srem ashr</string>
 </value>
 
-<value key="alu::2">
-	<string>sin cos tan rsqrt</string>
+<!-- ILU: integer logic unit -->
+<value key="lu::2">
+	<string>shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp</string>
 </value>
+
+<!-- BRU: branch unit -->
+<value key="lu::3">
+	<string>ret br switch indirectbr invoke resume unreachable phi call select vaarg</string>
+</value>
+
+<!-- FPU: floating-point unit -->
+<value key="lu::4">
+	<string>fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp</string>
+</value>
+
+<!-- NOP: no-op unit -->
+<value key="lu::5">
+	<string>fence atomiccmpxchg atomicrmw</string>
+</value>
+
 
 <!--***************************************************************************
  ******************************************************************************
@@ -67,32 +86,32 @@
 
 <!-- ret -->
 <value key="latency::ret">
-	<integer>1</integer>
+	<integer>3</integer>
 </value>
 
 <!-- br -->
 <value key="latency::br">
-	<integer>1</integer>
+	<integer>3</integer>
 </value>
 
 <!-- switch -->
 <value key="latency::switch">
-	<integer>1</integer>
+	<integer>3</integer>
 </value>
 
 <!-- indirectbr -->
 <value key="latency::indirectbr">
-	<integer>1</integer>
+	<integer>3</integer>
 </value>
 
 <!-- invoke -->
 <value key="latency::invoke">
-	<integer>1</integer>
+	<integer>3</integer>
 </value>
 
 <!-- resume -->
 <value key="latency::resume">
-	<integer>1</integer>
+	<integer>3</integer>
 </value>
 
 <!-- unreachable -->
@@ -125,7 +144,7 @@
 
 <!-- fsub -->
 <value key="latency::fsub::float">
-	<integer>10</integer>
+	<integer>4</integer>
 </value>
 
 <value key="latency::fsub::double">
@@ -134,12 +153,12 @@
 
 <!-- mul -->
 <value key="latency::mul">
-	<integer>2</integer>
+	<integer>4</integer>
 </value>
 
 <!-- fmul -->
 <value key="latency::fmul::float">
-	<integer>6</integer>
+	<integer>4</integer>
 </value>
 
 <value key="latency::fmul::double">
@@ -186,28 +205,28 @@
 
 <!-- shift -->
 <value key="latency::shl">
-	<integer>1</integer>
+	<integer>2</integer>
 </value>
 
 <value key="latency::lshr">
-	<integer>1</integer>
+	<integer>2</integer>
 </value>
 
 <value key="latency::ashr">
-	<integer>1</integer>
+	<integer>2</integer>
 </value>
 
 <!-- standard unary -->
 <value key="latency::and">
-	<integer>1</integer>
+	<integer>2</integer>
 </value>
 
 <value key="latency::or">
-	<integer>1</integer>
+	<integer>2</integer>
 </value>
 
 <value key="latency::xor">
-	<integer>1</integer>
+	<integer>2</integer>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -216,7 +235,7 @@
 
 <!-- alloca -->
 <value key="latency::alloca">
-	<integer>1</integer>
+	<integer>4</integer>
 </value>
 
 <!-- load -->
@@ -231,7 +250,7 @@
 
 <!-- getelementptr -->
 <value key="latency::getelementptr">
-	<integer>1</integer>
+	<integer>4</integer>
 </value>
 
 <!-- fence -->

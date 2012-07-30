@@ -1,7 +1,7 @@
 #ifndef Core_hh
 #define Core_hh
 
-#include <ALU.hh>
+#include <LU.hh>
 #include <MachineState.hh>
 
 namespace ska {
@@ -24,15 +24,15 @@ public:
 	~core_t() {}
 
 	/*-------------------------------------------------------------------------*
-	 * Add ALUs to the core.
+	 * Add LUs to the core.
 	 *-------------------------------------------------------------------------*/
 
-	void add_unit(alu_t * alu) {
-		units_.push_back(alu);
+	void add_unit(lu_t * lu) {
+		units_.push_back(lu);
 	} // add_unit
 
 	/*-------------------------------------------------------------------------*
-	 * Test to see if the core can except an op.  If yes, the id of the ALU
+	 * Test to see if the core can except an op.  If yes, the id of the LU
 	 * that will execute the op is return, -1 otherwise.
 	 *-------------------------------------------------------------------------*/
 
@@ -66,7 +66,7 @@ public:
 
 private:
 
-	std::vector<alu_t *> units_;	
+	std::vector<lu_t *> units_;	
 	size_t max_issue_;
 
 }; // class core_t

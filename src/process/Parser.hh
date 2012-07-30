@@ -68,14 +68,14 @@ parser_t::parser_t(const char * ir_file)
 	arch.getval(max_issue, "core::max_issue");
 	core_t core(max_issue);
 
-	int32_t alus;
-	arch.getval(alus, "alus");
+	int32_t lus;
+	arch.getval(lus, "lus");
 
-	for(int i(0); i<alus; ++i) {
-		alu_t * alu = new alu_t(i);
+	for(int i(0); i<lus; ++i) {
+		lu_t * lu = new lu_t(i);
 
 		char key[256];
-		sprintf(key, "alu::%d", i);
+		sprintf(key, "lu::%d", i);
 
 		std::string tmp;
 		arch.getval(tmp, key);
@@ -85,11 +85,11 @@ parser_t::parser_t(const char * ir_file)
 		char * tok = strtok(ops, " ");
 
 		while(tok != NULL) {
-			alu->add_op(code_map[tok]);
+			lu->add_op(code_map[tok]);
 			tok = strtok(NULL, " ");
 		} // while
 
-		core.add_unit(alu);
+		core.add_unit(lu);
 
 		delete[] ops;
 	} // for
@@ -127,6 +127,8 @@ parser_t::parser_t(const char * ir_file)
 				llvm::raw_string_ostream rso(str);
 				rso << *ita;
 				value = &*ita;			
+
+				DEBUG(rso.str());
 
 				/*----------------------------------------------------------------*
 				 * Create instruction and add dependencies
