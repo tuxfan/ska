@@ -3,6 +3,8 @@
 
 #include <QtGui/QtGui>
 
+#include <ViewPipeline.h>
+
 class viewmain_t : public QMainWindow
 {
 	Q_OBJECT

@@ -1,3 +1,7 @@
+/*----------------------------------------------------------------------------*
+ *
+ *----------------------------------------------------------------------------*/
+
 #include <ViewMain.h>
 
 viewmain_t::viewmain_t()
@@ -18,7 +22,7 @@ viewmain_t::viewmain_t()
 	textEdit_ = new QPlainTextEdit;
 	setCentralWidget(textEdit_);
 
-	//setWindowTitle(tr("Notepad"));
+	setWindowTitle(tr("SKAView"));
 } // viewmain_t::viewmain_t
 
 viewmain_t::~viewmain_t()

@@ -2,7 +2,7 @@
 #define ViewPipeline_h
 
 #include <QtGui/QPlainTextEdit>
-#include <QtGui/QObject>
+#include <QtCore/QObject>
 
 class viewpipeline_t : public QPlainTextEdit
 {
