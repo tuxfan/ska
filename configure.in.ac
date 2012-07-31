@@ -30,7 +30,8 @@ CONFIG_WITH_MACHINE("$srcdir/machine")
 
 AC_CONFIG_FILES([Makefile \
 	lib/Makefile \
-	bin/Makefile
+	bin/Makefile \
+	viewer/Makefile
 ])
 
 #------------------------------------------------------------------------------#
@@ -40,6 +41,7 @@ AC_CONFIG_FILES([Makefile \
 AC_PROG_CXX
 AC_PROG_LIBTOOL
 CONFIG_PROG_LLVM_CONFIG
+CONFIG_PROG_MOC
 
 #------------------------------------------------------------------------------#
 # Enable options
@@ -76,12 +78,26 @@ EXTRA_LDFLAGS="$EXTRA_LDFLAGS $XERCES_LDFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $XERCES_LIBS"
 
 #------------------------------------------------------------------------------#
+# Qt
+#------------------------------------------------------------------------------#
+
+CONFIG_GENERIC_LIB(qt, QT, [QApplication::beep()], C++)
+
+VIEWER_CPPFLAGS="$QT_CPPFLAGS"
+VIEWER_LDFLAGS="$QT_LDFLAGS"
+VIEWER_LIBS="$QT_LIBS"
+
+#------------------------------------------------------------------------------#
 # Set extras
 #------------------------------------------------------------------------------#
 
 AC_SUBST(EXTRA_CPPFLAGS)
 AC_SUBST(EXTRA_LDFLAGS)
 AC_SUBST(EXTRA_LIBS)
+
+AC_SUBST(VIEWER_CPPFLAGS)
+AC_SUBST(VIEWER_LDFLAGS)
+AC_SUBST(VIEWER_LIBS)
 
 #------------------------------------------------------------------------------#
 # Handle Doxygen

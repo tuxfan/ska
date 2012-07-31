@@ -7,7 +7,7 @@
 #include <Parameters.hh>
 #include <Parser.hh>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char ** argv) {
 
 	if(argc != 3) {
 		std::cerr << "Usage: " << argv[0] <<
