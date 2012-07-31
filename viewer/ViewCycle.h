@@ -5,8 +5,6 @@
 
 class viewcycle_t : public QWidget
 {
-	Q_OBJECT
-
 public:
 
 	viewcycle_t(viewpipeline_t * pipeline) : QWidget(pipeline) {

@@ -23,7 +23,7 @@ private:
 	QAction * openAction_;
 	QAction * quitAction_;
 
-	QPlainTextEdit * textEdit_;
+	viewpipeline_t * pipeline_;
 
 	QMenu * fileMenu_;
 

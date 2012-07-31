@@ -12,6 +12,12 @@ public:
 
 	viewpipeline_t(QWidget * parent = 0);
 
+	void load(const QStringList & cycles, const QString & pipelines,
+		const QStringList & instructions);
+
+	void cycleAreaPaintEvent(QPaintEvent * event);
+	void instructionAreaPaintEvent(QPaintEvent * event);
+
 	int cycleAreaWidth();
 	int instructionAreaWidth();
 
@@ -21,18 +27,21 @@ protected:
 
 private slots:
 
-	void updateCycleAreaWidth(int newCount);
-	void updateInstructionAreaWidth(int newMax);
+	void updateCycleAreaWidth(int newBlockCount);
+	void updateInstructionAreaWidth(int newBlockCount);
 
 	void highlightCurrentLine();
 
-	void updateCycleArea(const QRect &, int);
-	void updateInstructionArea(const QRect &, int);
+	void updateCycleArea(const QRect & rect, int dy);
+	void updateInstructionArea(const QRect & rect, int dy);
 
 private:
 
 	QWidget * cycleArea_;
 	QWidget * instructionArea_;
+
+	QStringList cycles_;
+	QStringList instructions_;
 
 }; // class viewpipeline_t
 
