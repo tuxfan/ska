@@ -3,6 +3,8 @@
 viewmain_t::viewmain_t()
 {
 	openAction_ = new QAction(tr("&Open"), this);
+	openAction_->setShortcut(tr("Ctrl+O"));
+
 	quitAction_ = new QAction(tr("&Quit"), this);
 
 	connect(openAction_, SIGNAL(triggered()), this, SLOT(open()));
