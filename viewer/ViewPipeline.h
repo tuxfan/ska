@@ -27,8 +27,7 @@ protected:
 
 private slots:
 
-	void updateCycleAreaWidth(int newBlockCount);
-	void updateInstructionAreaWidth(int newBlockCount);
+	void updateWidth(int newBlockCount);
 
 	void highlightCurrentLine();
 
