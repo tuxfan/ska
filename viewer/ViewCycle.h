@@ -25,6 +25,6 @@ private:
 
 	viewpipeline_t * pipeline_;
 
-}; // class viewmain_t
+}; // class viewcycle_t
 
 #endif // ViewCycle_h

@@ -132,10 +132,10 @@ public:
 					break;
 			} // switch
 
-			sprintf(buffer, "%06d | %d%c| ", int(issue_), alu_, m);
+			sprintf(buffer, "%06d | %2d:%1c | ", int(issue_), alu_, m);
 		}
 		else {
-			sprintf(buffer, "%06d | %d | ", int(issue_), alu_);
+			sprintf(buffer, "%06d | %2d   | ", int(issue_), alu_);
 		} // if
 
 		return buffer + stream_.str() + '|' + ir_;

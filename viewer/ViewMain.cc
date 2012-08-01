@@ -59,6 +59,7 @@ void viewmain_t::open()
 	QString line;
 	QString pipelines;
 	QStringList cycles;
+	QStringList issues;
 	QStringList instructions;
 
 	while(!stream.atEnd()) {
@@ -66,9 +67,10 @@ void viewmain_t::open()
 		QStringList sections = line.split('|');
 
 		cycles.append(sections[0]);
+		issues.append(sections[1]);
 		pipelines += sections[2] + "\n";
 		instructions.append(sections[3]);
 	} // while
 
-	pipeline_->load(cycles, pipelines, instructions);
+	pipeline_->load(cycles, issues, pipelines, instructions);
 } // viewmain_t::open

@@ -226,6 +226,14 @@ parser_t::parser_t(const char * ir_file)
 					issue = false;
 					continue;
 				} // if
+
+				if(issued > 1) {
+					for(auto cita = cycle_issue.begin();
+						cita != cycle_issue.end(); ++cita) {
+						(*cita)->set_multiple(issued);
+					} // for
+				} // if
+
 			} // while
 			
 			// update executing instructions
