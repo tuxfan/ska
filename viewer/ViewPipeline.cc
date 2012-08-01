@@ -1,3 +1,4 @@
+#include <iostream>
 #include <ViewPipeline.h>
 #include <ViewCycle.h>
 #include <ViewInstruction.h>
@@ -52,7 +53,7 @@ void viewpipeline_t::cycleAreaPaintEvent(QPaintEvent * event)
 			block.isValid() && top <= event->rect().bottom()) {
 			if(block.isVisible() && bottom >= event->rect().top()) {
 				painter.setPen(Qt::black);
-				painter.drawText(0, top, cycleArea_->width(),
+				painter.drawText(4, top, cycleArea_->width(),
 					fontMetrics().height(), Qt::AlignRight, cycles_[blockNumber]);
 			}
 
@@ -68,7 +69,7 @@ void viewpipeline_t::instructionAreaPaintEvent(QPaintEvent * event)
 {
 	if(instructions_.size() > 0) {
 		QPainter painter(instructionArea_);
-		painter.fillRect(event->rect(), Qt::yellow);
+		painter.fillRect(event->rect(), QColor(255,255,155));
 
 		QTextBlock block = firstVisibleBlock();
 		int blockNumber = block.blockNumber();
@@ -85,7 +86,7 @@ void viewpipeline_t::instructionAreaPaintEvent(QPaintEvent * event)
 			if(block.isVisible() && bottom >= event->rect().top()) {
 				painter.setPen(Qt::black);
 				painter.drawText(0, top, instructionArea_->width(),
-					fontMetrics().height(), Qt::AlignRight,
+					fontMetrics().height(), Qt::AlignLeft,
 					instructions_[blockNumber]);
 			}
 
@@ -105,7 +106,7 @@ int viewpipeline_t::cycleAreaWidth()
 		digits = cycles_[0].size();
 	}
 
-	int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits;
+	int space = fontMetrics().width(QLatin1Char('9')) * digits;
 
 	return space;
 } // viewpipeline_t::cycleAreaWidth
@@ -115,10 +116,12 @@ int viewpipeline_t::instructionAreaWidth()
 	int digits = 1;
 
 	if(instructions_.size() > 0) {
-		digits = instructions_[0].size();
+		for(int i=0; i<instructions_.size(); ++i) {
+			digits = std::max<int>(digits, instructions_[i].size());
+		} // for
 	}
 
-	int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits;
+	int space = 5 + fontMetrics().width(QLatin1Char('9')) * digits;
 
 	return space;
 } // viewpipeline_t::instructionAreaWidth
@@ -130,18 +133,40 @@ void viewpipeline_t::resizeEvent(QResizeEvent * event)
 	QRect cr = contentsRect();
 	cycleArea_->setGeometry(QRect(cr.left(), cr.top(),
 		cycleAreaWidth(), cr.height()));
-	instructionArea_->setGeometry(QRect(cr.left(), cr.top(),
-		instructionAreaWidth(), cr.height()));
+	instructionArea_->setGeometry(
+		QRect(cr.right() - verticalScrollBar()->sizeHint().width() -
+		instructionAreaWidth(), cr.top(), instructionAreaWidth(), cr.height()));
 
 } // viewpipeline_t::resizeEvent
+
+void viewpipeline_t::mousePressEvent(QMouseEvent * event)
+{
+	QPlainTextEdit::mousePressEvent(event);
+
+	highlightCurrentLine(event->globalPos());
+} // viewpipeline_t::mousePressEvent
 
 void viewpipeline_t::updateWidth(int newBlockCount)
 {
 	setViewportMargins(cycleAreaWidth(), 0, instructionAreaWidth(), 0);
 } // viewpipeline_t::updateWidth
 
-void viewpipeline_t::highlightCurrentLine()
+void viewpipeline_t::highlightCurrentLine(const QPoint & pos)
 {
+	std::cerr << "changed" << std::endl;
+//	QList<QTextEdit::ExtraSelection> extraSelections;
+
+//	if (!isReadOnly()) {
+//		QTextEdit::ExtraSelection selection;
+
+//		QColor lineColor = QColor(Qt::yellow).lighter(160);
+
+//		selection.format.setBackground(lineColor);
+//		selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+//		extraSelections.append(selection);
+//	} // if
+
+//	setExtraSelections(extraSelections);
 } // viewpipeline_t::highlightCurrentLine
 
 void viewpipeline_t::updateCycleArea(const QRect & rect, int dy)

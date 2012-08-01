@@ -24,12 +24,13 @@ public:
 protected:
 
 	void resizeEvent(QResizeEvent * event);
+	void mousePressEvent(QMouseEvent * event);
 
 private slots:
 
 	void updateWidth(int newBlockCount);
 
-	void highlightCurrentLine();
+	void highlightCurrentLine(const QPoint & pos);
 
 	void updateCycleArea(const QRect & rect, int dy);
 	void updateInstructionArea(const QRect & rect, int dy);

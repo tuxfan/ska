@@ -26,6 +26,7 @@ private:
 	viewpipeline_t * pipeline_;
 
 	QMenu * fileMenu_;
+	QToolBar * toolBar_;
 
 }; // class viewmain_t
 

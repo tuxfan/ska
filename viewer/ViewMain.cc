@@ -8,7 +8,7 @@
 
 viewmain_t::viewmain_t()
 {
-	openAction_ = new QAction(tr("&Open"), this);
+	openAction_ = new QAction(QIcon(":/icons/open.png"), tr("&Open"), this);
 	openAction_->setShortcut(tr("Ctrl+O"));
 
 	quitAction_ = new QAction(tr("&Quit"), this);
@@ -16,15 +16,21 @@ viewmain_t::viewmain_t()
 	connect(openAction_, SIGNAL(triggered()), this, SLOT(open()));
 	connect(quitAction_, SIGNAL(triggered()), qApp, SLOT(quit()));
 
+	// add file menu
 	fileMenu_ = menuBar()->addMenu(tr("&File"));
 	fileMenu_->addAction(openAction_);
 	fileMenu_->addSeparator();
 	fileMenu_->addAction(quitAction_);
 
+	// add toolbar
+	toolBar_ = addToolBar(tr("File"));
+	toolBar_->addAction(openAction_);
+
 	pipeline_ = new viewpipeline_t;
 	setCentralWidget(pipeline_);
 
 	setWindowTitle(tr("SKAView"));
+	resize(800, 600);
 } // viewmain_t::viewmain_t
 
 viewmain_t::~viewmain_t()
