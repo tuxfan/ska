@@ -20,7 +20,7 @@
 <root label="1.0">
 
 <value key="name">
-	<string>Generic</string>
+	<string>Intel Pentium M</string>
 </value>
 
 <!--***************************************************************************
@@ -30,7 +30,7 @@
  ****************************************************************************-->
 
 <value key="core::max_issue">
-	<integer>2</integer>
+	<integer>1</integer>
 </value>
 
 <!--***************************************************************************
@@ -68,6 +68,11 @@
 	<string>fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp</string>
 </value>
 
+<!-- VU: vector unit -->
+<value key="lu::4">
+	<string>extractelement insertelement shufflevector exractvalue insertvalue</string>
+</value>
+
 <!-- NOP: no-op unit -->
 <value key="lu::5">
 	<string>fence atomiccmpxchg atomicrmw</string>
@@ -86,32 +91,32 @@
 
 <!-- ret -->
 <value key="latency::ret">
-	<integer>3</integer>
+	<integer>1</integer>
 </value>
 
 <!-- br -->
 <value key="latency::br">
-	<integer>3</integer>
+	<integer>1</integer>
 </value>
 
 <!-- switch -->
 <value key="latency::switch">
-	<integer>3</integer>
+	<integer>1</integer>
 </value>
 
 <!-- indirectbr -->
 <value key="latency::indirectbr">
-	<integer>3</integer>
+	<integer>1</integer>
 </value>
 
 <!-- invoke -->
 <value key="latency::invoke">
-	<integer>3</integer>
+	<integer>1</integer>
 </value>
 
 <!-- resume -->
 <value key="latency::resume">
-	<integer>3</integer>
+	<integer>1</integer>
 </value>
 
 <!-- unreachable -->
@@ -125,35 +130,39 @@
 
 <!-- add -->
 <value key="latency::add">
-	<integer>4</integer>
+	<integer>2</integer>
 </value>
 
 <!-- fadd -->
 <value key="latency::fadd::float">
-	<integer>4</integer>
+	<integer>3</integer>
 </value>
 
 <value key="latency::fadd::double">
-	<integer>8</integer>
+	<integer>3</integer>
 </value>
 
 <!-- sub -->
 <value key="latency::sub">
-	<integer>4</integer>
+	<integer>2</integer>
 </value>
 
 <!-- fsub -->
 <value key="latency::fsub::float">
-	<integer>4</integer>
+	<integer>3</integer>
 </value>
 
 <value key="latency::fsub::double">
-	<integer>8</integer>
+	<integer>3</integer>
+</value>
+
+<value key="latency::fsub::vector">
+	<integer>3</integer>
 </value>
 
 <!-- mul -->
 <value key="latency::mul">
-	<integer>4</integer>
+	<integer>5</integer>
 </value>
 
 <!-- fmul -->
@@ -162,41 +171,41 @@
 </value>
 
 <value key="latency::fmul::double">
-	<integer>8</integer>
+	<integer>5</integer>
 </value>
 
 <!-- div -->
 <value key="latency::udiv">
-	<integer>4</integer>
+	<integer>39</integer>
 </value>
 
 <value key="latency::sdiv">
-	<integer>6</integer>
+	<integer>39</integer>
 </value>
 
 <value key="latency::fdiv::float">
-	<integer>4</integer>
+	<integer>34</integer>
 </value>
 
 <value key="latency::fdiv::double">
-	<integer>8</integer>
+	<integer>62</integer>
 </value>
 
 <!-- rem -->
 <value key="latency::urem">
-	<integer>4</integer>
+	<integer>39</integer>
 </value>
 
 <value key="latency::srem">
-	<integer>6</integer>
+	<integer>39</integer>
 </value>
 
 <value key="latency::frem::float">
-	<integer>4</integer>
+	<integer>34</integer>
 </value>
 
 <value key="latency::frem::double">
-	<integer>8</integer>
+	<integer>62</integer>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -205,28 +214,28 @@
 
 <!-- shift -->
 <value key="latency::shl">
-	<integer>2</integer>
+	<integer>1</integer>
 </value>
 
 <value key="latency::lshr">
-	<integer>2</integer>
+	<integer>1</integer>
 </value>
 
 <value key="latency::ashr">
-	<integer>2</integer>
+	<integer>1</integer>
 </value>
 
 <!-- standard unary -->
 <value key="latency::and">
-	<integer>2</integer>
+	<integer>1</integer>
 </value>
 
 <value key="latency::or">
-	<integer>2</integer>
+	<integer>1</integer>
 </value>
 
 <value key="latency::xor">
-	<integer>2</integer>
+	<integer>1</integer>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -235,22 +244,22 @@
 
 <!-- alloca -->
 <value key="latency::alloca">
-	<integer>4</integer>
+	<integer>1</integer>
 </value>
 
 <!-- load -->
 <value key="latency::load">
-	<integer>4</integer>
+	<integer>1</integer>
 </value>
 
 <!-- store -->
 <value key="latency::store">
-	<integer>4</integer>
+	<integer>1</integer>
 </value>
 
 <!-- getelementptr -->
 <value key="latency::getelementptr">
-	<integer>4</integer>
+	<integer>1</integer>
 </value>
 
 <!-- fence -->

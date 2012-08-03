@@ -13,6 +13,12 @@ viewmain_t::viewmain_t()
 
 	quitAction_ = new QAction(tr("&Quit"), this);
 
+	filler_ = new QLabel(this);
+
+	searchBox_ = new QLineEdit("", this);
+	searchBox_->setPlaceholderText("search");
+	searchBox_->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+
 	connect(openAction_, SIGNAL(triggered()), this, SLOT(open()));
 	connect(quitAction_, SIGNAL(triggered()), qApp, SLOT(quit()));
 
@@ -22,9 +28,11 @@ viewmain_t::viewmain_t()
 	fileMenu_->addSeparator();
 	fileMenu_->addAction(quitAction_);
 
-	// add toolbar
-	toolBar_ = addToolBar(tr("File"));
-	toolBar_->addAction(openAction_);
+	// add file toolbar
+	fileBar_ = addToolBar(tr("File"));
+	fileBar_->addAction(openAction_);
+	fileBar_->addWidget(filler_);
+	fileBar_->addWidget(searchBox_);
 
 	pipeline_ = new viewpipeline_t;
 	setCentralWidget(pipeline_);

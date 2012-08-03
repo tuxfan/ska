@@ -5,6 +5,10 @@
 #ifndef Parser_hh
 #define Parser_hh
 
+#if defined(USE_MANGLED_CALL_NAMES)
+#include <cxxabi.h>
+#endif
+
 #include <string>
 #include <cstring>
 #include <vector>
@@ -340,8 +344,12 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 				case llvm::Type::DoubleTyID:
 					arch.getval(latency, "latency::fsub::double");
 					break;
+				case llvm::Type::VectorTyID:
+					arch.getval(latency, "latency::fsub::vector");
+					break;
 				default:
-					ExitOnError("FSub Unhandled Type",
+					ExitOnError("FSub Unhandled Type " <<
+						instruction->getType()->getTypeID(),
 						ErrCode::UnknownCase);
 					break;
 			} // switch
@@ -548,8 +556,43 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 			break;
 
 		case llvm::Instruction::Call:
+			{
 			arch.getval(latency, "latency::call");
+#if 0
+			llvm::CallInst * cinst =
+				llvm::cast<llvm::CallInst>(instruction);
+			std::string call = "latency::" + cinst->getCalledFunction()->getName().str();
+
+			std::string name = cinst->getCalledFunction()->getName().str();
+
+#if defined(USE_MANGLED_CALL_NAMES)
+			int status;
+			char * um_name = abi::__cxa_demangle(name.c_str(), 0, 0, &status);
+			name = um_name;
+			delete um_name;
+#endif
+
+			std::cerr << "Function name: " << name << std::endl;
+			//std::string call = "latency::";
+
+			switch(instruction->getType()->getTypeID()) {
+				case llvm::Type::FloatTyID:
+					call += "::float";
+					break;
+				case llvm::Type::DoubleTyID:
+					call += "::double";
+					break;
+				default:
+					ExitOnError("Call Unhandled Type",
+						ErrCode::UnknownCase);
+					break;
+			} // switch
+
+			arch.getval(latency, call);
+#endif
+
 			break;
+			} // scope
 	
 		case llvm::Instruction::Select:
 			arch.getval(latency, "latency::select");

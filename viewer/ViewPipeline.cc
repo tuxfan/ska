@@ -3,6 +3,7 @@
 #include <ViewCycle.h>
 #include <ViewIssue.h>
 #include <ViewInstruction.h>
+#include <ViewHighlight.h>
 
 /*----------------------------------------------------------------------------*
  * viewpipeline_t constructor.
@@ -14,11 +15,13 @@ viewpipeline_t::viewpipeline_t(QWidget * parent)
 	setReadOnly(true);
 	setLineWrapMode(QPlainTextEdit::NoWrap);
 	setFont(QFont("Courier", 12));
+	setMouseTracking(true);
 
 	// create widget areas
 	cycleArea_ = new viewcycle_t(this);
 	issueArea_ = new viewissue_t(this);
 	instructionArea_ = new viewinstruction_t(this);
+	highlightArea_ = new viewhighlight_t(this);
 
 	// set-up callbacks
 	connect(this, SIGNAL(blockCountChanged(int)),
@@ -29,6 +32,8 @@ viewpipeline_t::viewpipeline_t(QWidget * parent)
 		this, SLOT(updateIssueArea(QRect,int)));
 	connect(this, SIGNAL(updateRequest(QRect,int)),
 		this, SLOT(updateInstructionArea(QRect,int)));
+	connect(this, SIGNAL(updateRequest(QRect,int)),
+		this, SLOT(updateHighlightArea(QRect,int)));
 
 	updateWidth(0);
 } // viewpipeline_t::viewpipeline_t
@@ -100,7 +105,7 @@ void viewpipeline_t::issueAreaPaintEvent(QPaintEvent * event)
 			if(block.isVisible() && bottom >= event->rect().top()) {
 				painter.setPen(Qt::black);
 				painter.drawText(0, top, issueArea_->width(),
-					fontMetrics().height(), Qt::AlignCenter, issues_[blockNumber]);
+					fontMetrics().height(), Qt::AlignLeft, issues_[blockNumber]);
 			}
 
 			block = block.next();
@@ -126,10 +131,6 @@ void viewpipeline_t::instructionAreaPaintEvent(QPaintEvent * event)
 		int top =
 			(int)blockBoundingGeometry(block).translated(contentOffset()).top();
 		int bottom = top + (int)blockBoundingRect(block).height();
-		int right =
-			(int)blockBoundingGeometry(block).translated(contentOffset()).right();
-		
-		right++;
 
 		while(blockNumber < instructions_.size() &&
 			block.isValid() && top <= event->rect().bottom()) {
@@ -147,6 +148,14 @@ void viewpipeline_t::instructionAreaPaintEvent(QPaintEvent * event)
 		} // while
 	} // if
 } // viewpipeline_t::instructionAreaPaintEvent
+
+void viewpipeline_t::highlightAreaPaintEvent(QPaintEvent * event)
+{
+	if(instructions_.size() > 0) {
+		QPainter painter(highlightArea_);
+		painter.fillRect(event->rect(), QColor(0,0,255, 63));
+	} // if
+} // viewpipeline_t::paintEvent
 
 /*----------------------------------------------------------------------------*
  * Get width of cycle area.
@@ -202,6 +211,16 @@ int viewpipeline_t::instructionAreaWidth()
 } // viewpipeline_t::instructionAreaWidth
 
 /*----------------------------------------------------------------------------*
+ * Get width of highlight area.
+ *----------------------------------------------------------------------------*/
+
+int viewpipeline_t::highlightAreaWidth()
+{
+	QRect cr = contentsRect();
+	return cr.width();
+} // viewpipeline_t::highlightAreaWidth
+
+/*----------------------------------------------------------------------------*
  * Override resize event.
  *----------------------------------------------------------------------------*/
 
@@ -218,17 +237,41 @@ void viewpipeline_t::resizeEvent(QResizeEvent * event)
 		QRect(cr.right() - verticalScrollBar()->sizeHint().width() -
 		instructionAreaWidth(), cr.top(), instructionAreaWidth(), cr.height()));
 
+
+	QTextBlock block = firstVisibleBlock();
+	highlight_.setHeight(3 * (int)blockBoundingRect(block).height());
+	highlight_.setWidth(cr.width());
+	highlightArea_->setGeometry(highlight_);
 } // viewpipeline_t::resizeEvent
 
 /*----------------------------------------------------------------------------*
- * Override mouse press event.
+ * Override mouse move event.
  *----------------------------------------------------------------------------*/
 
-void viewpipeline_t::mousePressEvent(QMouseEvent * event)
+void viewpipeline_t::mouseMoveEvent(QMouseEvent * event)
 {
-	QPlainTextEdit::mousePressEvent(event);
+	QPlainTextEdit::mouseMoveEvent(event);
 
-	highlightCurrentLine(event->globalPos());
+	QTextBlock block = firstVisibleBlock();
+	int blockNumber = block.blockNumber();
+	int top =
+		(int)blockBoundingGeometry(block).translated(contentOffset()).top();
+	int bottom = top + (int)blockBoundingRect(block).height();
+
+	blockNumber = blockNumber == 0 ? 1 : blockNumber;
+	while(blockNumber < instructions_.size() && block.isValid()) {
+		if(blockBoundingGeometry(block).contains(event->x(), event->y())) {
+			highlight_.moveTo(0, top - (int)blockBoundingRect(block).height());
+			highlightArea_->setGeometry(highlight_);
+			highlightArea_->repaint();
+			return;
+		} // if
+
+		block = block.next();
+		top = bottom;
+		bottom = top + (int) blockBoundingRect(block).height();
+		++blockNumber;
+	} // while
 } // viewpipeline_t::mousePressEvent
 
 /*----------------------------------------------------------------------------*
@@ -240,28 +283,6 @@ void viewpipeline_t::updateWidth(int newBlockCount)
 	setViewportMargins(cycleAreaWidth() + issueAreaWidth(), 0,
 		instructionAreaWidth(), 0);
 } // viewpipeline_t::updateWidth
-
-/*----------------------------------------------------------------------------*
- * Update highlights.
- *----------------------------------------------------------------------------*/
-
-void viewpipeline_t::highlightCurrentLine(const QPoint & pos)
-{
-	std::cerr << "changed" << std::endl;
-//	QList<QTextEdit::ExtraSelection> extraSelections;
-
-//	if (!isReadOnly()) {
-//		QTextEdit::ExtraSelection selection;
-
-//		QColor lineColor = QColor(Qt::yellow).lighter(160);
-
-//		selection.format.setBackground(lineColor);
-//		selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-//		extraSelections.append(selection);
-//	} // if
-
-//	setExtraSelections(extraSelections);
-} // viewpipeline_t::highlightCurrentLine
 
 /*----------------------------------------------------------------------------*
  * Update cycle area.
@@ -317,3 +338,22 @@ void viewpipeline_t::updateInstructionArea(const QRect & rect, int dy)
 		updateWidth(0);
 	} // if
 } // viewpipeline_t::updateInstructionArea
+
+/*----------------------------------------------------------------------------*
+ * Update highlight area.
+ *----------------------------------------------------------------------------*/
+
+void viewpipeline_t::updateHighlightArea(const QRect & rect, int dy)
+{
+	if(dy) {
+		highlightArea_->scroll(0, dy);
+	}
+	else {
+		highlightArea_->update(0, rect.y(), highlightArea_->width(),
+			rect.height());
+	} // if
+
+	if(rect.contains(viewport()->rect())) {
+		updateWidth(0);
+	} // if
+} // viewpipeline_t::updateHighlightArea

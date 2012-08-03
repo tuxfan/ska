@@ -18,35 +18,40 @@ public:
 	void cycleAreaPaintEvent(QPaintEvent * event);
 	void issueAreaPaintEvent(QPaintEvent * event);
 	void instructionAreaPaintEvent(QPaintEvent * event);
+	void highlightAreaPaintEvent(QPaintEvent * event);
 
 	int cycleAreaWidth();
 	int issueAreaWidth();
 	int instructionAreaWidth();
+	int highlightAreaWidth();
 
 protected:
 
 	void resizeEvent(QResizeEvent * event);
-	void mousePressEvent(QMouseEvent * event);
+	void mouseMoveEvent(QMouseEvent * event);
 
 private slots:
 
 	void updateWidth(int newBlockCount);
 
-	void highlightCurrentLine(const QPoint & pos);
-
 	void updateCycleArea(const QRect & rect, int dy);
 	void updateIssueArea(const QRect & rect, int dy);
 	void updateInstructionArea(const QRect & rect, int dy);
+	void updateHighlightArea(const QRect & rect, int dy);
 
 private:
 
 	QWidget * cycleArea_;
 	QWidget * issueArea_;
 	QWidget * instructionArea_;
+	QWidget * highlightArea_;
 
 	QStringList cycles_;
 	QStringList issues_;
 	QStringList instructions_;
+
+	QRect highlight_;
+	unsigned x_, y_;
 
 }; // class viewpipeline_t
 
