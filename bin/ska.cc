@@ -5,7 +5,7 @@
 
 #include <MachineState.hh>
 #include <Parameters.hh>
-#include <Parser.hh>
+#include <Simulator.hh>
 
 int main(int argc, char ** argv) {
 
@@ -18,7 +18,7 @@ int main(int argc, char ** argv) {
 	ska::parameters_t & gp = ska::parameters_t::instance();
 	gp.init(argv[1], false);
 
-	ska::parser_t p(argv[2]);
+	ska::simulator_t p(argv[2]);
 
 	return 0;
 } // main

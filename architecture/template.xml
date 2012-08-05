@@ -20,7 +20,7 @@
 <root label="1.0">
 
 <value key="name">
-	<string>Intel Pentium M</string>
+	<string>Processor Name</string>
 </value>
 
 <!--###########################################################################
@@ -68,7 +68,7 @@
 
 <!-- ALU: types -->
 <value key="lu::1::types">
-	<string>any</string>
+	<string>integer</string>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -82,7 +82,7 @@
 
 <!-- ILU: types -->
 <value key="lu::2::types">
-	<string>any</string>
+	<string>integer</string>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -203,6 +203,10 @@
 	<integer>3</integer>
 </value>
 
+<value key="latency::fadd::vector">
+	<integer>3</integer>
+</value>
+
 <!-- sub -->
 <value key="latency::sub">
 	<integer>2</integer>
@@ -235,6 +239,10 @@
 	<integer>5</integer>
 </value>
 
+<value key="latency::fmul::vector">
+	<integer>5</integer>
+</value>
+
 <!-- div -->
 <value key="latency::udiv">
 	<integer>39</integer>
@@ -252,6 +260,10 @@
 	<integer>62</integer>
 </value>
 
+<value key="latency::fdiv::vector">
+	<integer>62</integer>
+</value>
+
 <!-- rem -->
 <value key="latency::urem">
 	<integer>39</integer>
@@ -266,6 +278,10 @@
 </value>
 
 <value key="latency::frem::double">
+	<integer>62</integer>
+</value>
+
+<value key="latency::frem::vector">
 	<integer>62</integer>
 </value>
 
@@ -459,7 +475,7 @@
 	<integer>56</integer>
 </value>
 
-<value key="latency::sqrt::float">
+<value key="latency::sqrt::double">
 	<integer>114</integer>
 </value>
 

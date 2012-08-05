@@ -13,6 +13,5 @@ config/missing
 config/version
 configure
 configure.ac
-machine/
 src/include
 *.swp

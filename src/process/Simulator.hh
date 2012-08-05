@@ -2,8 +2,8 @@
  *
  *----------------------------------------------------------------------------*/
 
-#ifndef Parser_hh
-#define Parser_hh
+#ifndef Simulator_hh
+#define Simulator_hh
 
 #if defined(USE_MANGLED_CALL_NAMES)
 #include <cxxabi.h>
@@ -29,11 +29,12 @@
 #include <MachineState.hh>
 #include <Statistics.hh>
 #include <OpCodes.hh>
+#include <OpTypes.hh>
 #include <Core.hh>
 
 namespace ska {
 
-class parser_t
+class simulator_t
 {
 public:
 
@@ -41,8 +42,8 @@ public:
 	typedef std::vector<instruction_t *> instruction_vector_t;
 	typedef std::list<instruction_t *> instruction_list_t;
 
-	parser_t(const char * ir_file);
-	~parser_t() {}
+	simulator_t(const char * ir_file);
+	~simulator_t() {}
 
 	int32_t decode(llvm::Instruction * instruction);
 	void update_stats(llvm::Instruction * instruction);
@@ -55,9 +56,9 @@ private:
 	llvm::LLVMContext llvm_context_;
 	llvm::Module * llvm_module_;
 
-}; // class parser_t
+}; // class simulator_t
 
-parser_t::parser_t(const char * ir_file)
+simulator_t::simulator_t(const char * ir_file)
 	: llvm_module_(nullptr)
 {
 	parameters_t & arch = parameters_t::instance();
@@ -65,8 +66,9 @@ parser_t::parser_t(const char * ir_file)
 	statistics_t & stats = statistics_t::instance();
 	instruction_map_t processed;
 
-//////
-// Initialize core
+	/*-------------------------------------------------------------------------*
+	 * Initialize core.
+	 *-------------------------------------------------------------------------*/
 	
 	int32_t max_issue;
 	arch.getval(max_issue, "core::max_issue");
@@ -78,31 +80,56 @@ parser_t::parser_t(const char * ir_file)
 	for(int i(0); i<lus; ++i) {
 		lu_t * lu = new lu_t(i);
 
+		// parse instructions that this LU can handle
 		char key[256];
-		sprintf(key, "lu::%d", i);
-
 		std::string tmp;
+
+		sprintf(key, "lu::%d::instructions", i);
 		arch.getval(tmp, key);
+
 		char * ops = new char[tmp.size()+1];
 		strcpy(ops, tmp.c_str());
 
 		char * tok = strtok(ops, " ");
 
-		while(tok != NULL) {
+		while(tok != nullptr) {
 			lu->add_op(code_map[tok]);
-			tok = strtok(NULL, " ");
+			tok = strtok(nullptr, " ");
 		} // while
 
-		core.add_unit(lu);
-
 		delete[] ops;
+		tok = nullptr;
+
+		// parse types that this LU can handle
+		sprintf(key, "lu::%d::types", i);
+		arch.getval(tmp, key);
+
+		char * types = new char[tmp.size()+1];
+		strcpy(types, tmp.c_str());
+
+		tok = strtok(types, " ");
+
+		while(tok != nullptr) {
+			lu->add_type(type_map[tok]);
+			tok = strtok(nullptr, " ");
+		} // while
+
+		delete[] types;
+
+		// add unit to the core
+		core.add_unit(lu);
 	} // for
 
-////////
+	/*-------------------------------------------------------------------------*
+	 * Get parsed LLVM IR.
+	 *-------------------------------------------------------------------------*/
 
 	llvm_module_ = ParseIRFile(ir_file, llvm_err_, llvm_context_);
 
-	// visit modules
+	/*-------------------------------------------------------------------------*
+	 * Visit modules.
+	 *-------------------------------------------------------------------------*/
+
 	for(llvm::Module::iterator mita = llvm_module_->begin();
 		mita != llvm_module_->end(); ++mita) {
 
@@ -111,10 +138,15 @@ parser_t::parser_t(const char * ir_file)
 		instruction_list_t active;
 		instruction_vector_t instructions;
 
-		state.reset();
+		state.clear();
+		stats.clear();
 
 		llvm::Value * value = nullptr;
 		instruction_t * inst = nullptr;
+
+	/*-------------------------------------------------------------------------*
+	 * Visit instructions.
+	 *-------------------------------------------------------------------------*/
 
 		while(ita != inst_end(mita) || active.size()) {
 			size_t issued(0);
@@ -138,8 +170,8 @@ parser_t::parser_t(const char * ir_file)
 				 * Create instruction and add dependencies
 				 *----------------------------------------------------------------*/
 
-//std::cerr << "Parser creating instruction: " << rso.str() << std::endl;
-				inst = new instruction_t(latency, ita->getOpcode(), rso.str());
+				inst = new instruction_t(latency, ita->getOpcode(),
+					ita->getType()->getTypeID(), rso.str());
 
 				unsigned operands = ita->getNumOperands();
 				for(unsigned i(0); i<operands; ++i) {
@@ -149,7 +181,7 @@ parser_t::parser_t(const char * ir_file)
 					} // if
 				} // for
 
-				int32_t id = core.accept(ita->getOpcode(), inst);
+				int32_t id = core.accept(inst);
 				if(id >= 0) {
 
 					// currently, this means that the opcode was not recognized
@@ -266,9 +298,9 @@ parser_t::parser_t(const char * ir_file)
 		std::cout << "loads: " << stats["loads"] << std::endl;
 		std::cout << "stores: " << stats["stores"] << std::endl;
 	} // for
-} // parser_t::parser_t
+} // simulator_t::simulator_t
 
-int32_t parser_t::decode(llvm::Instruction * instruction) {
+int32_t simulator_t::decode(llvm::Instruction * instruction) {
 	parameters_t & arch = parameters_t::instance();
 	int32_t latency(-1);
 
@@ -558,9 +590,8 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 		case llvm::Instruction::Call:
 			{
 			arch.getval(latency, "latency::call");
-#if 0
-			llvm::CallInst * cinst =
-				llvm::cast<llvm::CallInst>(instruction);
+#if 1
+			llvm::CallInst * cinst = llvm::cast<llvm::CallInst>(instruction);
 			std::string call = "latency::" + cinst->getCalledFunction()->getName().str();
 
 			std::string name = cinst->getCalledFunction()->getName().str();
@@ -573,7 +604,6 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 #endif
 
 			std::cerr << "Function name: " << name << std::endl;
-			//std::string call = "latency::";
 
 			switch(instruction->getType()->getTypeID()) {
 				case llvm::Type::FloatTyID:
@@ -588,7 +618,7 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 					break;
 			} // switch
 
-			arch.getval(latency, call);
+//			arch.getval(latency, call);
 #endif
 
 			break;
@@ -640,9 +670,9 @@ int32_t parser_t::decode(llvm::Instruction * instruction) {
 	} // switch
 
 	return latency;
-} // parser_t::decode
+} // simulator_t::decode
 
-void parser_t::update_stats(llvm::Instruction * instruction) {
+void simulator_t::update_stats(llvm::Instruction * instruction) {
 	statistics_t & stats = statistics_t::instance();
 
 	switch(instruction->getOpcode()) {
@@ -773,9 +803,9 @@ void parser_t::update_stats(llvm::Instruction * instruction) {
 				ExitOnError("Unhandled Instruction", ErrCode::UnknownCase);
 			} // scope
 	} // switch
-} // parser_t::update_stats
+} // simulator_t::update_stats
 
-size_t parser_t::alloca_bytes(llvm::Type * type) {
+size_t simulator_t::alloca_bytes(llvm::Type * type) {
 	switch(type->getTypeID()) {
 
 		case llvm::Type::VoidTyID:
@@ -835,8 +865,8 @@ size_t parser_t::alloca_bytes(llvm::Type * type) {
 	} // switch
 
 	return 0;
-} // parser_t::alloca_bytes
+} // simulator_t::alloca_bytes
 
 } // namespace ska
 
-#endif // Parser_hh
+#endif // Simulator_hh

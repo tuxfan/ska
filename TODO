@@ -13,3 +13,5 @@
 - Get SPE code from Mike and generate spu_timings output
 
 - Add version information to library
+
+- Test mangled call name for general case

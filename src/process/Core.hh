@@ -1,3 +1,7 @@
+/*----------------------------------------------------------------------------*
+ * Core class.
+ *----------------------------------------------------------------------------*/
+
 #ifndef Core_hh
 #define Core_hh
 
@@ -5,6 +9,10 @@
 #include <MachineState.hh>
 
 namespace ska {
+
+/*----------------------------------------------------------------------------*
+ * Core class.
+ *----------------------------------------------------------------------------*/
 
 class core_t
 {
@@ -36,9 +44,9 @@ public:
 	 * that will execute the op is return, -1 otherwise.
 	 *-------------------------------------------------------------------------*/
 
-	int32_t accept(unsigned op, instruction_t * inst) {
+	int32_t accept(instruction_t * inst) {
 		for(auto unit = units_.begin(); unit != units_.end(); ++unit) {
-			if((*unit)->issue(op, inst)) {
+			if((*unit)->issue(inst)) {
 				return (*unit)->id();
 			} // if
 		} // for
@@ -58,7 +66,15 @@ public:
 		machine_state_t::instance().advance();
 	} // advance
 
+	/*-------------------------------------------------------------------------*
+	 * Return the maximum issue rate of the core.
+	 *-------------------------------------------------------------------------*/
+
 	size_t max_issue() const { return max_issue_; }
+
+	/*-------------------------------------------------------------------------*
+	 * Release the current instruction stream.
+	 *-------------------------------------------------------------------------*/
 
 	void release(int32_t id) {
 		units_[id]->flush();

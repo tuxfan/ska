@@ -1,3 +1,7 @@
+/*----------------------------------------------------------------------------*
+ * Logic Unit class.
+ *----------------------------------------------------------------------------*/
+
 #ifndef ALU_hh
 #define ALU_hh
 
@@ -7,11 +11,16 @@
 
 namespace ska {
 
+/*----------------------------------------------------------------------------*
+ * Logic Unit class.
+ *----------------------------------------------------------------------------*/
+
 class lu_t
 {
 public:
 
 	/*-------------------------------------------------------------------------*
+	 * Logic Unit state.
 	 *-------------------------------------------------------------------------*/
 
 	enum state_t {
@@ -24,7 +33,7 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	lu_t(int32_t id)
-		: state_(ready), id_(id), current_(nullptr) {}
+		: state_(ready), id_(id), type_any_(false), current_(nullptr) {}
 
 	/*-------------------------------------------------------------------------*
 	 * Destructor.
@@ -32,31 +41,41 @@ public:
 
 	~lu_t() {}
 
+	/*-------------------------------------------------------------------------*
+	 * Add an opcode that the LU can process.
+	 *-------------------------------------------------------------------------*/
+
 	void add_op(unsigned op) {
 		codes_.insert(op);
 	} // add_op
+
+	/*-------------------------------------------------------------------------*
+	 * Add a type that the LU can process.
+	 *-------------------------------------------------------------------------*/
+
+	void add_type(unsigned type) {
+		type_any_ = type == TypeAnyID ? true : type_any_;
+		types_.insert(type);
+	} // add_type
 
 	/*-------------------------------------------------------------------------*
 	 * Try to issue on this ALU.  Returns true if instruction was issued,
 	 * false otherwise.
 	 *-------------------------------------------------------------------------*/
 
-	bool issue(unsigned op, instruction_t * inst) {
-//std::cerr << "ALU " << id_ << " issue called: ";
+	bool issue(instruction_t * inst) {
 		if(state_ == busy) {
-//std::cerr << "busy" << std::endl;
 			return false;
 		}
 
-		if(codes_.find(op) != codes_.end()) {
-//std::cerr << "issuing op " << inst->op() << std::endl;
+		if((type_any_ || types_.find(inst->optype()) != types_.end()) &&
+			codes_.find(inst->opcode()) != codes_.end()) {
 			state_ = busy;
 			current_ = inst;
 			current_->issue(id_);
 			return true;
 		}
 		else {
-//std::cerr << "can't handle op " << inst->op() << std::endl;
 			return false;
 		} // if
 	}
@@ -66,18 +85,14 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	state_t advance() {
-//std::cerr << "ALU " << id_ << " advance: ";
 		if(current_ == nullptr) {
-//std::cerr << "ready" << std::endl;
 			state_ = ready;
 		}
 		else if(current_->state() > instruction_t::stalled) {
-//std::cerr << "ready (instruction executing)" << std::endl;
 			state_ = ready;
 			current_ = nullptr;
 		}
 		else {
-//std::cerr << "busy" << std::endl;
 			state_ = busy;
 		} // if
 
@@ -85,28 +100,30 @@ public:
 	}
 
 	/*-------------------------------------------------------------------------*
-	 * Return current ALU state.
+	 * Return current LU state.
 	 *-------------------------------------------------------------------------*/
 
 	state_t state() const { return state_; }
 
-	void flush() { current_ = nullptr; state_ = ready; }
-
-	int32_t id() const { return id_; }
-
 	/*-------------------------------------------------------------------------*
-	 * Return true if this ALU can execute the given opcode, false otherwise.
+	 * Flush the LU's pipeline.
 	 *-------------------------------------------------------------------------*/
 
-	bool handles(unsigned op) {
-		return codes_.find(op) != codes_.end();
-	} // handles
+	void flush() { current_ = nullptr; state_ = ready; }
+
+	/*-------------------------------------------------------------------------*
+	 * Return the LU is.
+	 *-------------------------------------------------------------------------*/
+
+	int32_t id() const { return id_; }
 
 private:
 
 	state_t state_;
 	int32_t id_;
 	std::set<unsigned> codes_;
+	std::set<unsigned> types_;
+	bool type_any_;
 	instruction_t * current_;
 
 }; // class lu_t

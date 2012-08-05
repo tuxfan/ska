@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*
- *
+ * Instruction class.
  *----------------------------------------------------------------------------*/
 
 #ifndef Instruction_hh
@@ -13,6 +13,10 @@
 #include <MachineState.hh>
 
 namespace ska {
+
+/*----------------------------------------------------------------------------*
+ * Instruction class.
+ *----------------------------------------------------------------------------*/
 
 class instruction_t
 {
@@ -35,11 +39,13 @@ public:
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
 
-	instruction_t(size_t latency, unsigned op, std::string & ir)
-		: state_(pending), alu_(-1), latency_(latency), op_(op), multiple_(1),
-		cycles_(0), issue_(0), ir_(ir), m_(machine_state_t::instance()) {
+	instruction_t(size_t latency, unsigned opcode, unsigned optype,
+		std::string & ir)
+		: latency_(latency), opcode_(opcode), optype_(optype), ir_(ir),
+		state_(pending), alu_(-1), multiple_(1), cycles_(0), issue_(0),
+		machine_(machine_state_t::instance()) {
 
-		for(size_t i(0); i<m_.current(); ++i) {
+		for(size_t i(0); i<machine_.current(); ++i) {
 			stream_ << ' ';
 		} // for
 	} // instruction_t
@@ -64,10 +70,14 @@ public:
 
 	state_t state() { return state_; }
 
+	/*-------------------------------------------------------------------------*
+	 * Issue this instruction.
+	 *-------------------------------------------------------------------------*/
+
 	void issue(int32_t alu) {
 		alu_ = alu;
 		cycles_ = 0;
-		issue_ = m_.current() - 1;
+		issue_ = machine_.current() - 1;
 		state_ = issued;
 	} // issue
 
@@ -89,7 +99,7 @@ public:
 			cycles_ > latency_ ? retired : executing;
 
 		if(state_ != retired) {
-			stream_ << m_.counter();
+			stream_ << machine_.counter();
 		} // if
 
 		return state_;
@@ -103,16 +113,30 @@ public:
 		return depends_;
 	} // dependencies
 
+	/*-------------------------------------------------------------------------*
+	 * Set multiple issue state.
+	 *-------------------------------------------------------------------------*/
+
 	void set_multiple(int32_t m) { multiple_ = m; }
 
-	unsigned op() const { return op_; }
+	/*-------------------------------------------------------------------------*
+	 * Return the LLVM OpCode of the instruction.
+	 *-------------------------------------------------------------------------*/
+
+	unsigned opcode() const { return opcode_; }
+
+	/*-------------------------------------------------------------------------*
+	 * Return the LLVM TypeID of the instruction.
+	 *-------------------------------------------------------------------------*/
+
+	unsigned optype() const { return optype_; }
 
 	/*-------------------------------------------------------------------------*
 	 * Return execution history as a string.
 	 *-------------------------------------------------------------------------*/
 
 	std::string string() {
-		while(stream_.str().size() < m_.current()+10) {
+		while(stream_.str().size() < machine_.current()+10) {
 			stream_ << ' ';
 		} // while
 
@@ -143,19 +167,21 @@ public:
 
 private:
 
+	size_t latency_;
+	unsigned opcode_;
+	unsigned optype_;
+	std::string ir_;
+
 	state_t state_;
 	int32_t alu_;
-	size_t latency_;
-	unsigned op_;
 	int32_t multiple_;
 	size_t cycles_;
 	size_t issue_;
 
 	std::vector<instruction_t *> depends_;
 	std::stringstream stream_;
-	std::string ir_;
 
-	machine_state_t & m_;
+	machine_state_t & machine_;
 
 }; // class instruction_t
 
