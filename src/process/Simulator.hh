@@ -32,6 +32,7 @@
 #include <OpTypes.hh>
 #include <Core.hh>
 #include <Utils.hh>
+#include <x86CallMap.hh>
 
 namespace ska {
 
@@ -151,6 +152,12 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 	for(llvm::Module::iterator mita = llvm_module_->begin();
 		mita != llvm_module_->end(); ++mita) {
 
+		llvm::inst_iterator ita = inst_begin(mita);
+		
+		if(ita == inst_end(mita)) {
+			continue;
+		} // if
+
 		stream << "#---------------------------------------" <<
 			"---------------------------------------#" << std::endl;
 		stream << "# Module Section: " << mita->getName().str() << std::endl;
@@ -159,8 +166,6 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 		stream << "BEGIN_MODULE" << std::endl;
 		stream << "KEYWORD_MODULE_NAME " << mita->getName().str() << std::endl;
 
-		llvm::inst_iterator ita = inst_begin(mita);
-		
 		instruction_list_t active;
 		instruction_vector_t instructions;
 
@@ -190,7 +195,7 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 				rso << *ita;
 				value = &*ita;			
 
-				//DEBUG(rso.str());
+				DEBUG(rso.str());
 
 				/*----------------------------------------------------------------*
 				 * Create instruction and add dependencies
@@ -323,6 +328,7 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 		stream << "KEYWORD_LOAD_BYTES " << stats["load bytes"] << std::endl;
 		stream << "KEYWORD_STORES " << stats["stores"] << std::endl;
 		stream << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
+		stream << "KEYWORD_CYCLES " << state.current() << std::endl;
 
 		stream << "BEGIN_INSTRUCTION_STREAM" << std::endl;
 
@@ -649,6 +655,11 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 			delete um_name;
 			name = name.substr(0, name.find_first_of("("));
 #endif
+
+			// check for x86 intrinsics
+			if(x86_match(name)) {
+				name = x86_call_map[name];
+			} // if
 
 			call = "latency::" + name;
 

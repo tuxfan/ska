@@ -40,7 +40,7 @@
  ############################################################################-->
 
 <value key="lus">
-	<integer>6</integer>
+	<integer>7</integer>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -124,7 +124,7 @@
 
 <!-- VU: types -->
 <value key="lu::5::types">
-	<string>vector</string>
+	<string>any</string>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -471,12 +471,43 @@
  + Call Operations
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
+<!-- sqrt -->
 <value key="latency::sqrt::float">
 	<integer>56</integer>
 </value>
 
 <value key="latency::sqrt::double">
 	<integer>114</integer>
+</value>
+
+<value key="latency::sqrt::vector">
+	<integer>114</integer>
+</value>
+
+<!-- rsqrt -->
+<value key="latency::rsqrt::float">
+	<integer>10</integer>
+</value>
+
+<value key="latency::rsqrt::double">
+	<integer>10</integer>
+</value>
+
+<value key="latency::rsqrt::vector">
+	<integer>10</integer>
+</value>
+
+<!-- rsqrt -->
+<value key="latency::hadd::float">
+	<integer>10</integer>
+</value>
+
+<value key="latency::hadd::double">
+	<integer>10</integer>
+</value>
+
+<value key="latency::hadd::vector">
+	<integer>10</integer>
 </value>
 
 </root>
