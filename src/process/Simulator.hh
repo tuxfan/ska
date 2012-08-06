@@ -164,7 +164,7 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 		stream << "#---------------------------------------" <<
 			"---------------------------------------#" << std::endl;
 		stream << "BEGIN_MODULE" << std::endl;
-		stream << "KEYWORD_MODULE_NAME " << mita->getName().str() << std::endl;
+		stream << "KEYWORD_NAME " << mita->getName().str() << std::endl;
 
 		instruction_list_t active;
 		instruction_vector_t instructions;

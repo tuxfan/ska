@@ -8,7 +8,7 @@ bin_PROGRAMS = \
 INCLUDES = -I${top_srcdir}/viewer \
 	@VIEWER_CPPFLAGS@
 
-moc_%.cc: %.h
+moc_%.cc: %.hh
 	@MOC@ $< -o $@
 
 qrc_%.cc: %.qrc

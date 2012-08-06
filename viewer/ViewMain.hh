@@ -3,7 +3,7 @@
 
 #include <QtGui/QtGui>
 
-#include <ViewPipeline.h>
+#include <ViewPipeline.hh>
 
 class viewmain_t : public QMainWindow
 {

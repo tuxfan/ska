@@ -1,9 +1,10 @@
 #include <iostream>
-#include <ViewPipeline.h>
-#include <ViewCycle.h>
-#include <ViewIssue.h>
-#include <ViewInstruction.h>
-#include <ViewHighlight.h>
+
+#include <ViewPipeline.hh>
+#include <ViewCycle.hh>
+#include <ViewIssue.hh>
+#include <ViewInstruction.hh>
+#include <ViewHighlight.hh>
 
 /*----------------------------------------------------------------------------*
  * viewpipeline_t constructor.

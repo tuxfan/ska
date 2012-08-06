@@ -3,7 +3,8 @@
 
 #include <iostream>
 #include <QtGui/QApplication>
-#include <ViewMain.h>
+
+#include <ViewMain.hh>
 
 int main(int argc, char ** argv) {
 
