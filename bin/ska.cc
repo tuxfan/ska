@@ -1,24 +1,83 @@
 /*----------------------------------------------------------------------------*
  *----------------------------------------------------------------------------*/
 
+#include <fstream>
 #include <iostream>
+#include <unistd.h>
 
 #include <MachineState.hh>
 #include <Parameters.hh>
 #include <Simulator.hh>
 
-int main(int argc, char ** argv) {
+#define USAGE(s)															\
+	std::cerr << "usage: " << (s) << " [-o output file]" <<	\
+	" architecture" << " ir" << std::endl;							\
+	std::exit(1);
 
-	if(argc != 3) {
-		std::cerr << "Usage: " << argv[0] <<
-			" <architecture file> <llvm ir file>" << std::endl;
-		std::exit(1);
+int main(int argc, char ** argv) {
+	std::string program = argv[0];
+	size_t pos = program.find_last_of('/');
+	if(pos != std::string::npos) {
+		program = program.substr(pos+1);
 	} // if
 
-	ska::parameters_t & gp = ska::parameters_t::instance();
-	gp.init(argv[1], false);
+	if(argc < 3) {
+		USAGE(program.c_str());
+	} // if
 
-	ska::simulator_t p(argv[2]);
+	/*-------------------------------------------------------------------------*
+	 * Parse input arguments.
+	 *-------------------------------------------------------------------------*/
+
+	int ch;
+	extern char * optarg;
+	extern int optind;
+
+	std::streambuf * stream_buf = std::cerr.rdbuf();
+	std::ofstream file;
+
+	while((ch = getopt(argc, argv, "o:")) != -1) {
+		switch(ch) {
+			case 'o':
+				file.open(optarg);
+
+				if(!file.good()) {
+					std::cerr << "Failed opening " << optarg << std::endl;
+					std::exit(1);
+				} // if
+
+				stream_buf = file.rdbuf();
+				break;
+			default:
+				USAGE(program.c_str());
+		} // switch
+	} // while
+
+	std::ostream stream(stream_buf);
+
+	argc -= optind;
+	argv += optind;
+
+	/*-------------------------------------------------------------------------*
+	 * Read architecture specification.
+	 *-------------------------------------------------------------------------*/
+
+	ska::parameters_t & gp = ska::parameters_t::instance();
+	gp.init(argv[0], false);
+
+	/*-------------------------------------------------------------------------*
+	 * Call simulator.
+	 *-------------------------------------------------------------------------*/
+
+	ska::simulator_t p(argv[1], stream);
+
+	/*-------------------------------------------------------------------------*
+	 * Close output file.
+	 *-------------------------------------------------------------------------*/
+
+	if(file.is_open()) {
+		file.close();
+	} // if
 
 	return 0;
 } // main

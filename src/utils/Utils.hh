@@ -13,6 +13,9 @@
 
 namespace ska {
 
+#define STRINGIFY(token) #token
+#define DEFINE_TO_STRING(define) STRINGIFY(define)
+
 #if defined(DEBUG)
 #include <cassert>
 #define DEBUG_ASSERT(statement) \

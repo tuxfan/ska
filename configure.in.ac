@@ -12,6 +12,8 @@ AC_CONFIG_AUX_DIR(config)
 VERSION_INFORMATION="VERSION_TAG"
 AC_SUBST(VERSION_INFORMATION)
 
+CPPFLAGS="$CPPFLAGS -DSKA_VERSION=$VERSION_INFORMATION"
+
 #------------------------------------------------------------------------------#
 # Initialize automake
 #------------------------------------------------------------------------------#

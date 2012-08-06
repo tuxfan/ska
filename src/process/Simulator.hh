@@ -31,8 +31,13 @@
 #include <OpCodes.hh>
 #include <OpTypes.hh>
 #include <Core.hh>
+#include <Utils.hh>
 
 namespace ska {
+
+#ifndef SKA_VERSION_TAG
+#define SKA_VERSION_TAG "undefined"
+#endif
 
 class simulator_t
 {
@@ -42,13 +47,13 @@ public:
 	typedef std::vector<instruction_t *> instruction_vector_t;
 	typedef std::list<instruction_t *> instruction_list_t;
 
-	simulator_t(const char * ir_file);
+	simulator_t(const char * ir_file, std::ostream & stream);
 	~simulator_t() {}
 
 	int32_t decode(llvm::Instruction * instruction);
 	void update_stats(llvm::Instruction * instruction);
 
-	size_t alloca_bytes(llvm::Type * type);
+	size_t bytes(llvm::Type * type);
 
 private:
 
@@ -58,7 +63,7 @@ private:
 
 }; // class simulator_t
 
-simulator_t::simulator_t(const char * ir_file)
+simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 	: llvm_module_(nullptr)
 {
 	parameters_t & arch = parameters_t::instance();
@@ -66,6 +71,19 @@ simulator_t::simulator_t(const char * ir_file)
 	statistics_t & stats = statistics_t::instance();
 	instruction_map_t processed;
 
+	/*-------------------------------------------------------------------------*
+	 * Write header information.
+	 *-------------------------------------------------------------------------*/
+
+	stream << "#---------------------------------------" <<
+		"---------------------------------------#" << std::endl;
+	stream << "# Static Kernel Analyzer (SKA)" << std::endl;
+	stream << "# Header Section" << std::endl;
+	stream << "#---------------------------------------" <<
+		"---------------------------------------#" << std::endl;
+	stream << "KEYWORD_SKA_VERSION " <<
+		DEFINE_TO_STRING(SKA_VERSION) << std::endl << std::endl;
+	
 	/*-------------------------------------------------------------------------*
 	 * Initialize core.
 	 *-------------------------------------------------------------------------*/
@@ -133,6 +151,14 @@ simulator_t::simulator_t(const char * ir_file)
 	for(llvm::Module::iterator mita = llvm_module_->begin();
 		mita != llvm_module_->end(); ++mita) {
 
+		stream << "#---------------------------------------" <<
+			"---------------------------------------#" << std::endl;
+		stream << "# Module Section: " << mita->getName().str() << std::endl;
+		stream << "#---------------------------------------" <<
+			"---------------------------------------#" << std::endl;
+		stream << "BEGIN_MODULE" << std::endl;
+		stream << "KEYWORD_MODULE_NAME " << mita->getName().str() << std::endl;
+
 		llvm::inst_iterator ita = inst_begin(mita);
 		
 		instruction_list_t active;
@@ -164,7 +190,7 @@ simulator_t::simulator_t(const char * ir_file)
 				rso << *ita;
 				value = &*ita;			
 
-				DEBUG(rso.str());
+				//DEBUG(rso.str());
 
 				/*----------------------------------------------------------------*
 				 * Create instruction and add dependencies
@@ -288,15 +314,24 @@ simulator_t::simulator_t(const char * ir_file)
 			core.advance();
 		} // while
 
+		stream << "KEYWORD_STACK_ALLOCATIONS " <<
+			stats["allocas"] << std::endl;
+		stream << "KEYWORD_STACK_ALLOCATION_BYTES " <<
+			stats["alloca bytes"] << std::endl;
+		stream << "KEYWORD_FLOPS " << stats["flops"] << std::endl;
+		stream << "KEYWORD_LOADS " << stats["loads"] << std::endl;
+		stream << "KEYWORD_LOAD_BYTES " << stats["load bytes"] << std::endl;
+		stream << "KEYWORD_STORES " << stats["stores"] << std::endl;
+		stream << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
+
+		stream << "BEGIN_INSTRUCTION_STREAM" << std::endl;
+
 		for(auto ita = instructions.begin(); ita != instructions.end(); ++ita) {
-			std::cout << (*ita)->string() << std::endl;
+			stream << (*ita)->string() << std::endl;
 		} // for
 
-		std::cout << std::endl;
-		std::cout << "allocs: " << stats["allocs"] << std::endl;
-		std::cout << "flops: " << stats["flops"] << std::endl;
-		std::cout << "loads: " << stats["loads"] << std::endl;
-		std::cout << "stores: " << stats["stores"] << std::endl;
+		stream << "END_INSTRUCTION_STREAM" << std::endl;
+		stream << "END_MODULE" << std::endl;
 	} // for
 } // simulator_t::simulator_t
 
@@ -355,6 +390,9 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 				case llvm::Type::DoubleTyID:
 					arch.getval(latency, "latency::fadd::double");
 					break;
+				case llvm::Type::VectorTyID:
+					arch.getval(latency, "latency::fadd::vector");
+					break;
 				default:
 					ExitOnError("FAdd Unhandled Type",
 						ErrCode::UnknownCase);
@@ -401,6 +439,9 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 				case llvm::Type::DoubleTyID:
 					arch.getval(latency, "latency::fmul::double");
 					break;
+				case llvm::Type::VectorTyID:
+					arch.getval(latency, "latency::fmul::vector");
+					break;
 				default:
 					ExitOnError("FMul Unhandled Type",
 						ErrCode::UnknownCase);
@@ -426,6 +467,9 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 				case llvm::Type::DoubleTyID:
 					arch.getval(latency, "latency::fdiv::double");
 					break;
+				case llvm::Type::VectorTyID:
+					arch.getval(latency, "latency::fdiv::vector");
+					break;
 				default:
 					ExitOnError("FDiv Unhandled Type",
 						ErrCode::UnknownCase);
@@ -450,6 +494,9 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 					break;
 				case llvm::Type::DoubleTyID:
 					arch.getval(latency, "latency::frem::double");
+					break;
+				case llvm::Type::VectorTyID:
+					arch.getval(latency, "latency::frem::vector");
 					break;
 				default:
 					ExitOnError("FRem Unhandled Type",
@@ -590,10 +637,9 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 		case llvm::Instruction::Call:
 			{
 			arch.getval(latency, "latency::call");
-#if 1
 			llvm::CallInst * cinst = llvm::cast<llvm::CallInst>(instruction);
-			std::string call = "latency::" + cinst->getCalledFunction()->getName().str();
 
+			std::string call;
 			std::string name = cinst->getCalledFunction()->getName().str();
 
 #if defined(USE_MANGLED_CALL_NAMES)
@@ -601,9 +647,10 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 			char * um_name = abi::__cxa_demangle(name.c_str(), 0, 0, &status);
 			name = um_name;
 			delete um_name;
+			name = name.substr(0, name.find_first_of("("));
 #endif
 
-			std::cerr << "Function name: " << name << std::endl;
+			call = "latency::" + name;
 
 			switch(instruction->getType()->getTypeID()) {
 				case llvm::Type::FloatTyID:
@@ -612,14 +659,16 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 				case llvm::Type::DoubleTyID:
 					call += "::double";
 					break;
+				case llvm::Type::VectorTyID:
+					call += "::vector";
+					break;
 				default:
 					ExitOnError("Call Unhandled Type",
 						ErrCode::UnknownCase);
 					break;
 			} // switch
 
-//			arch.getval(latency, call);
-#endif
+			arch.getval(latency, call);
 
 			break;
 			} // scope
@@ -727,17 +776,26 @@ void simulator_t::update_stats(llvm::Instruction * instruction) {
 		case llvm::Instruction::Xor:
 		case llvm::Instruction::Alloca:
 			{
+			stats["allocas"]++;
 			llvm::AllocaInst * ainst =
 				llvm::cast<llvm::AllocaInst>(instruction);
-			stats["allocs"] += alloca_bytes(ainst->getType());
+			stats["alloca bytes"] += bytes(ainst->getType());
 			break;
 			} // scope
 		case llvm::Instruction::Load:
+			{
 			stats["loads"]++;
+			llvm::Value * value = instruction->getOperand(0);
+			stats["load bytes"] += bytes(value->getType());
 			break;
+			} // scope
 		case llvm::Instruction::Store:
+			{
 			stats["stores"]++;
+			llvm::Value * value = instruction->getOperand(0);
+			stats["store bytes"] += bytes(value->getType());
 			break;
+			} // scope
 		case llvm::Instruction::GetElementPtr:
 			break;
 		case llvm::Instruction::Fence:
@@ -805,7 +863,7 @@ void simulator_t::update_stats(llvm::Instruction * instruction) {
 	} // switch
 } // simulator_t::update_stats
 
-size_t simulator_t::alloca_bytes(llvm::Type * type) {
+size_t simulator_t::bytes(llvm::Type * type) {
 	switch(type->getTypeID()) {
 
 		case llvm::Type::VoidTyID:
@@ -849,10 +907,10 @@ size_t simulator_t::alloca_bytes(llvm::Type * type) {
 
 		case llvm::Type::ArrayTyID:
 			return type->getArrayNumElements() *
-				alloca_bytes(type->getArrayElementType());
+				bytes(type->getArrayElementType());
 
 		case llvm::Type::PointerTyID:
-			return alloca_bytes(type->getPointerElementType());
+			return bytes(type->getPointerElementType());
 
 		case llvm::Type::VectorTyID:
 			break;
@@ -865,7 +923,7 @@ size_t simulator_t::alloca_bytes(llvm::Type * type) {
 	} // switch
 
 	return 0;
-} // simulator_t::alloca_bytes
+} // simulator_t::bytes
 
 } // namespace ska
 
