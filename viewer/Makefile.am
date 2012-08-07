@@ -16,7 +16,6 @@ qrc_%.cc: %.qrc
 
 skaview_SOURCES = \
 	@top_srcdir@/viewer/skaview.cc \
-	@top_srcdir@/viewer/ViewBar.cc \
 	@top_srcdir@/viewer/ViewMain.cc \
 	@top_srcdir@/viewer/ViewPipeline.cc
 nodist_skaview_SOURCES = \

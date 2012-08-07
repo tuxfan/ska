@@ -24,6 +24,9 @@ viewmain_t::viewmain_t()
 	/*-------------------------------------------------------------------------*
 	 * Loaded modules display
 	 *------------------------------------------------------------------------*/
+	loaded_ = new QLabel(this);
+	loaded_->setText("None");
+
 	selector_ = new QComboBox(this);
 	connect(selector_, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(load(int)));
@@ -55,35 +58,47 @@ viewmain_t::viewmain_t()
 	/*-------------------------------------------------------------------------*
 	 * Toolbar
 	 *------------------------------------------------------------------------*/
+	int fill = 0;
 	fileBar_ = addToolBar(tr("File"));
 
-	fill0_ = new QWidget(this);
-	fileBar_->addWidget(fill0_);
-	fill0_->setFixedWidth(10);
+	fill_[fill] = new QWidget(this);
+	fileBar_->addWidget(fill_[fill]);
+	fill_[fill]->setFixedWidth(10);
 
 	fileBar_->addAction(openAction_);
 
-	fill1_ = new QWidget(this);
-	fileBar_->addWidget(fill1_);
-	fill1_->setFixedWidth(10);
+	++fill;
+	fill_[fill] = new QWidget(this);
+	fileBar_->addWidget(fill_[fill]);
+	fill_[fill]->setFixedWidth(10);
+
+	fileBar_->addWidget(loaded_);
+
+	++fill;
+	fill_[fill] = new QWidget(this);
+	fileBar_->addWidget(fill_[fill]);
+	fill_[fill]->setFixedWidth(10);
 
 	fileBar_->addWidget(selector_);
 
-	fill2_ = new QWidget(this);
-	fileBar_->addWidget(fill2_);
-	fill2_->setFixedWidth(10);
+	++fill;
+	fill_[fill] = new QWidget(this);
+	fileBar_->addWidget(fill_[fill]);
+	fill_[fill]->setFixedWidth(10);
 
 	fileBar_->addWidget(status_);
 
-	fill3_ = new QWidget(this);
-	fileBar_->addWidget(fill3_);
-	fill3_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+	++fill;
+	fill_[fill] = new QWidget(this);
+	fileBar_->addWidget(fill_[fill]);
+	fill_[fill]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
 	fileBar_->addWidget(searchBox_);
 
-	fill4_ = new QWidget(this);
-	fileBar_->addWidget(fill4_);
-	fill4_->setFixedWidth(10);
+	++fill;
+	fill_[fill] = new QWidget(this);
+	fileBar_->addWidget(fill_[fill]);
+	fill_[fill]->setFixedWidth(10);
 
 	/*-------------------------------------------------------------------------*
 	 * Pipeline (main widget)
@@ -98,9 +113,17 @@ viewmain_t::viewmain_t()
 	resize(800, 600);
 } // viewmain_t::viewmain_t
 
+/*----------------------------------------------------------------------------*
+ * Destructor
+ *----------------------------------------------------------------------------*/
+
 viewmain_t::~viewmain_t()
 {
 } // viewmain_t::~viewmain_t
+
+/*----------------------------------------------------------------------------*
+ * Open
+ *----------------------------------------------------------------------------*/
 
 void viewmain_t::open()
 {
@@ -111,6 +134,11 @@ void viewmain_t::open()
 		return;
 	} // if
 
+	open(fileName);
+} // viewmain_t::open
+
+void viewmain_t::open(QString & fileName)
+{
 	QFile file(fileName);
 
 	if(!file.open(QIODevice::ReadOnly)) {
@@ -126,7 +154,6 @@ void viewmain_t::open()
 	QStringList cycles;
 	QStringList issues;
 	QStringList instructions;
-	program_version_t version;
 	module_data_t module;
 
 	while(!stream.atEnd()) {
@@ -138,10 +165,11 @@ void viewmain_t::open()
 		} // if
 
 		if(line.contains("KEYWORD_SKA_VERSION")) {
-			version.set(line.split(" ")[1]);
-			std::cerr << "Major: " << version.major() << std::endl;
-			std::cerr << "Minor: " << version.minor() << std::endl;
-			std::cerr << "Build: " << version.build() << std::endl;
+			version_.set(line.split(" ")[1]);
+		} // if
+
+		if(line.contains("KEYWORD_ARCHITECTURE")) {
+			architecture_ = line.split(" ")[1];
 		} // if
 
 		if(line.contains("BEGIN_MODULE")) {
@@ -186,12 +214,30 @@ void viewmain_t::open()
 	} // for
 
 	selector_->setEnabled(true);
+	//searchBox_->setEnabled(true);
+	loaded_->setText("Architecture: " + architecture_);
 
 	load(0);
 } // viewmain_t::open
 
+/*----------------------------------------------------------------------------*
+ * Load
+ *----------------------------------------------------------------------------*/
+
 void viewmain_t::load(int m)
 {
+	QString balance;
+	double ratio = modules_[m]["flops"].toDouble() /
+		modules_[m]["load bytes"].toDouble();
+	balance.setNum(ratio);
+
+	// update status
+	QString state =
+		"Cycles: " + modules_[m]["cycles"] +
+		", Balance: " + balance;
+	status_->setText(state);
+
+	// load data
 	pipeline_->load(modules_[m].cycles, modules_[m].issues,
 		modules_[m].pipelines, modules_[m].instructions);
 } // viewmain_t::load

@@ -2,13 +2,19 @@
 # TODO for SKA
 #------------------------------------------------------------------------------#
 
-- Add support for vector intrinsics (requires creating LLVM IR source)
+Urgent:
+
+- Figure out bug in direct.ll processing
+
+	Error is caused by multi-line switch statement in code.
+	This looks like actual input from the .ll file.  Not sure why LLVM doesn't
+	join this into one line.
+
+Not so urgent:
 
 - Finish search function
 
 - Add heuristics (look for metrics from proposal)
-
-- Finish output format/options
 
 - Get SPE code from Mike and generate spu_timings output
 

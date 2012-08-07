@@ -15,6 +15,8 @@ public:
 	viewmain_t();
 	~viewmain_t();
 
+	void open(QString & file);
+
 private slots:
 
 	void open();
@@ -32,18 +34,17 @@ private:
 
 	QToolBar * fileBar_;
 
+	QLabel * loaded_;
 	QComboBox * selector_;
 	QLabel * status_;
 	QLineEdit * searchBox_;
 
-	QWidget * fill0_;
-	QWidget * fill1_;
-	QWidget * fill2_;
-	QWidget * fill3_;
-	QWidget * fill4_;
+	QWidget * fill_[10];
 
 	// data
 	QVector<module_data_t> modules_;
+	program_version_t version_;
+	QString architecture_;
 
 }; // class viewmain_t
 

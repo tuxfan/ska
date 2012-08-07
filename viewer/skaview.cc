@@ -14,5 +14,10 @@ int main(int argc, char ** argv) {
 
 	main.show();
 
+	if(argc == 2) {
+		QString fileName = argv[1];
+		main.open(fileName);
+	} // if
+
 	return app.exec();
 } // main

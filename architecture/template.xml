@@ -20,7 +20,7 @@
 <root label="1.0">
 
 <value key="name">
-	<string>Processor Name</string>
+	<string>Template</string>
 </value>
 
 <!--###########################################################################
@@ -150,364 +150,922 @@
  + Terminator Operations
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
-<!-- ret -->
+<!-- ==================================
+ = ret
+ =================================== -->
+
 <value key="latency::ret">
 	<integer>1</integer>
 </value>
 
-<!-- br -->
+<value key="reciprocal::ret">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = br
+ =================================== -->
+
 <value key="latency::br">
 	<integer>1</integer>
 </value>
 
-<!-- switch -->
+<value key="reciprocal::br">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = switch
+ =================================== -->
+
 <value key="latency::switch">
 	<integer>1</integer>
 </value>
 
-<!-- indirectbr -->
+<value key="reciprocal::switch">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = indirectbr
+ =================================== -->
+
 <value key="latency::indirectbr">
 	<integer>1</integer>
 </value>
 
-<!-- invoke -->
+<value key="reciprocal::indirectbr">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = invoke
+ =================================== -->
+
 <value key="latency::invoke">
 	<integer>1</integer>
 </value>
 
-<!-- resume -->
+<value key="reciprocal::invoke">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = resume
+ =================================== -->
+
 <value key="latency::resume">
 	<integer>1</integer>
 </value>
 
-<!-- unreachable -->
+<value key="reciprocal::resume">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = unreachable
+ =================================== -->
+
 <value key="latency::unreachable">
 	<integer>1</integer>
+</value>
+
+<value key="reciprocal::unreachable">
+	<real>1</real>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  + Standard Binary Operations
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
-<!-- add -->
+<!-- ==================================
+ = add
+ =================================== -->
+
+<!-- any -->
 <value key="latency::add">
 	<integer>2</integer>
 </value>
 
-<!-- fadd -->
+<value key="reciprocal::add">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = fadd
+ =================================== -->
+
+<!-- float -->
 <value key="latency::fadd::float">
 	<integer>3</integer>
 </value>
 
+<value key="reciprocal::fadd::float">
+	<real>2</real>
+</value>
+
+<!-- double -->
 <value key="latency::fadd::double">
 	<integer>3</integer>
 </value>
 
+<value key="reciprocal::fadd::double">
+	<real>2</real>
+</value>
+
+<!-- vector -->
 <value key="latency::fadd::vector">
 	<integer>3</integer>
 </value>
 
-<!-- sub -->
+<value key="reciprocal::fadd::vector">
+	<real>2</real>
+</value>
+
+<!-- ==================================
+ = sub
+ =================================== -->
+
 <value key="latency::sub">
 	<integer>2</integer>
 </value>
 
-<!-- fsub -->
+<value key="reciprocal::sub">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = fsub
+ =================================== -->
+
+<!-- float -->
 <value key="latency::fsub::float">
 	<integer>3</integer>
 </value>
 
+<value key="reciprocal::fsub::float">
+	<real>2</real>
+</value>
+
+<!-- double -->
 <value key="latency::fsub::double">
 	<integer>3</integer>
 </value>
 
+<value key="reciprocal::fsub::double">
+	<real>2</real>
+</value>
+
+<!-- vector -->
 <value key="latency::fsub::vector">
 	<integer>3</integer>
 </value>
 
-<!-- mul -->
+<value key="reciprocal::fsub::vector">
+	<real>2</real>
+</value>
+
+<!-- ==================================
+ = mul
+ =================================== -->
+
 <value key="latency::mul">
 	<integer>5</integer>
 </value>
 
-<!-- fmul -->
+<value key="reciprocal::mul">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = fmul
+ =================================== -->
+
+<!-- float -->
 <value key="latency::fmul::float">
 	<integer>4</integer>
 </value>
 
+<value key="reciprocal::fmul::float">
+	<real>2</real>
+</value>
+
+<!-- double -->
 <value key="latency::fmul::double">
 	<integer>5</integer>
 </value>
 
+<value key="reciprocal::fmul::double">
+	<real>2</real>
+</value>
+
+<!-- vector -->
 <value key="latency::fmul::vector">
 	<integer>5</integer>
 </value>
 
-<!-- div -->
+<value key="reciprocal::fmul::vector">
+	<real>2</real>
+</value>
+
+<!-- ==================================
+ = udiv
+ =================================== -->
+
 <value key="latency::udiv">
 	<integer>39</integer>
 </value>
+
+<value key="reciprocal::udiv">
+	<integer>39</integer>
+</value>
+
+<!-- ==================================
+ = sdiv
+ =================================== -->
 
 <value key="latency::sdiv">
 	<integer>39</integer>
 </value>
 
+<value key="reciprocal::sdiv">
+	<real>39</real>
+</value>
+
+<!-- ==================================
+ = fdiv
+ =================================== -->
+
+<!-- float -->
 <value key="latency::fdiv::float">
 	<integer>34</integer>
 </value>
 
+<value key="reciprocal::fdiv::float">
+	<real>34</real>
+</value>
+
+<!-- double -->
 <value key="latency::fdiv::double">
 	<integer>62</integer>
 </value>
 
+<value key="reciprocal::fdiv::double">
+	<real>62</real>
+</value>
+
+<!-- vector -->
 <value key="latency::fdiv::vector">
 	<integer>62</integer>
 </value>
 
-<!-- rem -->
+<value key="reciprocal::fdiv::vector">
+	<real>62</real>
+</value>
+
+<!-- ==================================
+ = urem
+ =================================== -->
+
 <value key="latency::urem">
 	<integer>39</integer>
 </value>
+
+<value key="reciprocal::urem">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = srem
+ =================================== -->
 
 <value key="latency::srem">
 	<integer>39</integer>
 </value>
 
+<value key="reciprocal::srem">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = frem
+ =================================== -->
+
+<!-- float -->
 <value key="latency::frem::float">
 	<integer>34</integer>
 </value>
 
+<value key="reciprocal::frem::float">
+	<real>34</real>
+</value>
+
+<!-- double -->
 <value key="latency::frem::double">
 	<integer>62</integer>
 </value>
 
+<value key="reciprocal::frem::double">
+	<real>34</real>
+</value>
+
+<!-- vector -->
 <value key="latency::frem::vector">
 	<integer>62</integer>
+</value>
+
+<value key="reciprocal::frem::vector">
+	<real>34</real>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  + Logical Operations
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
-<!-- shift -->
+<!-- ==================================
+ = shl
+ =================================== -->
+
 <value key="latency::shl">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::shl">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = lshl
+ =================================== -->
 
 <value key="latency::lshr">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::lshr">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = ashr
+ =================================== -->
+
 <value key="latency::ashr">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::ashr">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = and
+ =================================== -->
 
 <!-- standard unary -->
 <value key="latency::and">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::and">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = or
+ =================================== -->
+
 <value key="latency::or">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::or">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = xor
+ =================================== -->
+
 <value key="latency::xor">
 	<integer>1</integer>
+</value>
+
+<value key="reciprocal::xor">
+	<real>1</real>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  + Memory Operations
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
+<!-- ==================================
+ = alloca
+ =================================== -->
+
 <!-- alloca -->
 <value key="latency::alloca">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::alloca">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = load
+ =================================== -->
 
 <!-- load -->
 <value key="latency::load">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::load">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = store
+ =================================== -->
+
 <!-- store -->
 <value key="latency::store">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::store">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = getelementptr
+ =================================== -->
 
 <!-- getelementptr -->
 <value key="latency::getelementptr">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::getelementptr">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = fence
+ =================================== -->
+
 <!-- fence -->
 <value key="latency::fence">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::fence">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = atomiccmpxchg
+ =================================== -->
 
 <!-- atomiccmpxchg -->
 <value key="latency::atomiccmpxchg">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::atomiccmpxchg">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = atomicrmw
+ =================================== -->
+
 <!-- atomicrmw -->
 <value key="latency::atomicrmw">
 	<integer>1</integer>
+</value>
+
+<value key="reciprocal::atomicrmw">
+	<real>1</real>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  + Cast Operations
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
+<!-- ==================================
+ = trunc
+ =================================== -->
+
 <value key="latency::trunc">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::trunc">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = zext
+ =================================== -->
 
 <value key="latency::zext">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::zext">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = sext
+ =================================== -->
+
 <value key="latency::sext">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::sext">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = fptoui
+ =================================== -->
 
 <value key="latency::fptoui">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::fptoui">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = fptosi
+ =================================== -->
+
 <value key="latency::fptosi">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::fptosi">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = uitofp
+ =================================== -->
 
 <value key="latency::uitofp">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::uitofp">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = sitofp
+ =================================== -->
+
 <value key="latency::sitofp">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::sitofp">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = fptrunc
+ =================================== -->
 
 <value key="latency::fptrunc">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::fptrunc">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = fpext
+ =================================== -->
+
 <value key="latency::fpext">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::fpext">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = ptrtoint
+ =================================== -->
 
 <value key="latency::ptrtoint">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::ptrtoint">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = inttoptr
+ =================================== -->
+
 <value key="latency::inttoptr">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::inttoptr">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = bitcast
+ =================================== -->
+
 <value key="latency::bitcast">
 	<integer>1</integer>
+</value>
+
+<value key="reciprocal::bitcast">
+	<real>1</real>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  + Other Operations
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
+<!-- ==================================
+ = icmp
+ =================================== -->
+
 <value key="latency::icmp">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::icmp">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = fcmp
+ =================================== -->
+
 <value key="latency::fcmp">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::fcmp">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = phi
+ =================================== -->
 
 <!-- phi -->
 <value key="latency::phi">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::phi">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = call
+ =================================== -->
+
 <value key="latency::call">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::call">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = select
+ =================================== -->
 
 <value key="latency::select">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::select">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = useop1
+ =================================== -->
+
 <value key="latency::userop1">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::useop1">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = userop2
+ =================================== -->
 
 <value key="latency::userop2">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::userop2">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = vaarg
+ =================================== -->
+
 <value key="latency::vaarg">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::vaarg">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = extractelement
+ =================================== -->
 
 <value key="latency::extractelement">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::extractelement">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = insertelement
+ =================================== -->
+
 <value key="latency::insertelement">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::insertelement">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = shufflevector
+ =================================== -->
 
 <value key="latency::shufflevector">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::shufflevector">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = extractvalue
+ =================================== -->
+
 <value key="latency::extractvalue">
 	<integer>1</integer>
 </value>
+
+<value key="reciprocal::extractvalue">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = insertvalue
+ =================================== -->
 
 <value key="latency::insertvalue">
 	<integer>1</integer>
 </value>
 
+<value key="reciprocal::insertvalue">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = landingpad
+ =================================== -->
+
 <value key="latency::landingpad">
 	<integer>1</integer>
+</value>
+
+<value key="reciprocal::landingpad">
+	<real>1</real>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  + Call Operations
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
-<!-- sqrt -->
+<!-- ==================================
+ = sqrt
+ =================================== -->
+
+<!-- float -->
 <value key="latency::sqrt::float">
 	<integer>56</integer>
 </value>
 
+<value key="reciprocal::sqrt::float">
+	<real>1</real>
+</value>
+
+<!-- double -->
 <value key="latency::sqrt::double">
 	<integer>114</integer>
 </value>
 
+<value key="reciprocal::sqrt::double">
+	<real>1</real>
+</value>
+
+<!-- vector -->
 <value key="latency::sqrt::vector">
 	<integer>114</integer>
 </value>
 
-<!-- rsqrt -->
+<value key="reciprocal::sqrt::vector">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = rsqrt
+ =================================== -->
+
+<!-- float -->
 <value key="latency::rsqrt::float">
 	<integer>10</integer>
 </value>
 
+<value key="reciprocal::rsqrt::float">
+	<real>1</real>
+</value>
+
+<!-- double -->
 <value key="latency::rsqrt::double">
 	<integer>10</integer>
 </value>
 
+<value key="reciprocal::rsqrt::double">
+	<real>1</real>
+</value>
+
+<!-- vector -->
 <value key="latency::rsqrt::vector">
 	<integer>10</integer>
 </value>
 
-<!-- rsqrt -->
+<value key="reciprocal::rsqrt::vector">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = hadd
+ =================================== -->
+
+<!-- float -->
 <value key="latency::hadd::float">
 	<integer>10</integer>
 </value>
 
+<value key="reciprocal::hadd::float">
+	<real>1</real>
+</value>
+
+<!-- double -->
 <value key="latency::hadd::double">
 	<integer>10</integer>
 </value>
 
+<value key="reciprocal::hadd::double">
+	<real>1</real>
+</value>
+
+<!-- vector -->
 <value key="latency::hadd::vector">
 	<integer>10</integer>
+</value>
+
+<value key="reciprocal::hadd::vector">
+	<real>1</real>
 </value>
 
 </root>

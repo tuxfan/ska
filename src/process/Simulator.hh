@@ -83,7 +83,12 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 	stream << "#---------------------------------------" <<
 		"---------------------------------------#" << std::endl;
 	stream << "KEYWORD_SKA_VERSION " <<
-		DEFINE_TO_STRING(SKA_VERSION) << std::endl << std::endl;
+		DEFINE_TO_STRING(SKA_VERSION) << std::endl;
+
+	std::string architecture;
+	arch.getval(architecture, "name");
+	stream << "KEYWORD_ARCHITECTURE " << architecture <<
+		std::endl << std::endl;
 	
 	/*-------------------------------------------------------------------------*
 	 * Initialize core.
