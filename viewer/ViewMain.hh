@@ -4,6 +4,7 @@
 #include <QtGui/QtGui>
 
 #include <ViewPipeline.hh>
+#include <ViewData.hh>
 
 class viewmain_t : public QMainWindow
 {
@@ -17,9 +18,11 @@ public:
 private slots:
 
 	void open();
+	void load(int m);
 
 private:
 
+	// GUI elements
 	QAction * openAction_;
 	QAction * quitAction_;
 
@@ -29,8 +32,18 @@ private:
 
 	QToolBar * fileBar_;
 
-	QLabel * filler_;
+	QComboBox * selector_;
+	QLabel * status_;
 	QLineEdit * searchBox_;
+
+	QWidget * fill0_;
+	QWidget * fill1_;
+	QWidget * fill2_;
+	QWidget * fill3_;
+	QWidget * fill4_;
+
+	// data
+	QVector<module_data_t> modules_;
 
 }; // class viewmain_t
 

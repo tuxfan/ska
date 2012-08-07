@@ -82,7 +82,7 @@
 
 <!-- ILU: types -->
 <value key="lu::2::types">
-	<string>integer</string>
+	<string>any</string>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -110,7 +110,7 @@
 
 <!-- FPU: types -->
 <value key="lu::4::types">
-	<string>float double vector</string>
+	<string>any</string>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

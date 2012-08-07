@@ -5,39 +5,95 @@
 #include <iostream>
 
 #include <ViewMain.hh>
-#include <ViewData.hh>
 
 viewmain_t::viewmain_t()
 {
+	/*-------------------------------------------------------------------------*
+	 * Open file action
+	 *------------------------------------------------------------------------*/
 	openAction_ = new QAction(QIcon(":/icons/open.png"), tr("&Open"), this);
 	openAction_->setShortcut(tr("Ctrl+O"));
+	connect(openAction_, SIGNAL(triggered()), this, SLOT(open()));
 
+	/*-------------------------------------------------------------------------*
+	 * Quit action
+	 *------------------------------------------------------------------------*/
 	quitAction_ = new QAction(tr("&Quit"), this);
+	connect(quitAction_, SIGNAL(triggered()), qApp, SLOT(quit()));
 
-	filler_ = new QLabel(this);
+	/*-------------------------------------------------------------------------*
+	 * Loaded modules display
+	 *------------------------------------------------------------------------*/
+	selector_ = new QComboBox(this);
+	connect(selector_, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(load(int)));
+	selector_->setFixedWidth(200);
+	selector_->setEnabled(false);
 
+	/*-------------------------------------------------------------------------*
+	 * Status information
+	 *------------------------------------------------------------------------*/
+	status_ = new QLabel(this);
+	status_->setText("No Data Loaded");
+
+	/*-------------------------------------------------------------------------*
+	 * Search
+	 *------------------------------------------------------------------------*/
 	searchBox_ = new QLineEdit("", this);
 	searchBox_->setPlaceholderText("search");
 	searchBox_->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+	searchBox_->setEnabled(false);
 
-	connect(openAction_, SIGNAL(triggered()), this, SLOT(open()));
-	connect(quitAction_, SIGNAL(triggered()), qApp, SLOT(quit()));
-
-	// add file menu
+	/*-------------------------------------------------------------------------*
+	 * File menu
+	 *------------------------------------------------------------------------*/
 	fileMenu_ = menuBar()->addMenu(tr("&File"));
 	fileMenu_->addAction(openAction_);
 	fileMenu_->addSeparator();
 	fileMenu_->addAction(quitAction_);
 
-	// add file toolbar
+	/*-------------------------------------------------------------------------*
+	 * Toolbar
+	 *------------------------------------------------------------------------*/
 	fileBar_ = addToolBar(tr("File"));
+
+	fill0_ = new QWidget(this);
+	fileBar_->addWidget(fill0_);
+	fill0_->setFixedWidth(10);
+
 	fileBar_->addAction(openAction_);
-	fileBar_->addWidget(filler_);
+
+	fill1_ = new QWidget(this);
+	fileBar_->addWidget(fill1_);
+	fill1_->setFixedWidth(10);
+
+	fileBar_->addWidget(selector_);
+
+	fill2_ = new QWidget(this);
+	fileBar_->addWidget(fill2_);
+	fill2_->setFixedWidth(10);
+
+	fileBar_->addWidget(status_);
+
+	fill3_ = new QWidget(this);
+	fileBar_->addWidget(fill3_);
+	fill3_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
 	fileBar_->addWidget(searchBox_);
 
+	fill4_ = new QWidget(this);
+	fileBar_->addWidget(fill4_);
+	fill4_->setFixedWidth(10);
+
+	/*-------------------------------------------------------------------------*
+	 * Pipeline (main widget)
+	 *------------------------------------------------------------------------*/
 	pipeline_ = new viewpipeline_t;
 	setCentralWidget(pipeline_);
 
+	/*-------------------------------------------------------------------------*
+	 * Misc.
+	 *------------------------------------------------------------------------*/
 	setWindowTitle(tr("SKAView"));
 	resize(800, 600);
 } // viewmain_t::viewmain_t
@@ -71,7 +127,6 @@ void viewmain_t::open()
 	QStringList issues;
 	QStringList instructions;
 	program_version_t version;
-	QVector<module_data_t> modules;
 	module_data_t module;
 
 	while(!stream.atEnd()) {
@@ -120,10 +175,23 @@ void viewmain_t::open()
 				line = stream.readLine();
 			} // while
 
-			modules.append(module);
+			modules_.append(module);
 		} // if
 	} // while
 
-	pipeline_->load(modules[0].cycles, modules[0].issues,
-		modules[0].pipelines, modules[0].instructions);
+	selector_->clear();
+
+	for(auto ita = modules_.begin(); ita != modules_.end(); ++ita) {
+		selector_->addItem((*ita)["name"]);
+	} // for
+
+	selector_->setEnabled(true);
+
+	load(0);
 } // viewmain_t::open
+
+void viewmain_t::load(int m)
+{
+	pipeline_->load(modules_[m].cycles, modules_[m].issues,
+		modules_[m].pipelines, modules_[m].instructions);
+} // viewmain_t::load

@@ -15,9 +15,10 @@ qrc_%.cc: %.qrc
 	@RCC@ $< -o $@
 
 skaview_SOURCES = \
+	@top_srcdir@/viewer/skaview.cc \
+	@top_srcdir@/viewer/ViewBar.cc \
 	@top_srcdir@/viewer/ViewMain.cc \
-	@top_srcdir@/viewer/ViewPipeline.cc \
-	@top_srcdir@/viewer/skaview.cc
+	@top_srcdir@/viewer/ViewPipeline.cc
 nodist_skaview_SOURCES = \
 	moc_ViewMain.cc \
 	moc_ViewPipeline.cc \
