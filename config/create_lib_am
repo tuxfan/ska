@@ -67,6 +67,6 @@ for file in `$find_exec src -type f -regex $src_str | sort` ; do
 done
 
 echo
-echo "libska_la_LDFLAGS = @VERSION_INFORMATION@ \\"
+echo "libska_la_LDFLAGS = -version-info @VERSION_INFORMATION@ \\"
 echo "	@EXTRA_LDFLAGS@"
 echo "libska_la_LIBADD = @EXTRA_LIBS@"

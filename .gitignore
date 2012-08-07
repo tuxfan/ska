@@ -11,6 +11,7 @@ config/install-sh
 config/ltmain.sh
 config/missing
 config/version
+config/lib_version
 configure
 configure.ac
 src/include

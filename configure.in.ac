@@ -9,10 +9,10 @@
 AC_INIT(ska, VERSION_TAG, bergen@lanl.gov)
 AC_CONFIG_AUX_DIR(config)
 
-VERSION_INFORMATION="VERSION_TAG"
+VERSION_INFORMATION=LIBRARY_TAG
 AC_SUBST(VERSION_INFORMATION)
 
-CPPFLAGS="$CPPFLAGS -DSKA_VERSION=$VERSION_INFORMATION"
+CPPFLAGS="$CPPFLAGS -DSKA_VERSION=VERSION_TAG"
 
 #------------------------------------------------------------------------------#
 # Initialize automake
