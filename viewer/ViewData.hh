@@ -6,6 +6,14 @@
 #include <ViewUtils.hh>
 
 struct module_data_t : public QMap<QString, QString> {
+	void clear() {
+		QMap::clear();
+		cycles.clear();
+		issues.clear();
+		pipelines = "";
+		instructions.clear();
+	} // clear
+
 	QStringList cycles;
 	QStringList issues;
 	QString pipelines;

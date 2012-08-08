@@ -150,10 +150,6 @@ void viewmain_t::open(QString & fileName)
 
 	QTextStream stream(&file);
 	QString line;
-	QString pipelines;
-	QStringList cycles;
-	QStringList issues;
-	QStringList instructions;
 	module_data_t module;
 
 	while(!stream.atEnd()) {
