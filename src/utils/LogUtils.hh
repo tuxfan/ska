@@ -16,6 +16,8 @@
 #if defined(ENABLE_DEBUG)
 #define DEBUG(s) \
 	std::cerr << s << std::endl
+#else
+#define DEBUG(s)
 #endif
 
 // utility function

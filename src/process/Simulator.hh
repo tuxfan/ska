@@ -51,7 +51,7 @@ public:
 	simulator_t(const char * ir_file, std::ostream & stream);
 	~simulator_t() {}
 
-	int32_t decode(llvm::Instruction * instruction);
+	instruction_properties_t decode(llvm::Instruction * instruction);
 	void update_stats(llvm::Instruction * instruction);
 
 	size_t bytes(llvm::Type * type);
@@ -94,21 +94,21 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 	 * Initialize core.
 	 *-------------------------------------------------------------------------*/
 	
-	int32_t max_issue;
+	size_t max_issue;
 	arch.getval(max_issue, "core::max_issue");
 	core_t core(max_issue);
 
-	int32_t lus;
+	size_t lus;
 	arch.getval(lus, "lus");
 
-	for(int i(0); i<lus; ++i) {
+	for(size_t i(0); i<lus; ++i) {
 		lu_t * lu = new lu_t(i);
 
 		// parse instructions that this LU can handle
 		char key[256];
 		std::string tmp;
 
-		sprintf(key, "lu::%d::instructions", i);
+		sprintf(key, "lu::%d::instructions", int(i));
 		arch.getval(tmp, key);
 
 		char * ops = new char[tmp.size()+1];
@@ -125,7 +125,7 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 		tok = nullptr;
 
 		// parse types that this LU can handle
-		sprintf(key, "lu::%d::types", i);
+		sprintf(key, "lu::%d::types", int(i));
 		arch.getval(tmp, key);
 
 		char * types = new char[tmp.size()+1];
@@ -191,23 +191,16 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 
 			while(ita != inst_end(mita) && issue &&
 				issued < core.max_issue()) {
+				value = &*ita;
 
-				// get instruction latency
-				int32_t latency = decode(&*ita);
-
-				std::string str;
-				llvm::raw_string_ostream rso(str);
-				rso << *ita;
-				value = &*ita;			
-
-				DEBUG(rso.str());
+				// get instruction properties
+				instruction_properties_t properties = decode(&*ita);
 
 				/*----------------------------------------------------------------*
 				 * Create instruction and add dependencies
 				 *----------------------------------------------------------------*/
 
-				inst = new instruction_t(latency, ita->getOpcode(),
-					ita->getType()->getTypeID(), rso.str());
+				inst = new instruction_t(properties);
 
 				unsigned operands = ita->getNumOperands();
 				for(unsigned i(0); i<operands; ++i) {
@@ -221,7 +214,7 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 				if(id >= 0) {
 
 					// currently, this means that the opcode was not recognized
-					if(latency == -1) {
+					if(properties.latency == 0) {
 						++ita;
 						issue = false;
 						continue;
@@ -346,42 +339,62 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 	} // for
 } // simulator_t::simulator_t
 
-int32_t simulator_t::decode(llvm::Instruction * instruction) {
+instruction_properties_t simulator_t::decode(llvm::Instruction * instruction) {
 	parameters_t & arch = parameters_t::instance();
-	int32_t latency(-1);
+	instruction_properties_t properties;
 
-	switch(instruction->getOpcode()) {
+	unsigned opcode = instruction->getOpcode();
+	unsigned optype = instruction->getType()->getTypeID();
+
+	std::string str;
+	llvm::raw_string_ostream rso(str);
+	rso << *instruction;
+	properties.ir = rso.str();
+
+	DEBUG(rso.str());
+
+	properties.opcode = opcode;
+	properties.optype = optype;
+
+	switch(opcode) {
 
 		/*----------------------------------------------------------------------*
 		 * Terminator operators
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Ret:
-			arch.getval(latency, "latency::ret");
+			arch.getval(properties.latency, "latency::ret");
+			arch.getval(properties.reciprocal, "reciprocal::ret");
 			break;
 
 		case llvm::Instruction::Br:
-			arch.getval(latency, "latency::br");
+			arch.getval(properties.latency, "latency::br");
+			arch.getval(properties.reciprocal, "reciprocal::br");
 			break;
 
 		case llvm::Instruction::Switch:
-			arch.getval(latency, "latency::switch");
+			arch.getval(properties.latency, "latency::switch");
+			arch.getval(properties.reciprocal, "reciprocal::switch");
 			break;
 
 		case llvm::Instruction::IndirectBr:
-			arch.getval(latency, "latency::indirectbr");
+			arch.getval(properties.latency, "latency::indirectbr");
+			arch.getval(properties.reciprocal, "reciprocal::indirectbr");
 			break;
 
 		case llvm::Instruction::Invoke:
-			arch.getval(latency, "latency::invoke");
+			arch.getval(properties.latency, "latency::invoke");
+			arch.getval(properties.reciprocal, "reciprocal::invoke");
 			break;
 
 		case llvm::Instruction::Resume:
-			arch.getval(latency, "latency::resume");
+			arch.getval(properties.latency, "latency::resume");
+			arch.getval(properties.reciprocal, "reciprocal::resume");
 			break;
 
 		case llvm::Instruction::Unreachable:
-			arch.getval(latency, "latency::unreachable");
+			arch.getval(properties.latency, "latency::unreachable");
+			arch.getval(properties.reciprocal, "reciprocal::unreachable");
 			break;
 
 		/*----------------------------------------------------------------------*
@@ -389,20 +402,24 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Add:
-			arch.getval(latency, "latency::add");
+			arch.getval(properties.latency, "latency::add");
+			arch.getval(properties.reciprocal, "reciprocal::add");
 			break;
 
 		case llvm::Instruction::FAdd:
 			// get the instruction latency
-			switch(instruction->getType()->getTypeID()) {
+			switch(optype) {
 				case llvm::Type::FloatTyID:
-					arch.getval(latency, "latency::fadd::float");
+					arch.getval(properties.latency, "latency::fadd::float");
+					arch.getval(properties.reciprocal, "reciprocal::fadd::float");
 					break;
 				case llvm::Type::DoubleTyID:
-					arch.getval(latency, "latency::fadd::double");
+					arch.getval(properties.latency, "latency::fadd::double");
+					arch.getval(properties.reciprocal, "reciprocal::fadd::double");
 					break;
 				case llvm::Type::VectorTyID:
-					arch.getval(latency, "latency::fadd::vector");
+					arch.getval(properties.latency, "latency::fadd::vector");
+					arch.getval(properties.reciprocal, "reciprocal::fadd::vector");
 					break;
 				default:
 					ExitOnError("FAdd Unhandled Type",
@@ -413,20 +430,24 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 			break;
 
 		case llvm::Instruction::Sub:
-			arch.getval(latency, "latency::sub");
+			arch.getval(properties.latency, "latency::sub");
+			arch.getval(properties.reciprocal, "reciprocal::sub");
 			break;
 
 		case llvm::Instruction::FSub:
 			// get the instruction latency
-			switch(instruction->getType()->getTypeID()) {
+			switch(optype) {
 				case llvm::Type::FloatTyID:
-					arch.getval(latency, "latency::fsub::float");
+					arch.getval(properties.latency, "latency::fsub::float");
+					arch.getval(properties.reciprocal, "reciprocal::fsub::float");
 					break;
 				case llvm::Type::DoubleTyID:
-					arch.getval(latency, "latency::fsub::double");
+					arch.getval(properties.latency, "latency::fsub::double");
+					arch.getval(properties.reciprocal, "reciprocal::fsub::double");
 					break;
 				case llvm::Type::VectorTyID:
-					arch.getval(latency, "latency::fsub::vector");
+					arch.getval(properties.latency, "latency::fsub::vector");
+					arch.getval(properties.reciprocal, "reciprocal::fsub::vector");
 					break;
 				default:
 					ExitOnError("FSub Unhandled Type " <<
@@ -438,20 +459,24 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 			break;
 
 		case llvm::Instruction::Mul:
-			arch.getval(latency, "latency::mul");
+			arch.getval(properties.latency, "latency::mul");
+			arch.getval(properties.reciprocal, "reciprocal::mul");
 			break;
 
 		case llvm::Instruction::FMul:
 			// get the instruction latency
-			switch(instruction->getType()->getTypeID()) {
+			switch(optype) {
 				case llvm::Type::FloatTyID:
-					arch.getval(latency, "latency::fmul::float");
+					arch.getval(properties.latency, "latency::fmul::float");
+			arch.getval(properties.reciprocal, "reciprocal::fmul::float");
 					break;
 				case llvm::Type::DoubleTyID:
-					arch.getval(latency, "latency::fmul::double");
+					arch.getval(properties.latency, "latency::fmul::double");
+			arch.getval(properties.reciprocal, "reciprocal::fmul::double");
 					break;
 				case llvm::Type::VectorTyID:
-					arch.getval(latency, "latency::fmul::vector");
+					arch.getval(properties.latency, "latency::fmul::vector");
+			arch.getval(properties.reciprocal, "reciprocal::fmul::vector");
 					break;
 				default:
 					ExitOnError("FMul Unhandled Type",
@@ -462,24 +487,29 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 			break;
 
 		case llvm::Instruction::UDiv:
-			arch.getval(latency, "latency::udiv");
+			arch.getval(properties.latency, "latency::udiv");
+			arch.getval(properties.reciprocal, "reciprocal::udiv");
 			break;
 
 		case llvm::Instruction::SDiv:
-			arch.getval(latency, "latency::sdiv");
+			arch.getval(properties.latency, "latency::sdiv");
+			arch.getval(properties.reciprocal, "reciprocal::sdiv");
 			break;
 
 		case llvm::Instruction::FDiv:
 			// get the instruction latency
-			switch(instruction->getType()->getTypeID()) {
+			switch(optype) {
 				case llvm::Type::FloatTyID:
-					arch.getval(latency, "latency::fdiv::float");
+					arch.getval(properties.latency, "latency::fdiv::float");
+			arch.getval(properties.reciprocal, "reciprocal::fdiv::float");
 					break;
 				case llvm::Type::DoubleTyID:
-					arch.getval(latency, "latency::fdiv::double");
+					arch.getval(properties.latency, "latency::fdiv::double");
+			arch.getval(properties.reciprocal, "reciprocal::fdiv::double");
 					break;
 				case llvm::Type::VectorTyID:
-					arch.getval(latency, "latency::fdiv::vector");
+					arch.getval(properties.latency, "latency::fdiv::vector");
+			arch.getval(properties.reciprocal, "reciprocal::fdiv::vector");
 					break;
 				default:
 					ExitOnError("FDiv Unhandled Type",
@@ -490,24 +520,29 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 			break;
 
 		case llvm::Instruction::URem:
-			arch.getval(latency, "latency::urem");
+			arch.getval(properties.latency, "latency::urem");
+			arch.getval(properties.reciprocal, "reciprocal::urem");
 			break;
 
 		case llvm::Instruction::SRem:
-			arch.getval(latency, "latency::srem");
+			arch.getval(properties.latency, "latency::srem");
+			arch.getval(properties.reciprocal, "reciprocal::srem");
 			break;
 
 		case llvm::Instruction::FRem:
 			// get the instruction latency
-			switch(instruction->getType()->getTypeID()) {
+			switch(optype) {
 				case llvm::Type::FloatTyID:
-					arch.getval(latency, "latency::frem::float");
+					arch.getval(properties.latency, "latency::frem::float");
+			arch.getval(properties.reciprocal, "reciprocal::frem::float");
 					break;
 				case llvm::Type::DoubleTyID:
-					arch.getval(latency, "latency::frem::double");
+					arch.getval(properties.latency, "latency::frem::double");
+			arch.getval(properties.reciprocal, "reciprocal::frem::double");
 					break;
 				case llvm::Type::VectorTyID:
-					arch.getval(latency, "latency::frem::vector");
+					arch.getval(properties.latency, "latency::frem::vector");
+			arch.getval(properties.reciprocal, "reciprocal::frem::vector");
 					break;
 				default:
 					ExitOnError("FRem Unhandled Type",
@@ -522,27 +557,33 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Shl:
-			arch.getval(latency, "latency::shl");
+			arch.getval(properties.latency, "latency::shl");
+			arch.getval(properties.reciprocal, "reciprocal::shl");
 			break;
 
 		case llvm::Instruction::LShr:
-			arch.getval(latency, "latency::lshr");
+			arch.getval(properties.latency, "latency::lshr");
+			arch.getval(properties.reciprocal, "reciprocal::lshr");
 			break;
 
 		case llvm::Instruction::AShr:
-			arch.getval(latency, "latency::ashr");
+			arch.getval(properties.latency, "latency::ashr");
+			arch.getval(properties.reciprocal, "reciprocal::ashr");
 			break;
 
 		case llvm::Instruction::And:
-			arch.getval(latency, "latency::and");
+			arch.getval(properties.latency, "latency::and");
+			arch.getval(properties.reciprocal, "reciprocal::and");
 			break;
 
 		case llvm::Instruction::Or:
-			arch.getval(latency, "latency::or");
+			arch.getval(properties.latency, "latency::or");
+			arch.getval(properties.reciprocal, "reciprocal::or");
 			break;
 
 		case llvm::Instruction::Xor:
-			arch.getval(latency, "latency::xor");
+			arch.getval(properties.latency, "latency::xor");
+			arch.getval(properties.reciprocal, "reciprocal::xor");
 			break;
 
 		/*----------------------------------------------------------------------*
@@ -550,31 +591,38 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Alloca:
-			arch.getval(latency, "latency::alloca");
+			arch.getval(properties.latency, "latency::alloca");
+			arch.getval(properties.reciprocal, "reciprocal::alloca");
 			break;
 
 		case llvm::Instruction::Load:
-			arch.getval(latency, "latency::load");
+			arch.getval(properties.latency, "latency::load");
+			arch.getval(properties.reciprocal, "reciprocal::load");
 			break;
 	
 		case llvm::Instruction::Store:
-			arch.getval(latency, "latency::store");
+			arch.getval(properties.latency, "latency::store");
+			arch.getval(properties.reciprocal, "reciprocal::store");
 			break;
 	
 		case llvm::Instruction::GetElementPtr:
-			arch.getval(latency, "latency::getelementptr");
+			arch.getval(properties.latency, "latency::getelementptr");
+			arch.getval(properties.reciprocal, "reciprocal::getelementptr");
 			break;
 	
 		case llvm::Instruction::Fence:
-			arch.getval(latency, "latency::fence");
+			arch.getval(properties.latency, "latency::fence");
+			arch.getval(properties.reciprocal, "reciprocal::fence");
 			break;
 	
 		case llvm::Instruction::AtomicCmpXchg:
-			arch.getval(latency, "latency::atomiccmpxchg");
+			arch.getval(properties.latency, "latency::atomiccmpxchg");
+			arch.getval(properties.reciprocal, "reciprocal::atomiccmpxchg");
 			break;
 	
 		case llvm::Instruction::AtomicRMW:
-			arch.getval(latency, "latency::atomicrmw");
+			arch.getval(properties.latency, "latency::atomicrmw");
+			arch.getval(properties.reciprocal, "reciprocal::atomicrmw");
 			break;
 	
 		/*----------------------------------------------------------------------*
@@ -582,51 +630,63 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Trunc:
-			arch.getval(latency, "latency::trunc");
+			arch.getval(properties.latency, "latency::trunc");
+			arch.getval(properties.reciprocal, "reciprocal::trunc");
 			break;
 	
 		case llvm::Instruction::ZExt:
-			arch.getval(latency, "latency::zext");
+			arch.getval(properties.latency, "latency::zext");
+			arch.getval(properties.reciprocal, "reciprocal::zext");
 			break;
 	
 		case llvm::Instruction::SExt:
-			arch.getval(latency, "latency::sext");
+			arch.getval(properties.latency, "latency::sext");
+			arch.getval(properties.reciprocal, "reciprocal::sext");
 			break;
 	
 		case llvm::Instruction::FPToUI:
-			arch.getval(latency, "latency::fptoui");
+			arch.getval(properties.latency, "latency::fptoui");
+			arch.getval(properties.reciprocal, "reciprocal::fptoui");
 			break;
 	
 		case llvm::Instruction::FPToSI:
-			arch.getval(latency, "latency::fptosi");
+			arch.getval(properties.latency, "latency::fptosi");
+			arch.getval(properties.reciprocal, "reciprocal::fptosi");
 			break;
 	
 		case llvm::Instruction::UIToFP:
-			arch.getval(latency, "latency::uitofp");
+			arch.getval(properties.latency, "latency::uitofp");
+			arch.getval(properties.reciprocal, "reciprocal::uitofp");
 			break;
 	
 		case llvm::Instruction::SIToFP:
-			arch.getval(latency, "latency::sitofp");
+			arch.getval(properties.latency, "latency::sitofp");
+			arch.getval(properties.reciprocal, "reciprocal::sitofp");
 			break;
 	
 		case llvm::Instruction::FPTrunc:
-			arch.getval(latency, "latency::fptrunc");
+			arch.getval(properties.latency, "latency::fptrunc");
+			arch.getval(properties.reciprocal, "reciprocal::fptrunc");
 			break;
 	
 		case llvm::Instruction::FPExt:
-			arch.getval(latency, "latency::fpext");
+			arch.getval(properties.latency, "latency::fpext");
+			arch.getval(properties.reciprocal, "reciprocal::fpext");
 			break;
 	
 		case llvm::Instruction::PtrToInt:
-			arch.getval(latency, "latency::ptrtoint");
+			arch.getval(properties.latency, "latency::ptrtoint");
+			arch.getval(properties.reciprocal, "reciprocal::ptrtoint");
 			break;
 	
 		case llvm::Instruction::IntToPtr:
-			arch.getval(latency, "latency::inttoptr");
+			arch.getval(properties.latency, "latency::inttoptr");
+			arch.getval(properties.reciprocal, "reciprocal::inttoptr");
 			break;
 	
 		case llvm::Instruction::BitCast:
-			arch.getval(latency, "latency::bitcast");
+			arch.getval(properties.latency, "latency::bitcast");
+			arch.getval(properties.reciprocal, "reciprocal::bitcast");
 			break;
 	
 		/*----------------------------------------------------------------------*
@@ -634,20 +694,24 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::ICmp:
-			arch.getval(latency, "latency::icmp");
+			arch.getval(properties.latency, "latency::icmp");
+			arch.getval(properties.reciprocal, "reciprocal::icmp");
 			break;
 
 		case llvm::Instruction::FCmp:
-			arch.getval(latency, "latency::fcmp");
+			arch.getval(properties.latency, "latency::fcmp");
+			arch.getval(properties.reciprocal, "reciprocal::fcmp");
 			break;
 
 		case llvm::Instruction::PHI:
-			arch.getval(latency, "latency::phi");
+			arch.getval(properties.latency, "latency::phi");
+			arch.getval(properties.reciprocal, "reciprocal::phi");
 			break;
 
 		case llvm::Instruction::Call:
 			{
-			arch.getval(latency, "latency::call");
+			arch.getval(properties.latency, "latency::call");
+			arch.getval(properties.reciprocal, "reciprocal::call");
 			llvm::CallInst * cinst = llvm::cast<llvm::CallInst>(instruction);
 
 			std::string call;
@@ -666,9 +730,9 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 				name = x86_call_map[name];
 			} // if
 
-			call = "latency::" + name;
+			call = name;
 
-			switch(instruction->getType()->getTypeID()) {
+			switch(optype) {
 				case llvm::Type::FloatTyID:
 					call += "::float";
 					break;
@@ -684,49 +748,60 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 					break;
 			} // switch
 
-			arch.getval(latency, call);
+			arch.getval(properties.latency, "latency::" + call);
+			arch.getval(properties.reciprocal, "reciprocal::" + call);
 
 			break;
 			} // scope
 	
 		case llvm::Instruction::Select:
-			arch.getval(latency, "latency::select");
+			arch.getval(properties.latency, "latency::select");
+			arch.getval(properties.reciprocal, "reciprocal::select");
 			break;
 	
 		case llvm::Instruction::UserOp1:
-			arch.getval(latency, "latency::userop1");
+			arch.getval(properties.latency, "latency::userop1");
+			arch.getval(properties.reciprocal, "reciprocal::userop1");
 			break;
 	
 		case llvm::Instruction::UserOp2:
-			arch.getval(latency, "latency::userop2");
+			arch.getval(properties.latency, "latency::userop2");
+			arch.getval(properties.reciprocal, "reciprocal::userop2");
 			break;
 	
 		case llvm::Instruction::VAArg:
-			arch.getval(latency, "latency::vaarg");
+			arch.getval(properties.latency, "latency::vaarg");
+			arch.getval(properties.reciprocal, "reciprocal::vaarg");
 			break;
 	
 		case llvm::Instruction::ExtractElement:
-			arch.getval(latency, "latency::extractelement");
+			arch.getval(properties.latency, "latency::extractelement");
+			arch.getval(properties.reciprocal, "reciprocal::extractelement");
 			break;
 	
 		case llvm::Instruction::InsertElement:
-			arch.getval(latency, "latency::insertelement");
+			arch.getval(properties.latency, "latency::insertelement");
+			arch.getval(properties.reciprocal, "reciprocal::insertelement");
 			break;
 	
 		case llvm::Instruction::ShuffleVector:
-			arch.getval(latency, "latency::shufflevector");
+			arch.getval(properties.latency, "latency::shufflevector");
+			arch.getval(properties.reciprocal, "reciprocal::shufflevector");
 			break;
 
 		case llvm::Instruction::ExtractValue:
-			arch.getval(latency, "latency::extractvalue");
+			arch.getval(properties.latency, "latency::extractvalue");
+			arch.getval(properties.reciprocal, "reciprocal::extractvalue");
 			break;
 	
 		case llvm::Instruction::InsertValue:
-			arch.getval(latency, "latency::insertvalue");
+			arch.getval(properties.latency, "latency::insertvalue");
+			arch.getval(properties.reciprocal, "reciprocal::insertvalue");
 			break;
 	
 		case llvm::Instruction::LandingPad:
-			arch.getval(latency, "latency::landingpad");
+			arch.getval(properties.latency, "latency::landingpad");
+			arch.getval(properties.reciprocal, "reciprocal::landingpad");
 			break;
 	
 		default:
@@ -734,7 +809,7 @@ int32_t simulator_t::decode(llvm::Instruction * instruction) {
 
 	} // switch
 
-	return latency;
+	return properties;
 } // simulator_t::decode
 
 void simulator_t::update_stats(llvm::Instruction * instruction) {

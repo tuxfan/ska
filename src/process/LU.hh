@@ -32,7 +32,7 @@ public:
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
 
-	lu_t(int32_t id)
+	lu_t(size_t id)
 		: state_(ready), id_(id), type_any_(false), current_(nullptr) {}
 
 	/*-------------------------------------------------------------------------*
@@ -78,7 +78,7 @@ public:
 		else {
 			return false;
 		} // if
-	}
+	} // issue
 
 	/*-------------------------------------------------------------------------*
 	 * Update ALU state.
@@ -115,12 +115,12 @@ public:
 	 * Return the LU is.
 	 *-------------------------------------------------------------------------*/
 
-	int32_t id() const { return id_; }
+	size_t id() const { return id_; }
 
 private:
 
 	state_t state_;
-	int32_t id_;
+	size_t id_;
 	std::set<unsigned> codes_;
 	std::set<unsigned> types_;
 	bool type_any_;

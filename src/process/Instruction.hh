@@ -9,10 +9,30 @@
 #include <string>
 #include <sstream>
 #include <cstdio>
+#include <limits>
 
 #include <MachineState.hh>
 
 namespace ska {
+
+/*----------------------------------------------------------------------------*
+ * Instruction properties class.
+ *----------------------------------------------------------------------------*/
+
+struct instruction_properties_t {
+	instruction_properties_t()
+		: latency(std::numeric_limits<size_t>::max()),
+		reciprocal(std::numeric_limits<float>::max()),
+		opcode(std::numeric_limits<unsigned>::max()),
+		optype(std::numeric_limits<unsigned>::max()),
+		ir("") {}
+
+	size_t latency;
+	float reciprocal;
+	unsigned opcode;
+	unsigned optype;
+	std::string ir;
+}; // struct instruction_properties_t
 
 /*----------------------------------------------------------------------------*
  * Instruction class.
@@ -28,7 +48,7 @@ public:
 
 	enum state_t {
 		pending,
-		issued,
+		staging,
 		stalled,
 		executing,
 		last,
@@ -39,11 +59,9 @@ public:
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
 
-	instruction_t(size_t latency, unsigned opcode, unsigned optype,
-		std::string & ir)
-		: latency_(latency), opcode_(opcode), optype_(optype), ir_(ir),
-		state_(pending), alu_(-1), multiple_(1), cycles_(0), issue_(0),
-		machine_(machine_state_t::instance()) {
+	instruction_t(instruction_properties_t props)
+		: props_(props), state_(pending), alu_(-1), multiple_(1),
+		cycles_(0), issue_(0), machine_(machine_state_t::instance()) {
 
 		for(size_t i(0); i<machine_.current(); ++i) {
 			stream_ << ' ';
@@ -78,7 +96,7 @@ public:
 		alu_ = alu;
 		cycles_ = 0;
 		issue_ = machine_.current() - 1;
-		state_ = issued;
+		state_ = staging;
 	} // issue
 
 	/*-------------------------------------------------------------------------*
@@ -95,8 +113,18 @@ public:
 			} // if
 		} // for
 
-		state_ = ++cycles_ == latency_ ? last :
-			cycles_ > latency_ ? retired : executing;
+		state_ =
+			// if
+			++cycles_ == props_.latency ?
+				last : // in last pipeline stage
+			// else if
+			cycles_ > props_.latency ?
+				retired :
+			// else if
+			cycles_ > size_t(props_.reciprocal-1) ?
+				executing :
+			// else
+				staging; // still inside of issue latency
 
 		if(state_ != retired) {
 			stream_ << machine_.counter();
@@ -123,13 +151,13 @@ public:
 	 * Return the LLVM OpCode of the instruction.
 	 *-------------------------------------------------------------------------*/
 
-	unsigned opcode() const { return opcode_; }
+	unsigned opcode() const { return props_.opcode; }
 
 	/*-------------------------------------------------------------------------*
 	 * Return the LLVM TypeID of the instruction.
 	 *-------------------------------------------------------------------------*/
 
-	unsigned optype() const { return optype_; }
+	unsigned optype() const { return props_.optype; }
 
 	/*-------------------------------------------------------------------------*
 	 * Return execution history as a string.
@@ -162,15 +190,12 @@ public:
 			sprintf(buffer, "%06d | %2d   | ", int(issue_), alu_);
 		} // if
 
-		return buffer + stream_.str() + '|' + ir_;
+		return buffer + stream_.str() + '|' + props_.ir;
 	} // string
 
 private:
 
-	size_t latency_;
-	unsigned opcode_;
-	unsigned optype_;
-	std::string ir_;
+	instruction_properties_t props_;
 
 	state_t state_;
 	int32_t alu_;
