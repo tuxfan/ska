@@ -64,7 +64,7 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	bool issue(instruction_t * inst) {
-		if(state_ == busy) {
+		if(state_ == busy || inst->state() == instruction_t::stalled) {
 			return false;
 		}
 
@@ -88,7 +88,7 @@ public:
 		if(current_ == nullptr) {
 			state_ = ready;
 		}
-		else if(current_->state() > instruction_t::stalled) {
+		else if(current_->state() > instruction_t::staging) {
 			state_ = ready;
 			current_ = nullptr;
 		}

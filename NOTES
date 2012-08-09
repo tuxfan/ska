@@ -1,0 +1,11 @@
+#------------------------------------------------------------------------------#
+# Notes
+#------------------------------------------------------------------------------#
+
+-	Multiple issue may be incorrect.  This depends on what is meant by multi-
+	issue.  Intel means that multple instructions can be decoded concurrently.
+	An instruction may still stall after it is decoded.  IBM means that multiple
+	instructions can be dispatched concurrently.  An instruction will only be
+	dispatched when all of its dependencies are available, so that no stalls
+	occur after the dispatch. The IBM definition probably makes more sense for
+	statically scheduled architectures.

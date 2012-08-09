@@ -154,22 +154,30 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 	 * Visit modules.
 	 *-------------------------------------------------------------------------*/
 
-	for(llvm::Module::iterator mita = llvm_module_->begin();
-		mita != llvm_module_->end(); ++mita) {
+	for(llvm::Module::iterator fita = llvm_module_->begin();
+		fita != llvm_module_->end(); ++fita) {
 
-		llvm::inst_iterator ita = inst_begin(mita);
+#if 0
+for(llvm::Function::iterator bita = fita->begin();
+	bita != fita->end(); ++bita) {
+	llvm::errs() << "Basic Block: " << bita->getName() << " has " <<
+		bita->size() << " instructions\n";
+} // for
+#endif
+
+		llvm::inst_iterator ita = inst_begin(fita);
 		
-		if(ita == inst_end(mita)) {
+		if(ita == inst_end(fita)) {
 			continue;
 		} // if
 
 		stream << "#---------------------------------------" <<
 			"---------------------------------------#" << std::endl;
-		stream << "# Module Section: " << mita->getName().str() << std::endl;
+		stream << "# Module Section: " << fita->getName().str() << std::endl;
 		stream << "#---------------------------------------" <<
 			"---------------------------------------#" << std::endl;
 		stream << "BEGIN_MODULE" << std::endl;
-		stream << "KEYWORD_NAME " << mita->getName().str() << std::endl;
+		stream << "KEYWORD_NAME " << fita->getName().str() << std::endl;
 
 		instruction_list_t active;
 		instruction_vector_t instructions;
@@ -184,12 +192,12 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 	 * Visit instructions.
 	 *-------------------------------------------------------------------------*/
 
-		while(ita != inst_end(mita) || active.size()) {
+		while(ita != inst_end(fita) || active.size()) {
 			size_t issued(0);
 			bool issue(true);
 			std::vector<instruction_t *> cycle_issue;
 
-			while(ita != inst_end(mita) && issue &&
+			while(ita != inst_end(fita) && issue &&
 				issued < core.max_issue()) {
 				value = &*ita;
 
@@ -200,15 +208,23 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 				 * Create instruction and add dependencies
 				 *----------------------------------------------------------------*/
 
-				inst = new instruction_t(properties);
+				if(inst == nullptr) {
+					inst = new instruction_t(properties);
 
-				unsigned operands = ita->getNumOperands();
-				for(unsigned i(0); i<operands; ++i) {
-					auto op = processed.find(ita->getOperand(i));
-					if(op != processed.end()) {
-						inst->add_dependency(op->second);
-					} // if
-				} // for
+					unsigned operands = ita->getNumOperands();
+					for(unsigned i(0); i<operands; ++i) {
+						auto op = processed.find(ita->getOperand(i));
+						if(op != processed.end()) {
+							inst->add_dependency(op->second);
+						} // if
+					} // for
+
+					/*-------------------------------------------------------------*
+					 * Add instruction to active list
+					 *-------------------------------------------------------------*/
+
+					active.push_back(inst);
+				} // if
 
 				int32_t id = core.accept(inst);
 				if(id >= 0) {
@@ -261,12 +277,6 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 					cycle_issue.push_back(inst);
 
 					/*-------------------------------------------------------------*
-					 * Add instruction to active list
-					 *-------------------------------------------------------------*/
-
-					active.push_back(inst);
-
-					/*-------------------------------------------------------------*
 					 * Add instruction to hash
 					 *-------------------------------------------------------------*/
 
@@ -284,10 +294,11 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 
 					++issued;
 					++ita;
+					inst = nullptr;
 				}
 				else {
-					delete inst;
-					inst = nullptr;
+					//delete inst;
+					//inst = nullptr;
 					issue = false;
 					continue;
 				} // if

@@ -48,8 +48,8 @@ public:
 
 	enum state_t {
 		pending,
-		staging,
 		stalled,
+		staging,
 		executing,
 		last,
 		retired
@@ -80,6 +80,9 @@ public:
 
 	void add_dependency(instruction_t * inst) {
 		depends_.push_back(inst);
+		if(inst->state() != retired) {
+			state_ = stalled;
+		} // if
 	} // add_dependency
 
 	/*-------------------------------------------------------------------------*
