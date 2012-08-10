@@ -64,7 +64,8 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	bool issue(instruction_t * inst) {
-		if(state_ == busy || inst->state() == instruction_t::stalled) {
+//		if(state_ == busy || !inst->ready()) {
+		if(state_ == busy) {
 			return false;
 		}
 

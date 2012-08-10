@@ -34,7 +34,7 @@ public:
 	size_t clear() {
 		// this has to do with the ordering of updates to
 		// various states (machine, alus, instructions)
-		cycle_ = 1;
+		cycle_ = 0;
 		return cycle_;
 	} // reset
 
@@ -48,7 +48,7 @@ public:
 	 * Base-ten counter for instruction status.
  	 *-------------------------------------------------------------------------*/
 
-	size_t counter() const { return (cycle_-1)%10; }
+	size_t counter() const { return cycle_%10; }
 
 private:
 

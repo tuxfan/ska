@@ -68,7 +68,7 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 	: llvm_module_(nullptr)
 {
 	parameters_t & arch = parameters_t::instance();
-	machine_state_t & state = machine_state_t::instance();
+	machine_state_t & machine = machine_state_t::instance();
 	statistics_t & stats = statistics_t::instance();
 	instruction_map_t processed;
 
@@ -182,7 +182,7 @@ for(llvm::Function::iterator bita = fita->begin();
 		instruction_list_t active;
 		instruction_vector_t instructions;
 
-		state.clear();
+		machine.clear();
 		stats.clear();
 
 		llvm::Value * value = nullptr;
@@ -201,14 +201,14 @@ for(llvm::Function::iterator bita = fita->begin();
 				issued < core.max_issue()) {
 				value = &*ita;
 
-				// get instruction properties
-				instruction_properties_t properties = decode(&*ita);
-
 				/*----------------------------------------------------------------*
 				 * Create instruction and add dependencies
 				 *----------------------------------------------------------------*/
 
 				if(inst == nullptr) {
+					// get instruction properties
+					instruction_properties_t properties = decode(&*ita);
+
 					inst = new instruction_t(properties);
 
 					unsigned operands = ita->getNumOperands();
@@ -226,15 +226,24 @@ for(llvm::Function::iterator bita = fita->begin();
 					active.push_back(inst);
 				} // if
 
+#if 0
+for(auto aita = active.begin(); aita != active.end(); ++aita) {
+	std::cerr << "opcode: " << (*aita)->opcode() << std::endl;
+	std::cerr << "string: " << (*aita)->string() << std::endl;
+}
+#endif
 				int32_t id = core.accept(inst);
 				if(id >= 0) {
 
+// just for debugging
+#if 0
 					// currently, this means that the opcode was not recognized
 					if(properties.latency == 0) {
 						++ita;
 						issue = false;
 						continue;
 					} // if
+#endif
 
 					/*-------------------------------------------------------------*
 					 * Check for dependencies within this issue
@@ -326,6 +335,14 @@ for(llvm::Function::iterator bita = fita->begin();
 			} // for
 
 			core.advance();
+
+// FIXME: Debug
+#if 0
+if(machine.current() > 50) {
+	std::cerr << "cycle: " << machine.current() << std::endl;
+	break;
+} // if
+#endif
 		} // while
 
 		stream << "KEYWORD_STACK_ALLOCATIONS " <<
@@ -337,7 +354,7 @@ for(llvm::Function::iterator bita = fita->begin();
 		stream << "KEYWORD_LOAD_BYTES " << stats["load bytes"] << std::endl;
 		stream << "KEYWORD_STORES " << stats["stores"] << std::endl;
 		stream << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
-		stream << "KEYWORD_CYCLES " << state.current() << std::endl;
+		stream << "KEYWORD_CYCLES " << machine.current() << std::endl;
 
 		stream << "BEGIN_INSTRUCTION_STREAM" << std::endl;
 

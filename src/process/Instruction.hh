@@ -12,6 +12,7 @@
 #include <limits>
 
 #include <MachineState.hh>
+#include <OpCodes.hh>
 
 namespace ska {
 
@@ -51,7 +52,7 @@ public:
 		stalled,
 		staging,
 		executing,
-		last,
+//		last,
 		retired
 	}; // enum state_t
 
@@ -61,7 +62,7 @@ public:
 
 	instruction_t(instruction_properties_t props)
 		: props_(props), state_(pending), alu_(-1), multiple_(1),
-		cycles_(0), issue_(0), machine_(machine_state_t::instance()) {
+		cycles_(0), issued_(0), retired_(0), machine_(machine_state_t::instance()) {
 
 		for(size_t i(0); i<machine_.current(); ++i) {
 			stream_ << ' ';
@@ -80,10 +81,17 @@ public:
 
 	void add_dependency(instruction_t * inst) {
 		depends_.push_back(inst);
-		if(inst->state() != retired) {
-			state_ = stalled;
-		} // if
 	} // add_dependency
+
+	bool ready() {
+		for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
+			if((*ita)->state() != retired) {
+				return false;
+			} // if
+		} // for
+
+		return true;
+	} // ready
 
 	/*-------------------------------------------------------------------------*
 	 * Return current state.
@@ -91,14 +99,25 @@ public:
 
 	state_t state() { return state_; }
 
+// FIXME:
+	void set_state(state_t s) { state_ = s; }
+
 	/*-------------------------------------------------------------------------*
 	 * Issue this instruction.
 	 *-------------------------------------------------------------------------*/
 
 	void issue(int32_t alu) {
+auto oita = code_map.begin();
+for(; oita != code_map.end(); ++oita) {
+	if(oita->second == opcode()) {
+		break;
+	} // 
+} // for
+std::cerr << "Issuing " << oita->first <<
+	" on cycle " << machine_.current() << std::endl;
 		alu_ = alu;
 		cycles_ = 0;
-		issue_ = machine_.current() - 1;
+		issued_ = machine_.current();
 		state_ = staging;
 	} // issue
 
@@ -107,31 +126,76 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	state_t advance() {
+		if(state_ == pending) {
+			stream_ << ' ';
+			return state_;
+		} // if
+
 		// check for active dependencies
+		size_t depends_retired(0);
 		for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
 			if((*ita)->state() != retired) {
 				state_ = stalled;
 				stream_ << '-';
 				return state_;
 			} // if
+
+			depends_retired = (*ita)->cycle_retired() > depends_retired ?
+				(*ita)->cycle_retired() :
+				depends_retired;
 		} // for
+
+		if(machine_.current() > 0 && depends_retired == machine_.current()) {
+			state_ = stalled;
+			stream_ << '-';
+			return state_;
+		} // if
+
+#if 0
+		// Check for start on next cycle
+		// (This means that a dependency retired on the current cycle)
+		if(state_ == stalled) {
+			stream_ << '-';
+			state_ = staging;
+			return state_;
+		} // if
+#endif
 
 		state_ =
 			// if
-			++cycles_ == props_.latency ?
-				last : // in last pipeline stage
-			// else if
-			cycles_ > props_.latency ?
+			++cycles_ >= props_.latency ?
 				retired :
+//				last : // in last pipeline stage
+			// else if
+//			cycles_ > props_.latency ?
+//				retired :
 			// else if
 			cycles_ > size_t(props_.reciprocal-1) ?
 				executing :
 			// else
 				staging; // still inside of issue latency
 
-		if(state_ != retired) {
+#if 0
+		if(state_ > stalled && props_.latency == 1) {
 			stream_ << machine_.counter();
+			state_ = retired;
 		} // if
+#endif
+
+		if(state_ == retired) {
+			retired_ = machine_.current();
+		} // if
+
+		stream_ << machine_.counter();
+
+#if 0
+		if(state_ != retired || cycle_issued() == machine_.current()) {
+			stream_ << machine_.counter();
+		}
+		else {
+			retired_ = machine_.current();
+		} // if
+#endif
 
 		return state_;
 	} // advance
@@ -187,14 +251,29 @@ public:
 					break;
 			} // switch
 
-			sprintf(buffer, "%06d | %2d:%1c | ", int(issue_), alu_, m);
+			sprintf(buffer, "%06d | %2d:%1c | ", int(issued_), alu_, m);
 		}
 		else {
-			sprintf(buffer, "%06d | %2d   | ", int(issue_), alu_);
+			sprintf(buffer, "%06d | %2d   | ", int(issued_), alu_);
 		} // if
 
 		return buffer + stream_.str() + '|' + props_.ir;
 	} // string
+
+	size_t latency() const { return props_.latency; }
+	size_t reciprocal() const { return size_t(props_.reciprocal); }
+
+	size_t cycle_issued() const {
+		return state_ > pending ?
+			issued_ :
+			std::numeric_limits<size_t>::max();
+	} // cycle_issued
+
+	size_t cycle_retired() const {
+		return state_ == retired ?
+			retired_ :
+			std::numeric_limits<size_t>::max();
+	} // cycle_retired
 
 private:
 
@@ -204,7 +283,8 @@ private:
 	int32_t alu_;
 	int32_t multiple_;
 	size_t cycles_;
-	size_t issue_;
+	size_t issued_;
+	size_t retired_;
 
 	std::vector<instruction_t *> depends_;
 	std::stringstream stream_;
