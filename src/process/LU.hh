@@ -64,7 +64,6 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	bool issue(instruction_t * inst) {
-//		if(state_ == busy || !inst->ready()) {
 		if(state_ == busy) {
 			return false;
 		}

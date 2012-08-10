@@ -52,7 +52,6 @@ public:
 		stalled,
 		staging,
 		executing,
-//		last,
 		retired
 	}; // enum state_t
 
@@ -61,8 +60,8 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	instruction_t(instruction_properties_t props)
-		: props_(props), state_(pending), alu_(-1), multiple_(1),
-		cycles_(0), issued_(0), retired_(0), machine_(machine_state_t::instance()) {
+		: props_(props), state_(pending), alu_(-1), multiple_(1), cycles_(0),
+		issued_(0), retired_(0), machine_(machine_state_t::instance()) {
 
 		for(size_t i(0); i<machine_.current(); ++i) {
 			stream_ << ' ';
@@ -76,12 +75,16 @@ public:
 	~instruction_t() {}
 
 	/*-------------------------------------------------------------------------*
-	 * Add instruction dependencies.
+	 * Add instruction dependency.
 	 *-------------------------------------------------------------------------*/
 
 	void add_dependency(instruction_t * inst) {
 		depends_.push_back(inst);
 	} // add_dependency
+
+	/*-------------------------------------------------------------------------*
+	 * Check data dependencies.
+	 *-------------------------------------------------------------------------*/
 
 	bool ready() {
 		for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
@@ -99,25 +102,11 @@ public:
 
 	state_t state() { return state_; }
 
-// FIXME:
-	void set_state(state_t s) { state_ = s; }
-
 	/*-------------------------------------------------------------------------*
 	 * Issue this instruction.
 	 *-------------------------------------------------------------------------*/
 
 	void issue(int32_t alu) {
-// FIXME
-#if 0
-auto oita = code_map.begin();
-for(; oita != code_map.end(); ++oita) {
-	if(oita->second == opcode()) {
-		break;
-	} // 
-} // for
-std::cerr << "Issuing " << oita->first <<
-	" on cycle " << machine_.current() << std::endl;
-#endif
 		alu_ = alu;
 		cycles_ = 0;
 		issued_ = machine_.current();
@@ -128,10 +117,11 @@ std::cerr << "Issuing " << oita->first <<
 	 * Advance instruction state.
 	 *-------------------------------------------------------------------------*/
 
-	state_t advance() {
+	void advance() {
+		// default state is unissued
 		if(state_ == pending) {
 			stream_ << ' ';
-			return state_;
+			return;
 		} // if
 
 		// check for active dependencies
@@ -140,7 +130,7 @@ std::cerr << "Issuing " << oita->first <<
 			if((*ita)->state() != retired) {
 				state_ = stalled;
 				stream_ << '-';
-				return state_;
+				return;
 			} // if
 
 			depends_retired = (*ita)->cycle_retired() > depends_retired ?
@@ -148,59 +138,32 @@ std::cerr << "Issuing " << oita->first <<
 				depends_retired;
 		} // for
 
+		// this checks to see if a dependency was retired on this cycle,
+		// meaning that this instruction can't advance until next cycle.
 		if(machine_.current() > 0 && depends_retired == machine_.current()) {
 			state_ = stalled;
 			stream_ << '-';
-			return state_;
+			return;
 		} // if
 
-#if 0
-		// Check for start on next cycle
-		// (This means that a dependency retired on the current cycle)
-		if(state_ == stalled) {
-			stream_ << '-';
-			state_ = staging;
-			return state_;
-		} // if
-#endif
-
+		// set new state.
 		state_ =
 			// if
 			++cycles_ >= props_.latency ?
 				retired :
-//				last : // in last pipeline stage
-			// else if
-//			cycles_ > props_.latency ?
-//				retired :
 			// else if
 			cycles_ > size_t(props_.reciprocal-1) ?
 				executing :
 			// else
 				staging; // still inside of issue latency
 
-#if 0
-		if(state_ > stalled && props_.latency == 1) {
-			stream_ << machine_.counter();
-			state_ = retired;
-		} // if
-#endif
-
+		// record when instruction retired.
 		if(state_ == retired) {
 			retired_ = machine_.current();
 		} // if
 
+		// write cycle digit to stream.
 		stream_ << machine_.counter();
-
-#if 0
-		if(state_ != retired || cycle_issued() == machine_.current()) {
-			stream_ << machine_.counter();
-		}
-		else {
-			retired_ = machine_.current();
-		} // if
-#endif
-
-		return state_;
 	} // advance
 
 	/*-------------------------------------------------------------------------*
@@ -263,14 +226,26 @@ std::cerr << "Issuing " << oita->first <<
 		return buffer + stream_.str() + '|' + props_.ir;
 	} // string
 
+	/*-------------------------------------------------------------------------*
+	 * Return various instruciton properties.
+	 *-------------------------------------------------------------------------*/
+
 	size_t latency() const { return props_.latency; }
 	size_t reciprocal() const { return size_t(props_.reciprocal); }
+
+	/*-------------------------------------------------------------------------*
+	 * Return the cycle on which this instruction was issued.
+	 *-------------------------------------------------------------------------*/
 
 	size_t cycle_issued() const {
 		return state_ > pending ?
 			issued_ :
 			std::numeric_limits<size_t>::max();
 	} // cycle_issued
+
+	/*-------------------------------------------------------------------------*
+	 * Return the cycle on which this instruction was retired.
+	 *-------------------------------------------------------------------------*/
 
 	size_t cycle_retired() const {
 		return state_ == retired ?

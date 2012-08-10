@@ -226,24 +226,8 @@ for(llvm::Function::iterator bita = fita->begin();
 					active.push_back(inst);
 				} // if
 
-#if 0
-for(auto aita = active.begin(); aita != active.end(); ++aita) {
-	std::cerr << "opcode: " << (*aita)->opcode() << std::endl;
-	std::cerr << "string: " << (*aita)->string() << std::endl;
-}
-#endif
 				int32_t id = core.accept(inst);
 				if(id >= 0) {
-
-// just for debugging
-#if 0
-					// currently, this means that the opcode was not recognized
-					if(properties.latency == 0) {
-						++ita;
-						issue = false;
-						continue;
-					} // if
-#endif
 
 					/*-------------------------------------------------------------*
 					 * Check for dependencies within this issue
@@ -335,14 +319,6 @@ for(auto aita = active.begin(); aita != active.end(); ++aita) {
 			} // for
 
 			core.advance();
-
-// FIXME: Debug
-#if 0
-if(machine.current() > 50) {
-	std::cerr << "cycle: " << machine.current() << std::endl;
-	break;
-} // if
-#endif
 		} // while
 
 		stream << "KEYWORD_STACK_ALLOCATIONS " <<
