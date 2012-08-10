@@ -1012,29 +1012,29 @@
 
 <!-- float -->
 <value key="latency::rsqrt::float">
-	<size>10</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::rsqrt::float">
-	<real>1</real>
+	<real>2</real>
 </value>
 
 <!-- double -->
 <value key="latency::rsqrt::double">
-	<size>10</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::rsqrt::double">
-	<real>1</real>
+	<real>2</real>
 </value>
 
 <!-- vector -->
 <value key="latency::rsqrt::vector">
-	<size>10</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::rsqrt::vector">
-	<real>1</real>
+	<real>2</real>
 </value>
 
 <!-- ==================================
@@ -1043,29 +1043,29 @@
 
 <!-- float -->
 <value key="latency::hadd::float">
-	<size>10</size>
+	<size>4</size>
 </value>
 
 <value key="reciprocal::hadd::float">
-	<real>1</real>
+	<real>2</real>
 </value>
 
 <!-- double -->
 <value key="latency::hadd::double">
-	<size>10</size>
+	<size>4</size>
 </value>
 
 <value key="reciprocal::hadd::double">
-	<real>1</real>
+	<real>2</real>
 </value>
 
 <!-- vector -->
 <value key="latency::hadd::vector">
-	<size>10</size>
+	<size>4</size>
 </value>
 
 <value key="reciprocal::hadd::vector">
-	<real>1</real>
+	<real>2</real>
 </value>
 
 </root>

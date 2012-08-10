@@ -107,6 +107,8 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	void issue(int32_t alu) {
+// FIXME
+#if 0
 auto oita = code_map.begin();
 for(; oita != code_map.end(); ++oita) {
 	if(oita->second == opcode()) {
@@ -115,6 +117,7 @@ for(; oita != code_map.end(); ++oita) {
 } // for
 std::cerr << "Issuing " << oita->first <<
 	" on cycle " << machine_.current() << std::endl;
+#endif
 		alu_ = alu;
 		cycles_ = 0;
 		issued_ = machine_.current();
