@@ -284,6 +284,17 @@ for(llvm::Function::iterator bita = fita->begin();
 					} // for
 				} // for
 
+#if 0
+				if(issued > 0) {
+					for(auto cita = cycle_issue.begin();
+						cita != cycle_issue.end(); ++cita) {
+						if(!(*cita)->ready()) {
+							cycle_dependency = true;
+						} // if
+					} // for
+				} // if
+#endif
+
 				int32_t id = core.accept(inst);
 				if(!cycle_dependency && id >= 0) {
 

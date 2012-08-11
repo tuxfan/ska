@@ -1,9 +1,9 @@
+<?xml version = "1.0" encoding = "iso-8859-1"?>
 <!--###########################################################################
  # Copyright (c) 2012 Los Alamos National Security, LLC
  # All rights reserved.
  ############################################################################-->
 
-<?xml version = "1.0" encoding = "iso-8859-1"?>
 <!DOCTYPE root [
 	<!ELEMENT root (value*)>
 	<!ATTLIST root label CDATA #REQUIRED>
