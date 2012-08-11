@@ -1,3 +1,68 @@
+################################################################################
+# Copyright (c) 2012 Los Alamos National Security, LLC
+# All rights reserved.
+################################################################################
+
 #------------------------------------------------------------------------------#
-# Readme for Static Kernel Analysis (SKA) project
+# Requirements
 #------------------------------------------------------------------------------#
+
+Requirements:
+
+llvm >= 3.1
+dragonegg >= 3.1
+qt4 (development libraries and headers)
+
+#------------------------------------------------------------------------------#
+# Building:
+#------------------------------------------------------------------------------#
+
+This project uses standard GNU Autoconf tools.  To list the supported
+configuration options, do:
+
+% ./configure --help
+
+Additionally, this project supports the selection of most configuration
+options through a 'machine' file that lists a set of AC_DEFINE-defined
+environment variables, which will override any options passed to the
+'configure' script.  A set of templates are provided in the top-level
+directory of this project under the 'machine' sub-directory.  To use a
+machine file, copy a template into the 'machine' directory, edit the
+parameters and then run 'configure' with:
+
+% ./configure --with-machine=your_machine_file_name
+
+You may also copy your machine file into your out-of-source build
+directory.  In this case, you do not to specify the machine file name
+on the configure line, configure will automatically detect it:
+
+% mkdir build
+% cd build
+% cp your_machine_file_name .
+% ../configure
+
+# Note: If you are building this project from the git repository, you
+# will need to bootstrap the build system.  Please look at the file
+# DEVELOPER in the top-level source directory.
+
+#------------------------------------------------------------------------------#
+# Running ska and skaview
+#------------------------------------------------------------------------------#
+
+The 'ska' executable takes two filenames as arguements: an architecture
+specification in .xml format, and an LLVM IR file of the source code
+to be analyzed.  Optionally, you can specify an output file with the
+'-o' flag, e.g.,
+
+% ska -o saxby.ska pentium-m.xml saxby.ll
+
+In this case, 'saxby.ska' is the output file, 'pentium-m.xml' is the
+architecture file, and 'saxby.ll' is the LLVM IR file.
+
+If you generate an output file, you can use the optional viewer program
+'skaview' to look at the results.  'skaview' can be called with an
+output file name to open:
+
+% skaview saxby.ska
+
+The viewer recognizes the file suffix, '.ska'.

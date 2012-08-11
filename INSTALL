@@ -1,9 +1,0 @@
-#------------------------------------------------------------------------------#
-# Installation instructions for SKA.
-#------------------------------------------------------------------------------#
-
-Requirements:
-
-llvm >= 3.1
-dragonegg >= 3.1
-qt4 (development libraries and headers)

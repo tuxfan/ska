@@ -1,4 +1,9 @@
 /*----------------------------------------------------------------------------*
+ * Copyright (c) 2012 Los Alamos National Security, LLC
+ * All rights reserved
+ *----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*
  * Definition of XercesIO class
  *----------------------------------------------------------------------------*/
 
@@ -25,7 +30,7 @@ struct XercesIOErrorHandler : public XERCES_CPP_NAMESPACE::DOMErrorHandler {
 	bool handleError(const XERCES_CPP_NAMESPACE::DOMError & error) {
 		ExitOnError("XercesIOErrorHandler: " <<
 			transcoder(error.getMessage()) << " " <<
-			error.getLocation(), ErrCode::XercesError);
+			error.getLocation(), ska::XercesError);
 	} // handleError
 }; // XercesIOErrorHandler
 
@@ -70,7 +75,7 @@ public:
 		//Assert(node, "Bad DOMNode in populateDataBase");
 
 		if(node->getNodeType() != DOMNode::ELEMENT_NODE) {
-			ExitOnError("Wrong XML Node Type", ErrCode::AssertionFailed);
+			ExitOnError("Wrong XML Node Type", ska::AssertionFailed);
 		} // if
 
 		// go through the children of the root node
@@ -119,7 +124,7 @@ private:
 		} // for
 
 		ExitOnError("Failed to find child node of type " << type,
-			ErrCode::XercesError);
+			ska::XercesError);
 		return NULL;
 	} // get_child
 
@@ -132,7 +137,7 @@ private:
 		// make sure that this node has the correct number of attributes
 		if(nnm->getLength() != 1) {
 			ExitOnError("In tag" << transcoder(node->getNodeName()) <<
-				" has incorrect number of attributes", ErrCode::XercesError);
+				" has incorrect number of attributes", ska::XercesError);
 		} // if
 
 		// get the key attribute
@@ -141,7 +146,7 @@ private:
 
 		if(transcoder(attr->getName()) != "key") {
 			ExitOnError("In tag" << transcoder(node->getNodeName()) <<
-				" unrecognized attribute", ErrCode::XercesError);
+				" unrecognized attribute", ska::XercesError);
 		} // if
 
 		return transcoder(attr->getValue());
@@ -159,3 +164,14 @@ private:
 } // namespace ska
 
 #endif // XercesIO_h
+
+/*----------------------------------------------------------------------------*
+ * Local Variables: 
+ * mode:c++
+ * c-basic-offset:3
+ * indent-tabs-mode:t
+ * tab-width:3
+ * End:
+ *
+ * vim: set ts=3 :
+ *----------------------------------------------------------------------------*/

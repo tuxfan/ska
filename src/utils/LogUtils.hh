@@ -1,4 +1,9 @@
 /*----------------------------------------------------------------------------*
+ * Copyright (c) 2012 Los Alamos National Security, LLC
+ * All rights reserved
+ *----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*
  * Logging Utilities
  *----------------------------------------------------------------------------*/
 
@@ -36,7 +41,7 @@ std::string rstrip(const char * file) {
 #define Assert(b, s)									\
 	if(!(b)) {											\
 		ExitOnError("Assertion Failed: " << s,	\
-		ErrCode::AssertionFailed);					\
+		ska::AssertionFailed);						\
 	} // if
 
 #endif // LogUtils_hh
@@ -45,8 +50,6 @@ std::string rstrip(const char * file) {
  * Local Variables: 
  * mode:c++
  * c-basic-offset:3
- * c-file-offsets: ((arglist-intro . +))
- * coding: unix
  * indent-tabs-mode:t
  * tab-width:3
  * End:

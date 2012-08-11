@@ -1,4 +1,9 @@
 /*----------------------------------------------------------------------------*
+ * Copyright (c) 2012 Los Alamos National Security, LLC
+ * All rights reserved
+ *----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*
  * Definition of parameters_t class
  *----------------------------------------------------------------------------*/
 
@@ -368,8 +373,6 @@ std::ostream & operator << (std::ostream & stream,
  * Local Variables: 
  * mode:c++
  * c-basic-offset:3
- * c-file-offsets: ((arglist-intro . +))
- * coding: unix
  * indent-tabs-mode:t
  * tab-width:3
  * End:

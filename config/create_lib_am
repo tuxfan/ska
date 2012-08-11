@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 ################################################################################
-# Static Kernel Analysis (SKA) project
+# Copyright (c) 2012 Los Alamos National Security, LLC
+# All rights reserved.
 ################################################################################
 
 # OS X sucks!

@@ -1,9 +1,16 @@
 /*----------------------------------------------------------------------------*
+ * Copyright (c) 2012 Los Alamos National Security, LLC
+ * All rights reserved
+ *----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*
  * Machine state class.
  *----------------------------------------------------------------------------*/
 
 #ifndef MachineState_hh
 #define MachineState_hh
+
+namespace ska {
 
 class machine_state_t
 {
@@ -61,4 +68,17 @@ private:
 
 }; // class machine_state_t
 
+} // namespace ska
+
 #endif // MachineState_hh
+
+/*----------------------------------------------------------------------------*
+ * Local Variables: 
+ * mode:c++
+ * c-basic-offset:3
+ * indent-tabs-mode:t
+ * tab-width:3
+ * End:
+ *
+ * vim: set ts=3 :
+ *----------------------------------------------------------------------------*/

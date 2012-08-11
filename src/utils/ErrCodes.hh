@@ -1,11 +1,16 @@
 /*----------------------------------------------------------------------------*
+ * Copyright (c) 2012 Los Alamos National Security, LLC
+ * All rights reserved
+ *----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*
  * Definition of Errcodes
  *----------------------------------------------------------------------------*/
 
 #ifndef ErrCodes_hh
 #define ErrCodes_hh
 
-namespace ErrCode {
+namespace ska {
 
 	static const int32_t AssertionFailed(-10000);
 	static const int32_t UnknownCase(-10001);
@@ -18,7 +23,7 @@ namespace ErrCode {
 	static const int32_t XercesError(-1008);
 	static const int32_t MemoryAllocationError(-1009);
 
-} // namespace ErrCode
+} // namespace ska
 
 #endif // ErrCodes_hh
 

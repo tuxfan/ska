@@ -1,4 +1,9 @@
 /*----------------------------------------------------------------------------*
+ * Copyright (c) 2012 Los Alamos National Security, LLC
+ * All rights reserved
+ *----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*
  * Simulator class.
  *----------------------------------------------------------------------------*/
 
@@ -480,7 +485,7 @@ instruction_properties_t simulator_t::decode(llvm::Instruction * instruction) {
 					break;
 				default:
 					ExitOnError("FAdd Unhandled Type",
-						ErrCode::UnknownCase);
+						ska::UnknownCase);
 					break;
 			} // switch
 
@@ -509,7 +514,7 @@ instruction_properties_t simulator_t::decode(llvm::Instruction * instruction) {
 				default:
 					ExitOnError("FSub Unhandled Type " <<
 						instruction->getType()->getTypeID(),
-						ErrCode::UnknownCase);
+						ska::UnknownCase);
 					break;
 			} // switch
 
@@ -537,7 +542,7 @@ instruction_properties_t simulator_t::decode(llvm::Instruction * instruction) {
 					break;
 				default:
 					ExitOnError("FMul Unhandled Type",
-						ErrCode::UnknownCase);
+						ska::UnknownCase);
 					break;
 			} // switch
 
@@ -570,7 +575,7 @@ instruction_properties_t simulator_t::decode(llvm::Instruction * instruction) {
 					break;
 				default:
 					ExitOnError("FDiv Unhandled Type",
-						ErrCode::UnknownCase);
+						ska::UnknownCase);
 					break;
 			} // switch
 
@@ -603,7 +608,7 @@ instruction_properties_t simulator_t::decode(llvm::Instruction * instruction) {
 					break;
 				default:
 					ExitOnError("FRem Unhandled Type",
-						ErrCode::UnknownCase);
+						ska::UnknownCase);
 					break;
 			} // switch
 
@@ -801,7 +806,7 @@ instruction_properties_t simulator_t::decode(llvm::Instruction * instruction) {
 					break;
 				default:
 					ExitOnError("Call Unhandled Type",
-						ErrCode::UnknownCase);
+						ska::UnknownCase);
 					break;
 			} // switch
 
@@ -862,7 +867,7 @@ instruction_properties_t simulator_t::decode(llvm::Instruction * instruction) {
 			break;
 	
 		default:
-			ExitOnError("Unhandled Instruction", ErrCode::UnknownCase);
+			ExitOnError("Unhandled Instruction", ska::UnknownCase);
 
 	} // switch
 
@@ -1006,7 +1011,7 @@ void simulator_t::update_stats(llvm::Instruction * instruction) {
 			break;
 		default:
 			{
-				ExitOnError("Unhandled Instruction", ErrCode::UnknownCase);
+				ExitOnError("Unhandled Instruction", ska::UnknownCase);
 			} // scope
 	} // switch
 } // simulator_t::update_stats
@@ -1076,3 +1081,14 @@ size_t simulator_t::bytes(llvm::Type * type) {
 } // namespace ska
 
 #endif // Simulator_hh
+
+/*----------------------------------------------------------------------------*
+ * Local Variables: 
+ * mode:c++
+ * c-basic-offset:3
+ * indent-tabs-mode:t
+ * tab-width:3
+ * End:
+ *
+ * vim: set ts=3 :
+ *----------------------------------------------------------------------------*/

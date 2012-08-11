@@ -1,3 +1,8 @@
+/*----------------------------------------------------------------------------*
+ * Copyright (c) 2012 Los Alamos National Security, LLC
+ * All rights reserved
+ *----------------------------------------------------------------------------*/
+
 #ifndef x86CallMap_hh
 #define x86CallMap_hh
 
@@ -17,3 +22,14 @@ std::map<std::string, std::string> x86_call_map = {
 } // namespace ska
 
 #endif // x86CallMap_hh
+
+/*----------------------------------------------------------------------------*
+ * Local Variables: 
+ * mode:c++
+ * c-basic-offset:3
+ * indent-tabs-mode:t
+ * tab-width:3
+ * End:
+ *
+ * vim: set ts=3 :
+ *----------------------------------------------------------------------------*/

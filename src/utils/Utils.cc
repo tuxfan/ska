@@ -1,4 +1,9 @@
 /*----------------------------------------------------------------------------*
+ * Copyright (c) 2012 Los Alamos National Security, LLC
+ * All rights reserved
+ *----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*
  * Utilities
  *----------------------------------------------------------------------------*/
 
@@ -6,7 +11,7 @@
 #include <math.h>
 #include <stdint.h>
 
-namespace atlas {
+namespace ska {
 
 uint32_t nanodelay(uint32_t i) {
   uint32_t a = 0;
@@ -58,7 +63,7 @@ void util_free(void * handle)
 #endif
 } // util_free
 
-} // namespace atlas
+} // namespace ska
 
 /*----------------------------------------------------------------------------*
  * Local Variables: 
