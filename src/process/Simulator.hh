@@ -274,29 +274,50 @@ for(llvm::Function::iterator bita = fita->begin();
 				 *-------------------------------------------------------------*/
 
 				bool cycle_dependency(false);
-				for(auto cita = cycle_issue.begin();
-					cita != cycle_issue.end(); ++cita) {
-					for(auto dita = inst->dependencies().begin();
-						dita != inst->dependencies().end(); ++dita) {
-							if(*dita == *cita) {
-								cycle_dependency = true;
-							} // if
-					} // for
-				} // for
-
-#if 0
 				if(issued > 0) {
 					for(auto cita = cycle_issue.begin();
 						cita != cycle_issue.end(); ++cita) {
-						if(!(*cita)->ready()) {
-							cycle_dependency = true;
+						for(auto dita = inst->dependencies().begin();
+							dita != inst->dependencies().end(); ++dita) {
+								if(*dita == *cita) {
+									cycle_dependency = true;
+									break;
+								} // if
+						} // for
+
+						if(cycle_dependency) {
+							break;
 						} // if
 					} // for
 				} // if
-#endif
+
+				/*-------------------------------------------------------------*
+				 * Check for stalls
+				 *-------------------------------------------------------------*/
+
+				bool cycle_stall(false);
+				if(!cycle_dependency) {
+					for(auto a = active.begin(); a != active.end(); ++a) {
+						// check for any type of stall from an active instruction
+						if((*a)->state() == instruction_t::stalled) {
+							cycle_stall = true;
+							break;
+						} // if
+
+
+						// if this is a multiple issue, check to make sure that
+						// all dependencies of the sister instructions are ready
+						if(issued > 0 && !cycle_dependency &&
+							(*a)->state() < instruction_t::staging) {
+							cycle_stall = true;
+							break;
+						} // if
+					} // for
+				} // if
+
 
 				int32_t id = core.accept(inst);
-				if(!cycle_dependency && id >= 0) {
+				if(!cycle_dependency && !cycle_stall && id >= 0) {
 
 					/*##############################################################
 					 ###############################################################
@@ -339,9 +360,9 @@ for(llvm::Function::iterator bita = fita->begin();
 				}
 				else {
 					// cleanup failed multiple issue attempt
-					if(issued > 0) {
+					if(cycle_stall || issued > 0) {
 
-						// remove instruction from active list
+						// remove current instruction from active list
 						for(auto a = active.begin(); a != active.end(); ++a) {
 							if((*a) == inst) {
 								active.erase(a);
@@ -349,7 +370,7 @@ for(llvm::Function::iterator bita = fita->begin();
 							} // if
 						} // for
 
-						// free the ALU
+						// free the ALU for the current instruction
 						if(id != -1) {
 							core.release(id);
 						} // if
