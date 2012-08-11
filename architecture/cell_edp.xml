@@ -283,7 +283,7 @@
 
 <!-- double -->
 <value key="latency::fmul::double">
-	<size>5</size>
+	<size>4</size>
 </value>
 
 <value key="reciprocal::fmul::double">
@@ -292,7 +292,7 @@
 
 <!-- vector -->
 <value key="latency::fmul::vector">
-	<size>5</size>
+	<size>4</size>
 </value>
 
 <value key="reciprocal::fmul::vector">

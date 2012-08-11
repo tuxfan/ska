@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*
- *
+ * Simulator class.
  *----------------------------------------------------------------------------*/
 
 #ifndef Simulator_hh
@@ -40,29 +40,67 @@ namespace ska {
 #define SKA_VERSION_TAG "undefined"
 #endif
 
+/*----------------------------------------------------------------------------*
+ * Simulator class.
+ *----------------------------------------------------------------------------*/
+
 class simulator_t
 {
 public:
+
+	/*-------------------------------------------------------------------------*
+	 * Public types
+	 *-------------------------------------------------------------------------*/
 
 	typedef std::map<llvm::Value *, instruction_t *> instruction_map_t;
 	typedef std::vector<instruction_t *> instruction_vector_t;
 	typedef std::list<instruction_t *> instruction_list_t;
 
+	/*-------------------------------------------------------------------------*
+	 * Constructor
+	 *-------------------------------------------------------------------------*/
+
 	simulator_t(const char * ir_file, std::ostream & stream);
+
+	/*-------------------------------------------------------------------------*
+	 * Destructor
+	 *-------------------------------------------------------------------------*/
+
 	~simulator_t() {}
-
-	instruction_properties_t decode(llvm::Instruction * instruction);
-	void update_stats(llvm::Instruction * instruction);
-
-	size_t bytes(llvm::Type * type);
 
 private:
 
+	/*-------------------------------------------------------------------------*
+	 * Decode an llvm::Instruction.  This gets property information about
+	 * the instruction (latency, issue latency, opcode, optype) that is used
+	 * to contruct a instruction_t instance.
+	 *-------------------------------------------------------------------------*/
+
+	instruction_properties_t decode(llvm::Instruction * instruction);
+	
+	/*-------------------------------------------------------------------------*
+	 * Update statistic based on the execution of 'instruction'.
+	 *-------------------------------------------------------------------------*/
+
+	void update_stats(llvm::Instruction * instruction);
+
+	/*-------------------------------------------------------------------------*
+	 * Compute the number of bytes associated with a given llvm::Type.  This
+	 * is used to compute load and store sizes.
+	 *-------------------------------------------------------------------------*/
+
+	size_t bytes(llvm::Type * type);
+
+	// private data members
 	llvm::SMDiagnostic llvm_err_;
 	llvm::LLVMContext llvm_context_;
 	llvm::Module * llvm_module_;
 
 }; // class simulator_t
+
+/*----------------------------------------------------------------------------*
+ * Simulator class.
+ *----------------------------------------------------------------------------*/
 
 simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 	: llvm_module_(nullptr)
@@ -165,9 +203,9 @@ for(llvm::Function::iterator bita = fita->begin();
 } // for
 #endif
 
-		llvm::inst_iterator ita = inst_begin(fita);
+		llvm::inst_iterator iita = inst_begin(fita);
 		
-		if(ita == inst_end(fita)) {
+		if(iita == inst_end(fita)) {
 			continue;
 		} // if
 
@@ -192,14 +230,14 @@ for(llvm::Function::iterator bita = fita->begin();
 	 * Visit instructions.
 	 *-------------------------------------------------------------------------*/
 
-		while(ita != inst_end(fita) || active.size()) {
+		while(iita != inst_end(fita) || active.size() > 0) {
 			size_t issued(0);
 			bool issue(true);
 			std::vector<instruction_t *> cycle_issue;
 
-			while(ita != inst_end(fita) && issue &&
+			while(iita != inst_end(fita) && issue &&
 				issued < core.max_issue()) {
-				value = &*ita;
+				value = &*iita;
 
 				/*----------------------------------------------------------------*
 				 * Create instruction and add dependencies
@@ -207,13 +245,13 @@ for(llvm::Function::iterator bita = fita->begin();
 
 				if(inst == nullptr) {
 					// get instruction properties
-					instruction_properties_t properties = decode(&*ita);
+					instruction_properties_t properties = decode(&*iita);
 
 					inst = new instruction_t(properties);
 
-					unsigned operands = ita->getNumOperands();
+					unsigned operands = iita->getNumOperands();
 					for(unsigned i(0); i<operands; ++i) {
-						auto op = processed.find(ita->getOperand(i));
+						auto op = processed.find(iita->getOperand(i));
 						if(op != processed.end()) {
 							inst->add_dependency(op->second);
 						} // if
@@ -226,30 +264,24 @@ for(llvm::Function::iterator bita = fita->begin();
 					active.push_back(inst);
 				} // if
 
-				int32_t id = core.accept(inst);
-				if(id >= 0) {
+				/*-------------------------------------------------------------*
+				 * Check for dependencies within this issue
+				 *-------------------------------------------------------------*/
 
-					/*-------------------------------------------------------------*
-					 * Check for dependencies within this issue
-					 *-------------------------------------------------------------*/
-
-					for(auto cita = cycle_issue.begin();
-						cita != cycle_issue.end(); ++cita) {
-						for(auto dita = inst->dependencies().begin();
-							dita != inst->dependencies().end(); ++dita) {
-								if(*dita == *cita) {
-									issue = false;
-								} // if
-						} // for
+				bool cycle_dependency(false);
+				for(auto cita = cycle_issue.begin();
+					cita != cycle_issue.end(); ++cita) {
+					for(auto dita = inst->dependencies().begin();
+						dita != inst->dependencies().end(); ++dita) {
+							if(*dita == *cita) {
+								cycle_dependency = true;
+							} // if
 					} // for
+				} // for
 
-					if(issue == false) {
-						core.release(id);
-						delete inst;
-						inst = nullptr;
-						continue;
-					} // if
-			
+				int32_t id = core.accept(inst);
+				if(!cycle_dependency && id >= 0) {
+
 					/*##############################################################
 					 ###############################################################
 					 # Everything that makes it to this point actually gets
@@ -261,7 +293,7 @@ for(llvm::Function::iterator bita = fita->begin();
 					 * Update statistics
 					 *-------------------------------------------------------------*/
 
-					update_stats(&*ita);
+					update_stats(&*iita);
 				
 					/*-------------------------------------------------------------*
 					 * Add instruction to this issue
@@ -286,25 +318,45 @@ for(llvm::Function::iterator bita = fita->begin();
 					 *-------------------------------------------------------------*/
 
 					++issued;
-					++ita;
+					++iita;
 					inst = nullptr;
 				}
 				else {
-					//delete inst;
-					//inst = nullptr;
+					// cleanup failed multiple issue attempt
+					if(issued > 0) {
+
+						// remove instruction from active list
+						for(auto a = active.begin(); a != active.end(); ++a) {
+							if((*a) == inst) {
+								active.erase(a);
+								break;
+							} // if
+						} // for
+
+						// free the ALU
+						if(id != -1) {
+							core.release(id);
+						} // if
+
+						// delete the instruction
+						delete inst;
+						inst = nullptr;
+					} // if
+
 					issue = false;
 					continue;
 				} // if
 
+				// if multiple issue was possible, update the affected
+				// instructions state
 				if(issued > 1) {
 					for(auto cita = cycle_issue.begin();
 						cita != cycle_issue.end(); ++cita) {
 						(*cita)->set_multiple(issued);
 					} // for
 				} // if
-
 			} // while
-			
+
 			// update executing instructions
 			auto a = active.begin();
 			while(a != active.end()) {
@@ -316,8 +368,9 @@ for(llvm::Function::iterator bita = fita->begin();
 				else {
 					++a;
 				} // if
-			} // for
+			} // while
 
+			// set state for next cycle
 			core.advance();
 		} // while
 
@@ -334,8 +387,8 @@ for(llvm::Function::iterator bita = fita->begin();
 
 		stream << "BEGIN_INSTRUCTION_STREAM" << std::endl;
 
-		for(auto ita = instructions.begin(); ita != instructions.end(); ++ita) {
-			stream << (*ita)->string() << std::endl;
+		for(auto out = instructions.begin(); out != instructions.end(); ++out) {
+			stream << (*out)->string() << std::endl;
 		} // for
 
 		stream << "END_INSTRUCTION_STREAM" << std::endl;

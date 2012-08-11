@@ -55,6 +55,14 @@ public:
 		retired
 	}; // enum state_t
 
+	const char * state_strings[5] = {
+		"pending",
+		"stalled",
+		"staging",
+		"executing",
+		"retired"
+	};
+
 	/*-------------------------------------------------------------------------*
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
@@ -101,6 +109,9 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	state_t state() { return state_; }
+
+//FIXME:
+	int32_t alu() const { return alu_; }
 
 	/*-------------------------------------------------------------------------*
 	 * Issue this instruction.
@@ -166,6 +177,8 @@ public:
 		stream_ << machine_.counter();
 	} // advance
 
+size_t progress() const { return cycles_; }
+
 	/*-------------------------------------------------------------------------*
 	 * Return dependency vector.
 	 *-------------------------------------------------------------------------*/
@@ -197,8 +210,10 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	std::string string() {
-		while(stream_.str().size() < machine_.current()+10) {
-			stream_ << ' ';
+		std::string tmp(stream_.str());
+
+		while(tmp.size() < machine_.current()+10) {
+			tmp += ' ';
 		} // while
 
 		char buffer[256];
@@ -223,8 +238,47 @@ public:
 			sprintf(buffer, "%06d | %2d   | ", int(issued_), alu_);
 		} // if
 
-		return buffer + stream_.str() + '|' + props_.ir;
+		return buffer + tmp + '|' + props_.ir;
 	} // string
+
+std::string info() {
+	std::string info_str("");
+
+	auto c = code_map.begin();
+	for(; c != code_map.end(); ++c) {
+		if(c->second == opcode()) {
+			break;
+		} // if
+	} // for
+
+	if(c != code_map.end()) {
+		char buffer[1024];
+		sprintf(buffer, "Instruction\n\top: %s\n\tstate: %s\n\talu: %d\n"
+			"\tissue: %d\n\tlatency: %d\n\treciprocal: %d\n\tprogress: %d\n",
+			c->first.c_str(), state_strings[state()], alu(), int(cycle_issued()),
+			int(latency()), int(reciprocal()), int(progress()));
+		info_str += buffer;
+
+		for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
+			auto dc = code_map.begin();
+			for(; dc != code_map.end(); ++dc) {
+				if(dc->second == (*ita)->opcode()) {
+					break;
+				} // if
+			} // for
+
+			if(dc != code_map.end()) {
+				sprintf(buffer, "\tdependency: %s(%s)\n",
+					dc->first.c_str(), state_strings[(*ita)->state()]);
+				info_str += buffer;
+			} // if
+		} // for
+
+		info_str += string() + "\n";
+	} // if
+
+	return info_str;
+}
 
 	/*-------------------------------------------------------------------------*
 	 * Return various instruciton properties.
