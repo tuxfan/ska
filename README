@@ -9,9 +9,11 @@
 
 Requirements:
 
+C++ compiler with c++11 support
 llvm >= 3.1
-dragonegg >= 3.1
 qt4 (development libraries and headers)
+
+To create LLVM IR input files for SKA you'll need dragonegg >= 3.1
 
 #------------------------------------------------------------------------------#
 # Building:
@@ -43,7 +45,7 @@ on the configure line, configure will automatically detect it:
 
 # Note: If you are building this project from the git repository, you
 # will need to bootstrap the build system.  Please look at the file
-# DEVELOPER in the top-level source directory.
+# README.developer in the top-level source directory.
 
 #------------------------------------------------------------------------------#
 # Running ska and skaview
@@ -66,3 +68,7 @@ output file name to open:
 % skaview saxby.ska
 
 The viewer recognizes the file suffix, '.ska'.
+
+# NOTE: Sample architecture and LLVM IR files are included in
+# ./architecture and ./sample.  These get installed to
+# install_dir/share/ska.
