@@ -1,0 +1,24 @@
+################################################################################
+# Copyright (c) 2012 Los Alamos National Security, LLC
+# All rights reserved.
+################################################################################
+
+#------------------------------------------------------------------------------#
+# Sample files
+#------------------------------------------------------------------------------#
+
+This directory contains several samples of LLVM IR.
+
+# saxby.ll
+
+Single-precision multiply-add (not using intrinsic).
+
+# grav.ll
+
+Single-precision gravity potential calculation using sse intrinsics
+(rsqrt and hadd)
+
+# direct.ll
+
+Single-precision gravity potential calculations taken from the 'direct'
+project.

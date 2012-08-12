@@ -1,0 +1,27 @@
+################################################################################
+# Copyright (c) 2012 Los Alamos National Security, LLC
+# All rights reserved.
+################################################################################
+
+#------------------------------------------------------------------------------#
+# Architectures
+#------------------------------------------------------------------------------#
+
+This directory contains several sample architecture specifications.
+
+# template.xml
+
+Generic template for starting new architecture specifications.
+
+# cell-edp.xml
+
+The IBM PowerXCell 8i processor.
+
+# pentium-m.xml
+
+The Intel Pentium-M processor.  This will be the basis for the new Intel
+MIC architecture.
+
+# sandybridge.xml
+
+The Intel Sandy Bridge processor.

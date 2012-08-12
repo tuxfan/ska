@@ -7,22 +7,24 @@
 # TODO for SKA
 #------------------------------------------------------------------------------#
 
-Urgent:
+# Urgent:
 
-- Figure out bug in direct.ll processing
+-	None.
 
-	Error is caused by multi-line switch statement in code.
-	This looks like actual input from the .ll file.  Not sure why LLVM doesn't
-	join this into one line.
+# Not so urgent:
 
-Not so urgent:
+-	Finish search function.
 
-- Finish search function
+-	Add heuristics (look for metrics from proposal)
+	These should be added as library functions.
 
-- Add heuristics (look for metrics from proposal)
+-	Add version information to library
 
-- Get SPE code from Mike and generate spu_timings output
+-	Add better controls to GUI.  In particular, mouse-over information
+	about instruction meta-data would be nice (would need to add meta-
+	data collection to driver).  Also need to figure out how to display
+	metrics.  May need separate, non-modal window.
 
-- Add version information to library
+-	Add register allocation heuristics.  This will be difficult...
 
-- Test mangled call name for general case
+-	May want to modify xml format to group items.

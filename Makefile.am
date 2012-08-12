@@ -21,3 +21,20 @@ links:
 			ln -s $$link .; \
 		done \
 	)
+
+#------------------------------------------------------------------------------#
+# Extra install data
+#------------------------------------------------------------------------------#
+
+install-data-hook:
+	@(mkdir -p ${datarootdir}/ska && \
+		cp -r ${top_srcdir}/architecture ${datarootdir}/ska && \
+		cp -r ${top_srcdir}/sample ${datarootdir}/ska)
+
+#------------------------------------------------------------------------------#
+# Extra install data
+#------------------------------------------------------------------------------#
+
+dist-hook:
+	@(cp -r ${top_srcdir}/architecture ${distdir} && \
+		cp -r ${top_srcdir}/sample ${distdir})
