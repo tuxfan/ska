@@ -307,8 +307,7 @@ for(llvm::Function::iterator bita = fita->begin();
 
 						// if this is a multiple issue, check to make sure that
 						// all dependencies of the sister instructions are ready
-						if(issued > 0 && !cycle_dependency &&
-							(*a)->state() < instruction_t::staging) {
+						if(issued > 0 && (*a)->state() < instruction_t::staging) {
 							cycle_stall = true;
 							break;
 						} // if
