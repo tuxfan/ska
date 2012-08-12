@@ -37,4 +37,5 @@ install-data-hook:
 
 dist-hook:
 	@(cp -r ${top_srcdir}/architecture ${distdir} && \
-		cp -r ${top_srcdir}/sample ${distdir})
+		cp -r ${top_srcdir}/sample ${distdir} && \
+		cp -r ${top_srcdir}/machine ${distdir})
