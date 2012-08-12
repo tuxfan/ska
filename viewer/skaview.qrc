@@ -1,4 +1,9 @@
 <!DOCTYPE RCC><RCC version="1.0">
+<!-- ##########################################################################
+ # Copyright (c) 2012 Los Alamos National Security, LLC
+ # All rights reserved.
+ ############################################################################-->
+
 <qresource>
 	<file>icons/open.png</file>
 </qresource>

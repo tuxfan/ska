@@ -1,3 +1,8 @@
+/*----------------------------------------------------------------------------*
+ * Copyright (c) 2012 Los Alamos National Security, LLC
+ * All rights reserved
+ *----------------------------------------------------------------------------*/
+
 #ifndef ViewInstruction_h
 #define ViewInstruction_h
 

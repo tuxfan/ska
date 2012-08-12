@@ -7,10 +7,10 @@ dnl ------------------------------------------------------------------------ dnl
 dnl Generic rule for auto-detection of unix-style libraries
 dnl
 dnl CONFIG_GENERIC_LIB($1 = string name,
-dnl                 $2 = macro name,
-dnl                 $3 = library symbol,
-dnl                 $4 = language,
-dnl                 $5 = dependencies)
+dnl                    $2 = macro name,
+dnl                    $3 = library symbol,
+dnl                    $4 = language,
+dnl                    $5 = dependencies)
 dnl ------------------------------------------------------------------------ dnl
 
 AC_DEFUN([CONFIG_GENERIC_LIB], [

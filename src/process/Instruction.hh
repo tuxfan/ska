@@ -251,7 +251,7 @@ public:
 
 		char buffer[256];
 		if(multiple_ > 1) {
-			char m;
+			char m = 'X';
 
 			switch(multiple_) {
 				case 2:
