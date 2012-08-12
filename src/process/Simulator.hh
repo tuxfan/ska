@@ -249,10 +249,8 @@ for(llvm::Function::iterator bita = fita->begin();
 				 *----------------------------------------------------------------*/
 
 				if(inst == nullptr) {
-					// get instruction properties
-					instruction_properties_t properties = decode(&*iita);
 
-					inst = new instruction_t(properties);
+					inst = new instruction_t(decode(&*iita));
 
 					unsigned operands = iita->getNumOperands();
 					for(unsigned i(0); i<operands; ++i) {
@@ -263,6 +261,30 @@ for(llvm::Function::iterator bita = fita->begin();
 					} // for
 
 					/*-------------------------------------------------------------*
+					 * If an instruction that was previously issed and stalled
+					 * is now ready to execute, we can try for multiple-issue.
+					 *-------------------------------------------------------------*/
+
+					if(issued == 0) {
+						// Check for pending instructions from previous cycles
+						// NOTE: This has to happen before the current instruciton
+						// is added to active!
+						for(auto a = active.begin(); a != active.end(); ++a) {
+							if((*a)->state() == instruction_t::stalled &&
+								(*a)->ready()) {
+								// reset state to staging
+								(*a)->set_state(instruction_t::staging);
+
+								// add to instructions issued this cycle
+								cycle_issue.push_back(*a);
+
+								// update count
+								++issued;
+							} // if
+						} // for
+					} // if
+
+					/*-------------------------------------------------------------*
 					 * Add instruction to active list
 					 *-------------------------------------------------------------*/
 
@@ -270,7 +292,21 @@ for(llvm::Function::iterator bita = fita->begin();
 				} // if
 
 				/*-------------------------------------------------------------*
+				 * Check for dependencies of this instruction
+				 *
+				 * If the currently queued instruction has any dependencies
+				 * that have not retired, multiple issue cannot happen.
+				 *-------------------------------------------------------------*/
+
+				issue = inst->ready();
+
+				/*-------------------------------------------------------------*
 				 * Check for dependencies within this issue
+				 *
+				 * If the current instruction depends on any other instructions
+				 * that are to be issued this cycle, multiple issue cannot
+				 * happen because the current instruction will immediately
+				 * stall.
 				 *-------------------------------------------------------------*/
 
 				bool cycle_dependency(false);
@@ -293,27 +329,26 @@ for(llvm::Function::iterator bita = fita->begin();
 
 				/*-------------------------------------------------------------*
 				 * Check for stalls
+				 *
+				 * If any instruction (not counting the current) is stalled,
+				 * no new instructions can be issued.
 				 *-------------------------------------------------------------*/
 
 				bool cycle_stall(false);
 				if(!cycle_dependency) {
-					for(auto a = active.begin(); a != active.end(); ++a) {
+					for(auto a = active.begin(); (*a) != inst &&
+						a != active.end(); ++a) {
 						// check for any type of stall from an active instruction
 						if((*a)->state() == instruction_t::stalled) {
-							cycle_stall = true;
-							break;
-						} // if
-
-
-						// if this is a multiple issue, check to make sure that
-						// all dependencies of the sister instructions are ready
-						if(issued > 0 && (*a)->state() < instruction_t::staging) {
 							cycle_stall = true;
 							break;
 						} // if
 					} // for
 				} // if
 
+				/*-------------------------------------------------------------*
+				 * Try to issue
+				 *-------------------------------------------------------------*/
 
 				int32_t id = core.accept(inst);
 				if(!cycle_dependency && !cycle_stall && id >= 0) {
@@ -384,7 +419,7 @@ for(llvm::Function::iterator bita = fita->begin();
 				} // if
 
 				// if multiple issue was possible, update the affected
-				// instructions state
+				// instruction states
 				if(issued > 1) {
 					for(auto cita = cycle_issue.begin();
 						cita != cycle_issue.end(); ++cita) {

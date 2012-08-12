@@ -116,6 +116,12 @@ public:
 	state_t state() { return state_; }
 
 	/*-------------------------------------------------------------------------*
+	 * Set current state.
+	 *-------------------------------------------------------------------------*/
+
+	void set_state(state_t s) { state_ = s; }
+
+	/*-------------------------------------------------------------------------*
 	 * Return the alu assinged to this instruction.
 	 *-------------------------------------------------------------------------*/
 
@@ -161,6 +167,7 @@ public:
 		// meaning that this instruction can't advance until next cycle.
 		if(machine_.current() > 0 && depends_retired == machine_.current()) {
 			state_ = stalled;
+			issued_ = machine_.current() + 1;
 			stream_ << '-';
 			return;
 		} // if
@@ -185,7 +192,11 @@ public:
 		stream_ << machine_.counter();
 	} // advance
 
-size_t progress() const { return cycles_; }
+	/*-------------------------------------------------------------------------*
+	 * Return the current progress of the instruction.
+	 *-------------------------------------------------------------------------*/
+
+	size_t progress() const { return cycles_; }
 
 	/*-------------------------------------------------------------------------*
 	 * Return dependency vector.
@@ -240,10 +251,10 @@ size_t progress() const { return cycles_; }
 					break;
 			} // switch
 
-			sprintf(buffer, "%06d | %2d:%1c | ", int(issued_), alu_, m);
+			sprintf(buffer, "%06d | %1d:%1c | ", int(issued_), alu_, m);
 		}
 		else {
-			sprintf(buffer, "%06d | %2d   | ", int(issued_), alu_);
+			sprintf(buffer, "%06d | %1d   | ", int(issued_), alu_);
 		} // if
 
 		return buffer + tmp + '|' + props_.ir;
