@@ -21,7 +21,8 @@ namespace ska {
 	static const int32_t UndefinedMapKey(-1006);
 	static const int32_t BadInputValue(-1007);
 	static const int32_t XercesError(-1008);
-	static const int32_t MemoryAllocationError(-1009);
+	static const int32_t LLVMError(-1009);
+	static const int32_t MemoryAllocationError(-1010);
 
 } // namespace ska
 

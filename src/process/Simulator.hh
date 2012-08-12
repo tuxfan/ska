@@ -193,6 +193,11 @@ simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
 
 	llvm_module_ = ParseIRFile(ir_file, llvm_err_, llvm_context_);
 
+	if(llvm_module_ == nullptr) {
+		ExitOnError("LLVM parse failed on " << ir_file << std::endl <<
+			llvm_err_.getMessage(), ska::LLVMError);
+	} // if
+
 	/*-------------------------------------------------------------------------*
 	 * Visit modules.
 	 *-------------------------------------------------------------------------*/
@@ -330,13 +335,13 @@ for(llvm::Function::iterator bita = fita->begin();
 				/*-------------------------------------------------------------*
 				 * Check for stalls
 				 *
-				 * If any instruction (not counting the current) is stalled,
-				 * no new instructions can be issued.
+				 * If any instruction is stalled, no new instructions
+				 * can be issued.
 				 *-------------------------------------------------------------*/
 
 				bool cycle_stall(false);
 				if(!cycle_dependency) {
-					for(auto a = active.begin(); (*a) != inst &&
+					for(auto a = active.begin(); /* (*a) != inst && */
 						a != active.end(); ++a) {
 						// check for any type of stall from an active instruction
 						if((*a)->state() == instruction_t::stalled) {
@@ -344,6 +349,17 @@ for(llvm::Function::iterator bita = fita->begin();
 							break;
 						} // if
 					} // for
+				} // if
+
+				/*-------------------------------------------------------------*
+				 * Check to see if this instruction will stall on issue.
+				 *
+				 * The previous check will not catch this because the
+				 * instruction hasn't yet been advanced.
+				 *-------------------------------------------------------------*/
+
+				if(issued > 0 && !issue) {
+					cycle_stall = true;
 				} // if
 
 				/*-------------------------------------------------------------*

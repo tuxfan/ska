@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 #include <sstream>
 #include <cstdio>
 #include <limits>
@@ -79,6 +80,19 @@ public:
 		for(size_t i(0); i<machine_.current(); ++i) {
 			stream_ << ' ';
 		} // for
+
+		// remove wierd returns from IR
+		size_t offset = props_.ir.find_first_of('\n');
+		while(offset != std::string::npos) {
+			Warn("IR has returns (removing from output)");
+
+			while(props_.ir[offset+1] == ' ') {
+				props_.ir.erase(offset+1, 1);
+			} // while
+
+			props_.ir.replace(offset, 1, 1, ' ');
+			offset = props_.ir.find_first_of('\n');
+		} // while
 	} // instruction_t
 
 	/*-------------------------------------------------------------------------*

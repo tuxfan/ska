@@ -37,6 +37,9 @@ std::string rstrip(const char * file) {
    std::cerr << std::flush;		\
 	std::exit((e));
 
+#define Warn(s)														\
+	std::cerr << "Warning: " << s << "!!!" << std::endl;
+
 // Assert
 #define Assert(b, s)									\
 	if(!(b)) {											\
