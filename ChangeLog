@@ -7,7 +7,7 @@
 # ChangeLog
 #------------------------------------------------------------------------------#
 
-# 1.0.0 (initial release)
+# 1.0.x (initial release)
 
 This is the first official release of SKA.  SKA currently supports correct
 processing of data-dependency hazards (memory access stalls cannot be
