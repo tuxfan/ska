@@ -31,11 +31,13 @@ CONFIG_WITH_MACHINE("$srcdir/machine")
 # Configuration targets
 #------------------------------------------------------------------------------#
 
-AC_CONFIG_FILES([Makefile \
+AC_CONFIG_FILES([Makefile SANDBOX_SUBDIR \
 	lib/Makefile \
 	bin/Makefile \
 	viewer/Makefile
 ])
+
+SANDBOX_SUBST
 
 #------------------------------------------------------------------------------#
 # Program options

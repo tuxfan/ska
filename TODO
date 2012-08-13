@@ -13,18 +13,19 @@
 
 # Not so urgent:
 
+-	Add register allocation heuristics.  This could be difficult...
+	Need to add partial lowering functionality.
+
 -	Finish search function.
 
--	Add heuristics (look for metrics from proposal)
+-	Add metric heuristics (look for metrics from proposal).
 	These should be added as library functions.
 
--	Add version information to library
+-	Add version information to library.
 
 -	Add better controls to GUI.  In particular, mouse-over information
 	about instruction meta-data would be nice (would need to add meta-
 	data collection to driver).  Also need to figure out how to display
 	metrics.  May need separate, non-modal window.
-
--	Add register allocation heuristics.  This will be difficult...
 
 -	May want to modify xml format to group items.
