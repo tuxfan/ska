@@ -875,7 +875,6 @@ instruction_properties_t simulator_t::decode(llvm::Instruction * instruction) {
 			} // if
 
 			call = name;
-
 			switch(optype) {
 				case llvm::Type::FloatTyID:
 					call += "::float";
@@ -1009,6 +1008,7 @@ void simulator_t::update_stats(llvm::Instruction * instruction) {
 		case llvm::Instruction::And:
 		case llvm::Instruction::Or:
 		case llvm::Instruction::Xor:
+			break;
 		case llvm::Instruction::Alloca:
 			{
 			stats["allocas"]++;
