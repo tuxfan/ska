@@ -19,6 +19,7 @@
 
 #include <MachineState.hh>
 #include <OpCodes.hh>
+#include <LogUtils.hh>
 
 namespace ska {
 
@@ -75,7 +76,8 @@ public:
 
 	instruction_t(instruction_properties_t props)
 		: props_(props), state_(pending), alu_(-1), multiple_(1), cycles_(0),
-		issued_(0), retired_(0), machine_(machine_state_t::instance()) {
+		issued_(0), retired_(0), strahler_(1),
+		machine_(machine_state_t::instance()) {
 
 		for(size_t i(0); i<machine_.current(); ++i) {
 			stream_ << ' ';
@@ -108,6 +110,30 @@ public:
 	void add_dependency(instruction_t * inst) {
 		depends_.push_back(inst);
 	} // add_dependency
+
+	/*-------------------------------------------------------------------------*
+	 * Update the Strahler number of this instruction.
+	 *
+	 * The Strahler number is a measure of the branching complexity of the
+	 * tree of dependencies of an instruction.
+	 *-------------------------------------------------------------------------*/
+
+	void update_strahler_number() {
+		size_t _max(1);
+		for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
+			_max = std::max(_max, (*ita)->strahler_number());	
+		} // for
+
+		size_t _num_with_max(0);
+
+		for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
+			_num_with_max += (*ita)->strahler_number() == _max ? 1 : 0;
+		} // for
+
+		strahler_ = _num_with_max > 1 ? _max + 1 : _max;
+	} // update_strahler_number
+
+	size_t strahler_number() const { return strahler_; }
 
 	/*-------------------------------------------------------------------------*
 	 * Check data dependencies.
@@ -350,6 +376,8 @@ private:
 	size_t cycles_;
 	size_t issued_;
 	size_t retired_;
+
+	size_t strahler_;
 
 	std::vector<instruction_t *> depends_;
 	std::stringstream stream_;

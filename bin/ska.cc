@@ -17,7 +17,7 @@
 
 #define USAGE(s)															\
 	std::cerr << "usage: " << (s) << " [-o output file]" <<	\
-	" architecture" << " ir" << std::endl;							\
+	" architecture ir" << std::endl;									\
 	std::exit(1);
 
 int main(int argc, char ** argv) {
@@ -68,8 +68,7 @@ int main(int argc, char ** argv) {
 	 * Read architecture specification.
 	 *-------------------------------------------------------------------------*/
 
-	ska::parameters_t & gp = ska::parameters_t::instance();
-	gp.init(argv[0], false);
+	ska::parameters_t::instance().init(argv[0], false);
 
 	/*-------------------------------------------------------------------------*
 	 * Call simulator.
