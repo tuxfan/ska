@@ -119,18 +119,20 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	void update_strahler_number() {
-		size_t _max(1);
-		for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
-			_max = std::max(_max, (*ita)->strahler_number());	
-		} // for
+		if(!is_memory_op(props_.opcode)) {
+			size_t _max(1);
+			for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
+				_max = std::max(_max, (*ita)->strahler_number());	
+			} // for
 
-		size_t _num_with_max(0);
+			size_t _num_with_max(0);
 
-		for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
-			_num_with_max += (*ita)->strahler_number() == _max ? 1 : 0;
-		} // for
+			for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
+				_num_with_max += (*ita)->strahler_number() == _max ? 1 : 0;
+			} // for
 
-		strahler_ = _num_with_max > 1 ? _max + 1 : _max;
+			strahler_ = _num_with_max > 1 ? _max + 1 : _max;
+		} // if
 	} // update_strahler_number
 
 	size_t strahler_number() const { return strahler_; }

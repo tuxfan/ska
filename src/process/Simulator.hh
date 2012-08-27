@@ -238,7 +238,7 @@ for(llvm::Function::iterator bita = fita->begin();
 		llvm::Value * value = nullptr;
 		instruction_t * inst = nullptr;
 
-		size_t strahler(1);
+		size_t strahler_number(1);
 
 	/*-------------------------------------------------------------------------*
 	 * Visit instructions.
@@ -273,7 +273,8 @@ for(llvm::Function::iterator bita = fita->begin();
 					 *-------------------------------------------------------------*/
 
 					inst->update_strahler_number();
-					strahler = std::max(strahler, inst->strahler_number());
+					strahler_number = std::max(strahler_number,
+						inst->strahler_number());
 
 					/*-------------------------------------------------------------*
 					 * If an instruction that was previously issed and stalled
@@ -481,13 +482,11 @@ for(llvm::Function::iterator bita = fita->begin();
 		stream << "KEYWORD_STORES " << stats["stores"] << std::endl;
 		stream << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
 		stream << "KEYWORD_CYCLES " << machine.current() << std::endl;
-		stream << "KEYWORD_STRAHLER " << strahler << std::endl;
-
+		stream << "KEYWORD_STRAHLER " << strahler_number << std::endl;
 		stream << "BEGIN_INSTRUCTION_STREAM" << std::endl;
 
 		for(auto out = instructions.begin(); out != instructions.end(); ++out) {
 			stream << (*out)->string() << std::endl;
-			std::cerr << "strahler: " << (*out)->strahler_number() << std::endl;
 		} // for
 
 		stream << "END_INSTRUCTION_STREAM" << std::endl;

@@ -16,6 +16,11 @@
 
 namespace ska {
 
+bool is_memory_op(unsigned opcode) {
+	return opcode >= llvm::Instruction::Alloca &&
+		opcode < llvm::Instruction::Trunc;
+} // is_memory_op
+
 std::map<std::string, unsigned> code_map = {
 	// Terminator operators
 	{ "ret",				llvm::Instruction::Ret }, // 1
