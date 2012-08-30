@@ -76,7 +76,7 @@ public:
 
 	instruction_t(instruction_properties_t props)
 		: props_(props), state_(pending), alu_(-1), multiple_(1), cycles_(0),
-		issued_(0), retired_(0), strahler_(1),
+		issued_(0), retired_(0), strahler_(1), depth_(1),
 		machine_(machine_state_t::instance()) {
 
 		for(size_t i(0); i<machine_.current(); ++i) {
@@ -112,30 +112,39 @@ public:
 	} // add_dependency
 
 	/*-------------------------------------------------------------------------*
-	 * Update the Strahler number of this instruction.
+	 * Update the tree properties for the subexpression represented by this
+	 * instruction.
 	 *
-	 * The Strahler number is a measure of the branching complexity of the
+	 * Depth - simple depth from instruction to leaf.
+	 *
+	 * Strahler Number - a measure of the branching complexity of the
 	 * tree of dependencies of an instruction.
 	 *-------------------------------------------------------------------------*/
 
-	void update_strahler_number() {
+	void update_tree_properties() {
 		if(!is_memory_op(props_.opcode)) {
-			size_t _max(1);
+			size_t _strahler_max(1);
+			size_t _depth_max(1);
 			for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
-				_max = std::max(_max, (*ita)->strahler_number());	
+				_strahler_max =
+					std::max(_strahler_max, (*ita)->strahler_number());	
+				_depth_max = std::max(_depth_max, (*ita)->depth());
 			} // for
 
-			size_t _num_with_max(0);
+			size_t _num_with_smax(0);
 
 			for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
-				_num_with_max += (*ita)->strahler_number() == _max ? 1 : 0;
+				_num_with_smax +=
+					(*ita)->strahler_number() == _strahler_max ? 1 : 0;
 			} // for
 
-			strahler_ = _num_with_max > 1 ? _max + 1 : _max;
+			strahler_ = _num_with_smax > 1 ? _strahler_max + 1 : _strahler_max;
+			depth_ = _depth_max + 1;
 		} // if
-	} // update_strahler_number
+	} // update_tree_properties
 
 	size_t strahler_number() const { return strahler_; }
+	size_t depth() const { return depth_; }
 
 	/*-------------------------------------------------------------------------*
 	 * Check data dependencies.
@@ -379,7 +388,9 @@ private:
 	size_t issued_;
 	size_t retired_;
 
+	// tree properties
 	size_t strahler_;
+	size_t depth_;
 
 	std::vector<instruction_t *> depends_;
 	std::stringstream stream_;

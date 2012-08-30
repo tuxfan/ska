@@ -9,7 +9,8 @@
 
 # Urgent:
 
--	None.
+-	Add type information to Strahler number computation in preparation of
+	register support.
 
 # Not so urgent:
 

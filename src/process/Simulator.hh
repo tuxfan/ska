@@ -239,6 +239,7 @@ for(llvm::Function::iterator bita = fita->begin();
 		instruction_t * inst = nullptr;
 
 		size_t strahler_number(1);
+		size_t expression_depth(1);
 
 	/*-------------------------------------------------------------------------*
 	 * Visit instructions.
@@ -272,9 +273,11 @@ for(llvm::Function::iterator bita = fita->begin();
 					 * Keep track of branching complexity.
 					 *-------------------------------------------------------------*/
 
-					inst->update_strahler_number();
+					inst->update_tree_properties();
 					strahler_number = std::max(strahler_number,
 						inst->strahler_number());
+					expression_depth = std::max(expression_depth,
+						inst->depth());
 
 					/*-------------------------------------------------------------*
 					 * If an instruction that was previously issed and stalled
@@ -483,6 +486,9 @@ for(llvm::Function::iterator bita = fita->begin();
 		stream << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
 		stream << "KEYWORD_CYCLES " << machine.current() << std::endl;
 		stream << "KEYWORD_STRAHLER " << strahler_number << std::endl;
+		stream << "KEYWORD_DEPTH " << expression_depth << std::endl;
+		stream << "KEYWORD_BETA " <<
+			double(strahler_number)/expression_depth << std::endl;
 		stream << "BEGIN_INSTRUCTION_STREAM" << std::endl;
 
 		for(auto out = instructions.begin(); out != instructions.end(); ++out) {
