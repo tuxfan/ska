@@ -15,6 +15,9 @@
 #include <vector>
 #include <sstream>
 #include <typeinfo>
+#include <string>
+
+#include <sys/stat.h>
 
 namespace ska {
 
@@ -28,6 +31,45 @@ namespace ska {
 #else
 #define DEBUG_ASSERT(statement)
 #endif // DEBUG
+
+/*----------------------------------------------------------------------------*
+ * File utils
+ *----------------------------------------------------------------------------*/
+
+std::string try_file(const char * file, const char * var = nullptr) {
+	struct stat st;
+	std::string output("");
+
+	if(stat(file, &st) != -1) {
+		output = file;
+	}
+	else if(var != nullptr) {
+		char * paths = getenv(var) == nullptr ?
+			nullptr : strdup(getenv(var));
+		char * free_chars = paths;
+		char * path = nullptr;
+		char path_file[1024];
+		bool found(false);
+
+		while((path = strsep(&paths, ":")) != nullptr) {
+			sprintf(path_file, "%s/%s", path, file);
+
+			if(stat(path_file, &st) != -1) {
+				output = path_file;
+				found = true;
+				break;
+			} // if
+		} // while
+
+		free(free_chars);
+
+		if(found) {
+			output = path_file;
+		} // if
+	} // if
+
+	return output;
+} // try_file
 
 /*----------------------------------------------------------------------------*
  * Miscellaneous

@@ -1073,4 +1073,92 @@
 	<real>2</real>
 </value>
 
+<!-- ==================================
+ = log
+ =================================== -->
+
+<!-- float -->
+<value key="latency::log::float">
+	<size>4</size>
+</value>
+
+<value key="reciprocal::log::float">
+	<real>2</real>
+</value>
+
+<!-- double -->
+<value key="latency::log::double">
+	<size>4</size>
+</value>
+
+<value key="reciprocal::log::double">
+	<real>2</real>
+</value>
+
+<!-- vector -->
+<value key="latency::log::vector">
+	<size>4</size>
+</value>
+
+<value key="reciprocal::log::vector">
+	<real>2</real>
+</value>
+
+<!-- ==================================
+ = pow
+ =================================== -->
+
+<!-- float -->
+<value key="latency::pow::float">
+	<size>4</size>
+</value>
+
+<value key="reciprocal::pow::float">
+	<real>2</real>
+</value>
+
+<!-- double -->
+<value key="latency::pow::double">
+	<size>4</size>
+</value>
+
+<value key="reciprocal::pow::double">
+	<real>2</real>
+</value>
+
+<!-- vector -->
+<value key="latency::pow::vector">
+	<size>4</size>
+</value>
+
+<value key="reciprocal::pow::vector">
+	<real>2</real>
+</value>
+
+<!-- ==================================
+ = rand
+ =================================== -->
+
+<!-- float -->
+<value key="latency::rand::integer">
+	<size>4</size>
+</value>
+
+<value key="reciprocal::rand::integer">
+	<real>2</real>
+</value>
+
+<!-- ==================================
+ = printf
+ =================================== -->
+
+<!-- integer -->
+<value key="latency::printf::integer">
+	<size>1</size>
+</value>
+
+<value key="reciprocal::printf::integer">
+	<real>1</real>
+</value>
+
 </root>

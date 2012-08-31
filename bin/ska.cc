@@ -68,7 +68,8 @@ int main(int argc, char ** argv) {
 	 * Read architecture specification.
 	 *-------------------------------------------------------------------------*/
 
-	ska::parameters_t::instance().init(argv[0], false);
+	std::string archfile = ska::try_file(argv[0], "SKA_ARCH_PATH");
+	ska::parameters_t::instance().init(archfile.c_str(), false);
 
 	/*-------------------------------------------------------------------------*
 	 * Call simulator.

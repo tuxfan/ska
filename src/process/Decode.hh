@@ -408,6 +408,9 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 
 			call = name;
 			switch(optype) {
+				case llvm::Type::IntegerTyID:
+					call += "::integer";
+					break;
 				case llvm::Type::FloatTyID:
 					call += "::float";
 					break;
