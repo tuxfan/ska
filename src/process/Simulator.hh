@@ -475,6 +475,7 @@ for(llvm::Function::iterator bita = fita->begin();
 			core.advance();
 		} // while
 
+		stream << "# Primitive Statistics" << std::endl;
 		stream << "KEYWORD_STACK_ALLOCATIONS " <<
 			stats["allocas"] << std::endl;
 		stream << "KEYWORD_STACK_ALLOCATION_BYTES " <<
@@ -485,10 +486,12 @@ for(llvm::Function::iterator bita = fita->begin();
 		stream << "KEYWORD_STORES " << stats["stores"] << std::endl;
 		stream << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
 		stream << "KEYWORD_CYCLES " << machine.current() << std::endl;
+		stream << "# Derived Statistics" << std::endl;
 		stream << "KEYWORD_STRAHLER " << strahler_number << std::endl;
 		stream << "KEYWORD_DEPTH " << expression_depth << std::endl;
 		stream << "KEYWORD_BETA " <<
 			double(strahler_number)/expression_depth << std::endl;
+		stream << "# Pipeline" << std::endl;
 		stream << "BEGIN_INSTRUCTION_STREAM" << std::endl;
 
 		for(auto out = instructions.begin(); out != instructions.end(); ++out) {
