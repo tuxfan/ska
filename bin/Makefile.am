@@ -10,6 +10,11 @@
 bin_PROGRAMS = \
 	ska
 
+bin_SCRIPTS = \
+	skair
+
+CLEANFILES = ${bin_SCRIPTS}
+
 INCLUDES = -I${top_srcdir}/src/include \
 	@EXTRA_CPPFLAGS@
 

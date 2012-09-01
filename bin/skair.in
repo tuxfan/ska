@@ -1,0 +1,8 @@
+#! /usr/bin/env bash
+
+output=`echo $1 | sed 's,\.c$,\.ll,g'`
+simd_flags="-msse -msse2 -msse3 -msse4.1 -msse4.2 -msse4 -msse4a -mavx -mavx2"
+opt_flags="-O3"
+
+#gcc -msse -msse2 -msse4.1 -fplugin=/opt/llvm/3.1/lib/dragonegg.so -fplugin-arg-dragonegg-emit-ir -O3 -o $output -S $1
+gcc $simd_flags $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1
