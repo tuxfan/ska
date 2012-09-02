@@ -431,7 +431,8 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 			int32_t ierr = arch.getval(properties.latency, "latency::" + call);
 			ierr |= arch.getval(properties.reciprocal, "reciprocal::" + call);
 
-			if(ierr != 0) {
+			// getval returns true for success, false for failure
+			if(ierr != 1) {
 				Warn("Unrecognized Call: " << name);
 				properties.latency = 1;
 				properties.reciprocal = 1;
