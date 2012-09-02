@@ -30,6 +30,7 @@
 #include <llvm/Support/IRReader.h>
 #include <llvm/Support/InstIterator.h>
 
+#include <FileIO.hh>
 #include <Decode.hh>
 #include <Instruction.hh>
 #include <MachineState.hh>
@@ -65,7 +66,7 @@ public:
 	 * Constructor
 	 *-------------------------------------------------------------------------*/
 
-	simulator_t(const char * ir_file, std::ostream & stream);
+	simulator_t(const char * ir_file);
 
 	/*-------------------------------------------------------------------------*
 	 * Destructor
@@ -109,30 +110,31 @@ private:
  * Simulator class.
  *----------------------------------------------------------------------------*/
 
-simulator_t::simulator_t(const char * ir_file, std::ostream & stream)
+simulator_t::simulator_t(const char * ir_file)
 	: llvm_module_(nullptr)
 {
 	parameters_t & arch = parameters_t::instance();
 	machine_state_t & machine = machine_state_t::instance();
 	statistics_t & stats = statistics_t::instance();
 	instruction_map_t processed;
+	std::ostream & output = file_io_t::instance().out_stream();
 
 	/*-------------------------------------------------------------------------*
 	 * Write header information.
 	 *-------------------------------------------------------------------------*/
 
-	stream << "#---------------------------------------" <<
+	output << "#---------------------------------------" <<
 		"---------------------------------------#" << std::endl;
-	stream << "# Static Kernel Analyzer (SKA)" << std::endl;
-	stream << "# Header Section" << std::endl;
-	stream << "#---------------------------------------" <<
+	output << "# Static Kernel Analyzer (SKA)" << std::endl;
+	output << "# Header Section" << std::endl;
+	output << "#---------------------------------------" <<
 		"---------------------------------------#" << std::endl;
-	stream << "KEYWORD_SKA_VERSION " <<
+	output << "KEYWORD_SKA_VERSION " <<
 		DEFINE_TO_STRING(SKA_VERSION) << std::endl;
 
 	std::string architecture;
 	arch.getval(architecture, "name");
-	stream << "KEYWORD_ARCHITECTURE " << architecture <<
+	output << "KEYWORD_ARCHITECTURE " << architecture <<
 		std::endl << std::endl;
 	
 	/*-------------------------------------------------------------------------*
@@ -221,13 +223,13 @@ for(llvm::Function::iterator bita = fita->begin();
 			continue;
 		} // if
 
-		stream << "#---------------------------------------" <<
+		output << "#---------------------------------------" <<
 			"---------------------------------------#" << std::endl;
-		stream << "# Module Section: " << fita->getName().str() << std::endl;
-		stream << "#---------------------------------------" <<
+		output << "# Module Section: " << fita->getName().str() << std::endl;
+		output << "#---------------------------------------" <<
 			"---------------------------------------#" << std::endl;
-		stream << "BEGIN_MODULE" << std::endl;
-		stream << "KEYWORD_NAME " << fita->getName().str() << std::endl;
+		output << "BEGIN_MODULE" << std::endl;
+		output << "KEYWORD_NAME " << fita->getName().str() << std::endl;
 
 		instruction_list_t active;
 		instruction_vector_t instructions;
@@ -475,33 +477,33 @@ for(llvm::Function::iterator bita = fita->begin();
 			core.advance();
 		} // while
 
-		stream << "# Primitive Statistics" << std::endl;
-		stream << "KEYWORD_STACK_ALLOCATIONS " <<
+		output << "# Primitive Statistics" << std::endl;
+		output << "KEYWORD_STACK_ALLOCATIONS " <<
 			stats["allocas"] << std::endl;
-		stream << "KEYWORD_STACK_ALLOCATION_BYTES " <<
+		output << "KEYWORD_STACK_ALLOCATION_BYTES " <<
 			stats["alloca bytes"] << std::endl;
-		stream << "KEYWORD_FLOPS " << stats["flops"] << std::endl;
-		stream << "KEYWORD_LOADS " << stats["loads"] << std::endl;
-		stream << "KEYWORD_LOAD_BYTES " << stats["load bytes"] << std::endl;
-		stream << "KEYWORD_STORES " << stats["stores"] << std::endl;
-		stream << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
-		stream << "KEYWORD_CYCLES " << machine.current() << std::endl;
-		stream << "# Derived Statistics" << std::endl;
-		stream << "KEYWORD_BALANCE " <<
+		output << "KEYWORD_FLOPS " << stats["flops"] << std::endl;
+		output << "KEYWORD_LOADS " << stats["loads"] << std::endl;
+		output << "KEYWORD_LOAD_BYTES " << stats["load bytes"] << std::endl;
+		output << "KEYWORD_STORES " << stats["stores"] << std::endl;
+		output << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
+		output << "KEYWORD_CYCLES " << machine.current() << std::endl;
+		output << "# Derived Statistics" << std::endl;
+		output << "KEYWORD_BALANCE " <<
 			stats["flops"]/double(stats["load bytes"]) << std::endl;
-		stream << "KEYWORD_STRAHLER " << strahler_number << std::endl;
-		stream << "KEYWORD_DEPTH " << expression_depth << std::endl;
-		stream << "KEYWORD_BETA " <<
+		output << "KEYWORD_STRAHLER " << strahler_number << std::endl;
+		output << "KEYWORD_DEPTH " << expression_depth << std::endl;
+		output << "KEYWORD_BETA " <<
 			double(strahler_number)/expression_depth << std::endl;
-		stream << "# Pipeline" << std::endl;
-		stream << "BEGIN_INSTRUCTION_STREAM" << std::endl;
+		output << "# Pipeline" << std::endl;
+		output << "BEGIN_INSTRUCTION_STREAM" << std::endl;
 
 		for(auto out = instructions.begin(); out != instructions.end(); ++out) {
-			stream << (*out)->string() << std::endl;
+			output << (*out)->string() << std::endl;
 		} // for
 
-		stream << "END_INSTRUCTION_STREAM" << std::endl;
-		stream << "END_MODULE" << std::endl;
+		output << "END_INSTRUCTION_STREAM" << std::endl;
+		output << "END_MODULE" << std::endl;
 	} // for
 } // simulator_t::simulator_t
 

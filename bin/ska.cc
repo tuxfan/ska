@@ -39,27 +39,18 @@ int main(int argc, char ** argv) {
 	extern char * optarg;
 	extern int optind;
 
-	std::streambuf * stream_buf = std::cerr.rdbuf();
-	std::ofstream file;
-
-	while((ch = getopt(argc, argv, "o:")) != -1) {
+	while((ch = getopt(argc, argv, "o:l:")) != -1) {
 		switch(ch) {
 			case 'o':
-				file.open(optarg);
-
-				if(!file.good()) {
-					std::cerr << "Failed opening " << optarg << std::endl;
-					std::exit(1);
-				} // if
-
-				stream_buf = file.rdbuf();
+				file_io_t::instance().set_out_stream(optarg);
+				break;
+			case 'l':
+				file_io_t::instance().set_log_stream(optarg);
 				break;
 			default:
 				USAGE(program.c_str());
 		} // switch
 	} // while
-
-	std::ostream stream(stream_buf);
 
 	argc -= optind;
 	argv += optind;
@@ -75,15 +66,7 @@ int main(int argc, char ** argv) {
 	 * Call simulator.
 	 *-------------------------------------------------------------------------*/
 
-	ska::simulator_t p(argv[1], stream);
-
-	/*-------------------------------------------------------------------------*
-	 * Close output file.
-	 *-------------------------------------------------------------------------*/
-
-	if(file.is_open()) {
-		file.close();
-	} // if
+	ska::simulator_t p(argv[1]);
 
 	return 0;
 } // main

@@ -16,11 +16,14 @@
 #include <cstddef>
 #include <string>
 
+#include <FileIO.hh>
 #include <ErrCodes.hh>
+
+namespace ska {
 
 #if defined(ENABLE_DEBUG)
 #define DEBUG(s) \
-	std::cerr << s << std::endl
+	file_io_t::instance().log_stream() << s << std::endl
 #else
 #define DEBUG(s)
 #endif
@@ -32,13 +35,13 @@ std::string rstrip(const char * file) {
 	return tmp.substr(tmp.rfind(C)+1);
 } // rstrip
 
-#define ExitOnError(s, e)			\
-	std::cerr << s << std::endl;	\
-   std::cerr << std::flush;		\
+#define ExitOnError(s, e)											\
+	file_io_t::instance().log_stream() << s << std::endl;	\
+   file_io_t::instance().log_stream() << std::flush;		\
 	std::exit((e));
 
-#define Warn(s)														\
-	std::cerr << "Warning: " << s << "!!!" << std::endl;
+#define Warn(s)																			\
+	file_io_t::instance().log_stream() << "Warning: " << s << std::endl;
 
 // Assert
 #define Assert(b, s)									\
@@ -46,6 +49,14 @@ std::string rstrip(const char * file) {
 		ExitOnError("Assertion Failed: " << s,	\
 		ska::AssertionFailed);						\
 	} // if
+
+// WeakAssert
+#define WeakAssert(b, s)							\
+	if(!(b)) {											\
+		Warn("Weak Assertion Failed: " << s);	\
+	} // if
+
+} // namespace ska
 
 #endif // LogUtils_hh
 

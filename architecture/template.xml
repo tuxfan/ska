@@ -981,6 +981,54 @@
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- ==================================
+ = malloc
+ =================================== -->
+
+<!-- pointer -->
+<value key="latency::malloc::pointer">
+	<size>1</size>
+</value>
+
+<value key="reciprocal::malloc::pointer">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = free
+ =================================== -->
+
+<!-- pointer -->
+<value key="latency::free::pointer">
+	<size>1</size>
+</value>
+
+<value key="reciprocal::free::pointer">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = fabs
+ =================================== -->
+
+<!-- float -->
+<value key="latency::fabsf::float">
+	<size>1</size>
+</value>
+
+<value key="reciprocal::fabsf::float">
+	<real>1</real>
+</value>
+
+<!-- double -->
+<value key="latency::fabs::double">
+	<size>1</size>
+</value>
+
+<value key="reciprocal::fabs::double">
+	<real>1</real>
+</value>
+
+<!-- ==================================
  = sqrt
  =================================== -->
 

@@ -85,8 +85,8 @@ public:
 	  Return value for \param key in \param value as a boolean.
 	*/
 	int32_t getval(bool & value, const std::string & key) {
-		Assert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
-		Assert(db_element_t_to_string(std::get<0>(db_[key])) == "boolean",
+		WeakAssert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
+		WeakAssert(db_element_t_to_string(std::get<0>(db_[key])) == "boolean",
 			"key " << key << " is not a boolean value");
 		return string_to_bool(value, std::get<1>(db_[key]));
 	} // getval
@@ -113,8 +113,8 @@ public:
 	  Return value for \param key in \param value as a real_t.
 	*/
 	int32_t getval(real_t & value, const std::string & key) {
-		Assert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
-		Assert(db_element_t_to_string(std::get<0>(db_[key])) == "real",
+		WeakAssert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
+		WeakAssert(db_element_t_to_string(std::get<0>(db_[key])) == "real",
 			"key " << key << " is not a real value");
 		return string_to_type(value, std::get<1>(db_[key]));
 	} // getval
@@ -141,8 +141,8 @@ public:
 	  Return value for \param key in \param value as a string.
 	*/
 	int32_t getval(std::string & value, const std::string & key) {
-		Assert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
-		Assert(db_element_t_to_string(std::get<0>(db_[key])) == "string",
+		WeakAssert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
+		WeakAssert(db_element_t_to_string(std::get<0>(db_[key])) == "string",
 			"key " << key << " is not a string value");
 		value = std::get<1>(db_[key]);
 		return !(value.size() == 0);
@@ -179,8 +179,8 @@ public:
 	  Return value for \param key in \param value as a int32_t.
 	*/
 	int32_t getval(int32_t & value, const std::string & key) {
-		Assert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
-		Assert(db_element_t_to_string(std::get<0>(db_[key])) == "integer",
+		WeakAssert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
+		WeakAssert(db_element_t_to_string(std::get<0>(db_[key])) == "integer",
 			"key " << key << " is not an integer value");
 		return string_to_type(value, std::get<1>(db_[key]));
 	} // getval
@@ -207,8 +207,8 @@ public:
 	  Return value for \param key in \param value as a size_t.
 	*/
 	int32_t getval(size_t & value, const std::string & key) {
-		Assert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
-		Assert(db_element_t_to_string(std::get<0>(db_[key])) == "size",
+		WeakAssert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
+		WeakAssert(db_element_t_to_string(std::get<0>(db_[key])) == "size",
 			"key " << key << " is not a size value");
 		return string_to_type(value, std::get<1>(db_[key]));
 	} // getval
@@ -235,8 +235,8 @@ public:
 	  Return value for \param key in \param values as a std::vector<bool>.
 	*/
 	int32_t getval(std::vector<bool> & values, const std::string & key) {
-		Assert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
-		Assert(db_element_t_to_string(std::get<0>(db_[key])) ==
+		WeakAssert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
+		WeakAssert(db_element_t_to_string(std::get<0>(db_[key])) ==
 			"boolean_vector", "key " << key << " is not a boolean_vector value");
 		return string_to_bool_vector(values, std::get<1>(db_[key]));
 	} // getval
@@ -263,8 +263,8 @@ public:
 	  Return value for \param key in \param values as a std::vector<real_t>.
 	*/
 	int32_t getval(std::vector<real_t> & values, const std::string & key) {
-		Assert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
-		Assert(db_element_t_to_string(std::get<0>(db_[key])) ==
+		WeakAssert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
+		WeakAssert(db_element_t_to_string(std::get<0>(db_[key])) ==
 			"real_vector", "key " << key << " is not a real_vector value");
 		return string_to_vector(values, std::get<1>(db_[key]));
 	} // getval
@@ -291,8 +291,8 @@ public:
 	  Return value for \param key in \param values as a std::vector<int32_t>.
 	*/
 	int32_t getval(std::vector<int32_t> & values, const std::string & key) {
-		Assert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
-		Assert(db_element_t_to_string(std::get<0>(db_[key])) ==
+		WeakAssert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
+		WeakAssert(db_element_t_to_string(std::get<0>(db_[key])) ==
 			"integer_vector", "key " << key << " is not an integer_vector value");
 		return string_to_vector(values, std::get<1>(db_[key]));
 	} // getval
@@ -320,8 +320,8 @@ public:
 	  Return value for \param key in \param values as a std::vector<size_t>.
 	*/
 	int32_t getval(std::vector<size_t> & values, const std::string & key) {
-		Assert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
-		Assert(db_element_t_to_string(std::get<0>(db_[key])) ==
+		WeakAssert(stdMapKeyExists(db_, key), "key " << key << " does not exist");
+		WeakAssert(db_element_t_to_string(std::get<0>(db_[key])) ==
 			"size_vector", "key " << key << " is not a size_vector value");
 		return string_to_vector(values, std::get<1>(db_[key]));
 	} // getval

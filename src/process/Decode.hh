@@ -408,6 +408,9 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 
 			call = name;
 			switch(optype) {
+				case llvm::Type::PointerTyID:
+					call += "::pointer";
+					break;
 				case llvm::Type::IntegerTyID:
 					call += "::integer";
 					break;
@@ -421,13 +424,18 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 					call += "::vector";
 					break;
 				default:
-					ExitOnError("Call Unhandled Type",
-						ska::UnknownCase);
+					Warn("Call Unhandled Type: " << optype);
 					break;
 			} // switch
 
-			arch.getval(properties.latency, "latency::" + call);
-			arch.getval(properties.reciprocal, "reciprocal::" + call);
+			int32_t ierr = arch.getval(properties.latency, "latency::" + call);
+			ierr |= arch.getval(properties.reciprocal, "reciprocal::" + call);
+
+			if(ierr != 0) {
+				Warn("Unrecognized Call: " << name);
+				properties.latency = 1;
+				properties.reciprocal = 1;
+			} // if
 
 			break;
 			} // scope
