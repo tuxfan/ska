@@ -224,9 +224,7 @@ void viewmain_t::open(QString & fileName)
 void viewmain_t::load(int m)
 {
 	QString balance;
-	double ratio = modules_[m]["flops"].toDouble() /
-		modules_[m]["load bytes"].toDouble();
-	balance.setNum(ratio);
+	balance.setNum(modules_[m]["balance"].toDouble());
 
 	// update status
 	QString state =

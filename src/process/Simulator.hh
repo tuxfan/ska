@@ -487,6 +487,8 @@ for(llvm::Function::iterator bita = fita->begin();
 		stream << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
 		stream << "KEYWORD_CYCLES " << machine.current() << std::endl;
 		stream << "# Derived Statistics" << std::endl;
+		stream << "KEYWORD_BALANCE " <<
+			stats["flops"]/double(stats["load bytes"]) << std::endl;
 		stream << "KEYWORD_STRAHLER " << strahler_number << std::endl;
 		stream << "KEYWORD_DEPTH " << expression_depth << std::endl;
 		stream << "KEYWORD_BETA " <<

@@ -1,8 +1,34 @@
 #! /usr/bin/env bash
+#------------------------------------------------------------------------------#
+# Script to generate LLVM IR from input source.
+#------------------------------------------------------------------------------#
 
-output=`echo $1 | sed 's,\.c$,\.ll,g'`
 simd_flags="-msse -msse2 -msse3 -msse4.1 -msse4.2 -msse4 -msse4a -mavx -mavx2"
 opt_flags="-O3"
 
-#gcc -msse -msse2 -msse4.1 -fplugin=/opt/llvm/3.1/lib/dragonegg.so -fplugin-arg-dragonegg-emit-ir -O3 -o $output -S $1
-gcc $simd_flags $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1
+#------------------------------------------------------------------------------#
+# Parse language type from file suffix.
+#------------------------------------------------------------------------------#
+
+ftype=`echo $1 | sed 's,.*\.,,g'`
+fbase=`echo $1 | sed 's,\..*$,,g'`
+
+case $ftype in
+	f|F|f90|F90)
+		cmd=gfortran
+	;;
+	c|C)
+		cmd=gcc
+	;;
+	cc|CC|cxx)
+		cmd=g++
+	;;
+esac
+
+#------------------------------------------------------------------------------#
+# Call compiler with dragonegg plugin.
+#------------------------------------------------------------------------------#
+
+echo "Generating LLVM IR with:"
+echo "$cmd $simd_flags $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1"
+$cmd $simd_flags $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $fbase.ll -S $1
