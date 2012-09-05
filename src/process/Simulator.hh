@@ -478,6 +478,8 @@ for(llvm::Function::iterator bita = fita->begin();
 		} // while
 
 		output << "# Primitive Statistics" << std::endl;
+		output << "KEYWORD_INSTRUCTIONS " << instructions.size() << std::endl;
+		output << "KEYWORD_CYCLES " << machine.current() << std::endl;
 		output << "KEYWORD_STACK_ALLOCATIONS " <<
 			stats["allocas"] << std::endl;
 		output << "KEYWORD_STACK_ALLOCATION_BYTES " <<
@@ -487,8 +489,9 @@ for(llvm::Function::iterator bita = fita->begin();
 		output << "KEYWORD_LOAD_BYTES " << stats["load bytes"] << std::endl;
 		output << "KEYWORD_STORES " << stats["stores"] << std::endl;
 		output << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
-		output << "KEYWORD_CYCLES " << machine.current() << std::endl;
 		output << "# Derived Statistics" << std::endl;
+		output << "KEYWORD_CYCLES_PER_INSTRUCTION " <<
+			instructions.size()/double(machine.current()) << std::endl;
 		output << "KEYWORD_BALANCE " <<
 			stats["flops"]/double(stats["load bytes"]) << std::endl;
 		output << "KEYWORD_STRAHLER " << strahler_number << std::endl;
