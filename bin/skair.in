@@ -3,7 +3,60 @@
 # Script to generate LLVM IR from input source.
 #------------------------------------------------------------------------------#
 
+#------------------------------------------------------------------------------#
+# Usage
+#------------------------------------------------------------------------------#
+
+usage() {
+cat << EOF
+Usage: $0 options <input file>
+
+This script compiles the given input file into LLVM IR.
+
+Options:
+   -h  Show this message.
+   -o  Specify the output file name (default is 'input'.ll).
+
+Environment:
+   SKAIR_FLAGS  Extra compile flags.
+EOF
+exit
+}
+
+output=""
+
+[ $# -lt 1 ] && usage
+
+#------------------------------------------------------------------------------#
+# Parse command line
+#------------------------------------------------------------------------------#
+
+while getopts "ho:" opt ; do
+	case $opt in
+	h)
+		usage
+	;;
+	o)
+		output=$OPTARG
+	;;
+	\?)
+		usage
+	;;
+	esac
+done
+
+# advance to first required argument
+shift $(($OPTIND - 1))
+
+#------------------------------------------------------------------------------#
+# Default flags
+#------------------------------------------------------------------------------#
+
 simd_flags="-msse -msse2 -msse3 -msse4.1 -msse4.2 -msse4 -msse4a -mavx -mavx2"
+
+#------------------------------------------------------------------------------#
+# Check for user-supplied compiler flags
+#------------------------------------------------------------------------------#
 
 if [ -n "$SKAIR_FLAGS" ] ; then
 	opt_flags=$SKAIR_FLAGS
@@ -31,9 +84,17 @@ case $ftype in
 esac
 
 #------------------------------------------------------------------------------#
+# Set the output if the user didn't supply a name
+#------------------------------------------------------------------------------#
+
+if [ -z "$output" ] ; then
+	output=$fbase.ll
+fi
+
+#------------------------------------------------------------------------------#
 # Call compiler with dragonegg plugin.
 #------------------------------------------------------------------------------#
 
 echo "Generating LLVM IR with:"
 echo "$cmd $simd_flags $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1"
-$cmd $simd_flags $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $fbase.ll -S $1
+$cmd $simd_flags $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1
