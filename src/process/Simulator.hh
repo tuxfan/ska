@@ -76,16 +76,13 @@ public:
 
 private:
 
-#if 0
 	/*-------------------------------------------------------------------------*
-	 * Decode an llvm::Instruction.  This gets property information about
-	 * the instruction (latency, issue latency, opcode, optype) that is used
-	 * to contruct a instruction_t instance.
+	 * Run the simulator on a set of LLVM instructions.
 	 *-------------------------------------------------------------------------*/
 
-	instruction_properties_t decode(llvm::Instruction * instruction);
-#endif
-	
+	void run(llvm::inst_iterator & begin, llvm::inst_iterator & end,
+		instruction_vector_t & module);
+
 	/*-------------------------------------------------------------------------*
 	 * Update statistic based on the execution of 'instruction'.
 	 *-------------------------------------------------------------------------*/
@@ -104,6 +101,7 @@ private:
 	llvm::LLVMContext llvm_context_;
 	llvm::Module * llvm_module_;
 
+	core_t * core_;
 }; // class simulator_t
 
 /*----------------------------------------------------------------------------*
@@ -111,7 +109,7 @@ private:
  *----------------------------------------------------------------------------*/
 
 simulator_t::simulator_t(const char * ir_file)
-	: llvm_module_(nullptr)
+	: llvm_module_(nullptr), core_(nullptr)
 {
 	parameters_t & arch = parameters_t::instance();
 	machine_state_t & machine = machine_state_t::instance();
@@ -144,6 +142,8 @@ simulator_t::simulator_t(const char * ir_file)
 	size_t max_issue;
 	arch.getval(max_issue, "core::max_issue");
 	core_t core(max_issue);
+// FIXME: Adding core as private data member
+	core_ = new core_t(max_issue);
 
 	size_t lus;
 	arch.getval(lus, "lus");
@@ -189,6 +189,7 @@ simulator_t::simulator_t(const char * ir_file)
 
 		// add unit to the core
 		core.add_unit(lu);
+		core_->add_unit(lu);
 	} // for
 
 	/*-------------------------------------------------------------------------*
@@ -234,6 +235,7 @@ for(llvm::Function::iterator bita = fita->begin();
 		instruction_list_t active;
 		instruction_vector_t instructions;
 
+		// clear singleton states
 		machine.clear();
 		stats.clear();
 
@@ -509,6 +511,266 @@ for(llvm::Function::iterator bita = fita->begin();
 		output << "END_MODULE" << std::endl;
 	} // for
 } // simulator_t::simulator_t
+
+void simulator_t::run(llvm::inst_iterator & begin, llvm::inst_iterator & end,
+	instruction_vector_t & module) {
+	parameters_t & arch = parameters_t::instance();
+	statistics_t & stats = statistics_t::instance();
+	machine_state_t & machine = machine_state_t::instance();
+	instruction_list_t active;
+	instruction_vector_t instructions;
+
+	// clear singleton states
+	machine.clear();
+	stats.clear();
+
+	// get first LLVM instruction
+	llvm::inst_iterator iita = begin;
+
+	// sanity check
+	if(iita == end) {
+		return;
+	} // if
+
+	llvm::Value * value = nullptr;
+	instruction_t * inst = nullptr;
+
+	size_t strahler_number(1);
+	size_t expression_depth(1);
+
+	/*-------------------------------------------------------------------------*
+	 * Visit instructions.
+	 *-------------------------------------------------------------------------*/
+
+	while(iita != end || active.size() > 0) {
+		size_t issued(0);
+		bool issue(true);
+		std::vector<instruction_t *> cycle_issue;
+
+		while(iita != end && issue && issued < core_->max_issue()) {
+			value = &*iita;
+
+			/*-------------------------------------------------------------------*
+			 * Create instruction and add dependencies
+			 *-------------------------------------------------------------------*/
+
+			if(inst == nullptr) {
+
+				inst = new instruction_t(decode(&*iita));
+
+				for(unsigned i(0); i<iita->getNumOperands(); ++i) {
+					auto op = processed.find(iita->getOperand(i));
+					if(op != processed.end()) {
+						inst->add_dependency(op->second);
+					} // if
+				} // for
+
+				/*----------------------------------------------------------------*
+				 * Keep track of branching complexity.
+				 *----------------------------------------------------------------*/
+
+				inst->update_tree_properties();
+				strahler_number = std::max(strahler_number,
+					inst->strahler_number());
+				expression_depth = std::max(expression_depth,
+					inst->depth());
+
+				/*----------------------------------------------------------------*
+				 * If an instruction that was previously issed and stalled
+				 * is now ready to execute, we can try for multiple-issue.
+				 *----------------------------------------------------------------*/
+
+				if(issued == 0) {
+					// Check for pending instructions from previous cycles
+					// NOTE: This has to happen before the current instruciton
+					// is added to active!
+					for(auto a = active.begin(); a != active.end(); ++a) {
+						if((*a)->state() == instruction_t::stalled &&
+							(*a)->ready()) {
+							// reset state to staging
+							(*a)->set_state(instruction_t::staging);
+
+							// add to instructions issued this cycle
+							cycle_issue.push_back(*a);
+
+							// update count
+							++issued;
+						} // if
+					} // for
+				} // if
+
+				/*----------------------------------------------------------------*
+				 * Add instruction to active list
+				 *----------------------------------------------------------------*/
+
+				active.push_back(inst);
+			} // if
+
+			/*-------------------------------------------------------------------*
+			 * Check for dependencies of this instruction
+			 *
+			 * If the currently queued instruction has any dependencies
+			 * that have not retired, multiple issue cannot happen.
+			 *-------------------------------------------------------------------*/
+
+			issue = inst->ready();
+
+			/*-------------------------------------------------------------------*
+			 * Check for dependencies within this issue
+			 *
+			 * If the current instruction depends on any other instructions
+			 * that are to be issued this cycle, multiple issue cannot
+			 * happen because the current instruction will immediately
+			 * stall.
+			 *-------------------------------------------------------------------*/
+
+			bool cycle_dependency(false);
+			if(issued > 0) {
+				for(auto cita = cycle_issue.begin();
+					cita != cycle_issue.end(); ++cita) {
+					for(auto dita = inst->dependencies().begin();
+						dita != inst->dependencies().end(); ++dita) {
+							if(*dita == *cita) {
+								cycle_dependency = true;
+								break;
+							} // if
+					} // for
+
+					if(cycle_dependency) {
+						break;
+					} // if
+				} // for
+			} // if
+
+			/*-------------------------------------------------------------------*
+			 * Check for stalls
+			 *
+			 * If any instruction is stalled, no new instructions
+			 * can be issued.
+			 *-------------------------------------------------------------------*/
+
+			bool cycle_stall(false);
+			if(!cycle_dependency) {
+				for(auto a = active.begin(); /* (*a) != inst && */
+					a != active.end(); ++a) {
+					// check for any type of stall from an active instruction
+					if((*a)->state() == instruction_t::stalled) {
+						cycle_stall = true;
+						break;
+					} // if
+				} // for
+			} // if
+
+			/*-------------------------------------------------------------------*
+			 * Check to see if this instruction will stall on issue.
+			 *
+			 * The previous check will not catch this because the
+			 * instruction hasn't yet been advanced.
+			 *-------------------------------------------------------------------*/
+
+			if(issued > 0 && !issue) {
+				cycle_stall = true;
+			} // if
+
+			/*-------------------------------------------------------------------*
+			 * Try to issue
+			 *-------------------------------------------------------------------*/
+
+			int32_t id = core_->accept(inst);
+			if(!cycle_dependency && !cycle_stall && id >= 0) {
+
+				/*#################################################################
+				 ##################################################################
+				 # Everything that makes it to this point actually gets
+				 # issued and executed.
+				 ##################################################################
+				 *################################################################*/
+			
+				/*----------------------------------------------------------------*
+				 * Update statistics
+				 *----------------------------------------------------------------*/
+
+				update_stats(&*iita);
+			
+				/*----------------------------------------------------------------*
+				 * Add instruction to this issue
+				 *----------------------------------------------------------------*/
+			
+				cycle_issue.push_back(inst);
+
+				/*----------------------------------------------------------------*
+				 * Add instruction to hash
+				 *----------------------------------------------------------------*/
+
+				processed[value] = inst;
+
+				/*----------------------------------------------------------------*
+				 * Add instruction to issued instructions
+				 *----------------------------------------------------------------*/
+
+				instructions.push_back(inst);
+
+				/*----------------------------------------------------------------*
+				 * Advance LLVM instruction stream
+				 *----------------------------------------------------------------*/
+
+				++issued;
+				++iita;
+				inst = nullptr;
+			}
+			else {
+				// cleanup failed multiple issue attempt
+				if(cycle_stall || issued > 0) {
+
+					// remove current instruction from active list
+					for(auto a = active.begin(); a != active.end(); ++a) {
+						if((*a) == inst) {
+							active.erase(a);
+							break;
+						} // if
+					} // for
+
+					// free the ALU for the current instruction
+					if(id != -1) {
+						core_->release(id);
+					} // if
+
+					// delete the instruction
+					delete inst;
+					inst = nullptr;
+				} // if
+
+				issue = false;
+				continue;
+			} // if
+
+			// if multiple issue was possible, update the affected
+			// instruction states
+			if(issued > 1) {
+				for(auto cita = cycle_issue.begin();
+					cita != cycle_issue.end(); ++cita) {
+					(*cita)->set_multiple(issued);
+				} // for
+			} // if
+		} // while
+
+		// update executing instructions
+		auto a = active.begin();
+		while(a != active.end()) {
+			(*a)->advance();
+
+			if((*a)->state() == instruction_t::retired) {
+				active.erase(a++);
+			}
+			else {
+				++a;
+			} // if
+		} // while
+
+		// set state for next cycle
+		core_->advance();
+	} // while
+} // simulator_t::run
 
 void simulator_t::update_stats(llvm::Instruction * instruction) {
 	statistics_t & stats = statistics_t::instance();
