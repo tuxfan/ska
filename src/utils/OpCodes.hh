@@ -21,6 +21,10 @@ bool is_memory_op(unsigned opcode) {
 		opcode < llvm::Instruction::Trunc;
 } // is_memory_op
 
+bool is_call_op(unsigned opcode) {
+	return opcode == llvm::Instruction::Call;
+} // is_call_op
+
 std::map<std::string, unsigned> code_map = {
 	// Terminator operators
 	{ "ret",				llvm::Instruction::Ret }, // 1
@@ -92,6 +96,21 @@ std::map<std::string, unsigned> code_map = {
 	{ "insertvalue",		llvm::Instruction::InsertValue }, // 57
 	{ "landingpad",		llvm::Instruction::LandingPad } // 58
 };
+
+std::string code_name(unsigned code) {
+	std::string name("unknown");
+	for(auto c = code_map.begin(); c != code_map.end(); ++c) {
+		if(c->second == code) {
+			name = c->first;
+		} // if
+	} // for
+
+	return name;
+} // code_name
+
+std::string call_name(const std::string & call) {
+	return call.substr(0, call.find_first_of("("));
+} // call_name
 
 } // namespace ska
 

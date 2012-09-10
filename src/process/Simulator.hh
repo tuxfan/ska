@@ -35,6 +35,11 @@
 #include <Instruction.hh>
 #include <MachineState.hh>
 #include <Statistics.hh>
+
+#if defined(HAVE_GRAPHVIZ)
+#include <Graphviz.hh>
+#endif
+
 #include <OpCodes.hh>
 #include <OpTypes.hh>
 #include <Core.hh>
@@ -224,6 +229,11 @@ for(llvm::Function::iterator bita = fita->begin();
 
 // FIXME: New implementation
 
+#if defined(HAVE_GRAPHVIZ)
+		graphviz_t & graph = graphviz_t::instance();					
+		graph.clear();
+#endif
+
 		instruction_map_t imap;
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
 			imap[&*iita] = new instruction_t(decode(&*iita));
@@ -244,6 +254,9 @@ for(llvm::Function::iterator bita = fita->begin();
 				auto op = imap.find(iita->getOperand(i));
 				if(op != imap.end()) {
 					inst->add_dependency(op->second);
+#if defined(HAVE_GRAPHVIZ)
+					graph.add_edge(inst->agnode(), op->second->agnode());	
+#endif
 				} // if
 			} // for
 
@@ -255,6 +268,10 @@ for(llvm::Function::iterator bita = fita->begin();
 
 		std::cerr << "strahler: " << strahler_number << std::endl;
 		std::cerr << "depth: " << expression_depth << std::endl;
+
+#if defined(HAVE_GRAPHVIZ)
+		graph.write("test.gv");
+#endif
 
 #if 0
 		output << "#---------------------------------------" <<

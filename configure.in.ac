@@ -91,6 +91,16 @@ EXTRA_LDFLAGS="$EXTRA_LDFLAGS $XERCES_LDFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $XERCES_LIBS"
 
 #------------------------------------------------------------------------------#
+# Graphviz
+#------------------------------------------------------------------------------#
+
+CONFIG_GENERIC_LIB(graphviz, GRAPHVIZ, [gvContext()], C)
+
+EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS $GRAPHVIZ_CPPFLAGS"
+EXTRA_LDFLAGS="$EXTRA_LDFLAGS $GRAPHVIZ_LDFLAGS"
+EXTRA_LIBS="$EXTRA_LIBS $GRAPHVIZ_LIBS"
+
+#------------------------------------------------------------------------------#
 # Qt
 #------------------------------------------------------------------------------#
 

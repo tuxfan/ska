@@ -17,6 +17,10 @@
 #include <cstdio>
 #include <limits>
 
+#if defined(HAVE_GRAPHVIZ)
+#include <Graphviz.hh>
+#endif
+
 #include <MachineState.hh>
 #include <OpCodes.hh>
 #include <LogUtils.hh>
@@ -40,6 +44,7 @@ struct instruction_properties_t {
 	unsigned opcode;
 	unsigned optype;
 	std::string ir;
+	std::string name;
 }; // struct instruction_properties_t
 
 /*----------------------------------------------------------------------------*
@@ -77,13 +82,16 @@ public:
 	instruction_t(instruction_properties_t props)
 		: props_(props), state_(pending), alu_(-1), multiple_(1), cycles_(0),
 		issued_(0), retired_(0), strahler_(1), depth_(1),
+#if defined(HAVE_GRAPHVIZ)
+		agnode_(nullptr),
+#endif
 		machine_(machine_state_t::instance()) {
 
 		for(size_t i(0); i<machine_.current(); ++i) {
 			stream_ << ' ';
 		} // for
 
-		// remove wierd returns from IR
+		// remove weird returns from IR
 		size_t offset = props_.ir.find_first_of('\n');
 		while(offset != std::string::npos) {
 			Warn("IR has returns (removing from output)");
@@ -95,6 +103,14 @@ public:
 			props_.ir.replace(offset, 1, 1, ' ');
 			offset = props_.ir.find_first_of('\n');
 		} // while
+
+#if defined(HAVE_GRAPHVIZ)
+		graphviz_t & graph = graphviz_t::instance();
+		// add graphviz node
+		char _this[1024];
+		sprintf(_this, "%p", (void *)(this));
+		agnode_ = graph.add_node(_this, props_.name.c_str());
+#endif
 	} // instruction_t
 
 	/*-------------------------------------------------------------------------*
@@ -311,6 +327,7 @@ public:
 		return buffer + tmp + '|' + props_.ir;
 	} // string
 
+//#########FIXME
 std::string info() {
 	std::string info_str("");
 
@@ -377,6 +394,16 @@ std::string info() {
 			std::numeric_limits<size_t>::max();
 	} // cycle_retired
 
+	/*-------------------------------------------------------------------------*
+	 * Return the Graphviz node assocaited with this instruction
+	 *-------------------------------------------------------------------------*/
+
+#if defined(HAVE_GRAPHVIZ)
+	Agnode_t * agnode() {
+		return agnode_;
+	} // agnode
+#endif
+
 private:
 
 	instruction_properties_t props_;
@@ -395,8 +422,11 @@ private:
 	std::vector<instruction_t *> depends_;
 	std::stringstream stream_;
 
-	machine_state_t & machine_;
+#if defined(HAVE_GRAPHVIZ)
+	Agnode_t * agnode_;
+#endif
 
+	machine_state_t & machine_;
 }; // class instruction_t
 
 } // namespace ska

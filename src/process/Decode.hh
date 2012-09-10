@@ -31,6 +31,15 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 
 	properties.opcode = opcode;
 	properties.optype = optype;
+	
+	if(is_call_op(opcode)) {
+		llvm::CallInst * cinst = llvm::cast<llvm::CallInst>(instruction);
+		properties.name =
+			call_name(cinst->getCalledFunction()->getName().str());
+	}
+	else {
+		properties.name = code_name(opcode);
+	} // if
 
 	switch(opcode) {
 
