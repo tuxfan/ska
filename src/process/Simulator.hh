@@ -72,7 +72,7 @@ public:
 	 * Destructor
 	 *-------------------------------------------------------------------------*/
 
-	~simulator_t() {}
+	~simulator_t();
 
 private:
 
@@ -112,8 +112,8 @@ simulator_t::simulator_t(const char * ir_file)
 	: llvm_module_(nullptr), core_(nullptr)
 {
 	parameters_t & arch = parameters_t::instance();
-	machine_state_t & machine = machine_state_t::instance();
-	statistics_t & stats = statistics_t::instance();
+//	machine_state_t & machine = machine_state_t::instance();
+//	statistics_t & stats = statistics_t::instance();
 	instruction_map_t processed;
 	std::ostream & output = file_io_t::instance().out_stream();
 
@@ -141,8 +141,6 @@ simulator_t::simulator_t(const char * ir_file)
 	
 	size_t max_issue;
 	arch.getval(max_issue, "core::max_issue");
-	core_t core(max_issue);
-// FIXME: Adding core as private data member
 	core_ = new core_t(max_issue);
 
 	size_t lus;
@@ -188,7 +186,7 @@ simulator_t::simulator_t(const char * ir_file)
 		delete[] types;
 
 		// add unit to the core
-		core.add_unit(lu);
+		//core.add_unit(lu);
 		core_->add_unit(lu);
 	} // for
 
@@ -224,6 +222,41 @@ for(llvm::Function::iterator bita = fita->begin();
 			continue;
 		} // if
 
+// FIXME: New implementation
+
+		instruction_map_t imap;
+		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
+			imap[&*iita] = new instruction_t(decode(&*iita));
+		} // for
+
+		size_t strahler_number(1);
+		size_t expression_depth(1);
+		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
+			auto mita = imap.find(&*iita);
+
+			if(mita == imap.end()) {
+				Warn("Sanity check failed: did not find instruction");
+			} // if
+
+			instruction_t * inst = mita->second;
+
+			for(unsigned i(0); i<iita->getNumOperands(); ++i) {
+				auto op = imap.find(iita->getOperand(i));
+				if(op != imap.end()) {
+					inst->add_dependency(op->second);
+				} // if
+			} // for
+
+			inst->update_tree_properties();
+			strahler_number = std::max(strahler_number,
+				inst->strahler_number());
+			expression_depth = std::max(expression_depth, inst->depth());
+		} // for
+
+		std::cerr << "strahler: " << strahler_number << std::endl;
+		std::cerr << "depth: " << expression_depth << std::endl;
+
+#if 0
 		output << "#---------------------------------------" <<
 			"---------------------------------------#" << std::endl;
 		output << "# Module Section: " << fita->getName().str() << std::endl;
@@ -509,11 +542,18 @@ for(llvm::Function::iterator bita = fita->begin();
 
 		output << "END_INSTRUCTION_STREAM" << std::endl;
 		output << "END_MODULE" << std::endl;
+#endif
 	} // for
 } // simulator_t::simulator_t
 
+simulator_t::~simulator_t()
+{
+	delete core_;
+} // simulator_t::~simulator_t
+
 void simulator_t::run(llvm::inst_iterator & begin, llvm::inst_iterator & end,
 	instruction_vector_t & module) {
+#if 0
 	parameters_t & arch = parameters_t::instance();
 	statistics_t & stats = statistics_t::instance();
 	machine_state_t & machine = machine_state_t::instance();
@@ -770,6 +810,7 @@ void simulator_t::run(llvm::inst_iterator & begin, llvm::inst_iterator & end,
 		// set state for next cycle
 		core_->advance();
 	} // while
+#endif
 } // simulator_t::run
 
 void simulator_t::update_stats(llvm::Instruction * instruction) {
