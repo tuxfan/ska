@@ -128,16 +128,16 @@ public:
 	} // add_dependency
 
 	/*-------------------------------------------------------------------------*
-	 * Update the tree properties for the subexpression represented by this
+	 * Update the graph properties for the subexpression represented by this
 	 * instruction.
 	 *
 	 * Depth - simple depth from instruction to leaf.
 	 *
 	 * Strahler Number - a measure of the branching complexity of the
-	 * tree of dependencies of an instruction.
+	 * graph of dependencies of an instruction.
 	 *-------------------------------------------------------------------------*/
 
-	void update_tree_properties() {
+	void update_graph_properties() {
 		if(!is_memory_op(props_.opcode)) {
 			size_t _strahler_max(1);
 			size_t _depth_max(1);
@@ -157,9 +157,18 @@ public:
 			strahler_ = _num_with_smax > 1 ? _strahler_max + 1 : _strahler_max;
 			depth_ = _depth_max + 1;
 		} // if
-	} // update_tree_properties
+	} // update_graph_properties
+
+	/*-------------------------------------------------------------------------*
+	 * Return the Strahler number.
+	 *-------------------------------------------------------------------------*/
 
 	size_t strahler_number() const { return strahler_; }
+
+	/*-------------------------------------------------------------------------*
+	 * Return the depth.
+	 *-------------------------------------------------------------------------*/
+
 	size_t depth() const { return depth_; }
 
 	/*-------------------------------------------------------------------------*
@@ -327,45 +336,49 @@ public:
 		return buffer + tmp + '|' + props_.ir;
 	} // string
 
-//#########FIXME
-std::string info() {
-	std::string info_str("");
+	/*-------------------------------------------------------------------------*
+	 * Return debugging information.
+	 *-------------------------------------------------------------------------*/
 
-	auto c = code_map.begin();
-	for(; c != code_map.end(); ++c) {
-		if(c->second == opcode()) {
-			break;
-		} // if
-	} // for
+	std::string info() {
+		std::string info_str("");
 
-	if(c != code_map.end()) {
-		char buffer[1024];
-		sprintf(buffer, "Instruction\n\top: %s\n\tstate: %s\n\talu: %d\n"
-			"\tissue: %d\n\tlatency: %d\n\treciprocal: %d\n\tprogress: %d\n",
-			c->first.c_str(), state_strings[state()], alu(), int(cycle_issued()),
-			int(latency()), int(reciprocal()), int(progress()));
-		info_str += buffer;
-
-		for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
-			auto dc = code_map.begin();
-			for(; dc != code_map.end(); ++dc) {
-				if(dc->second == (*ita)->opcode()) {
-					break;
-				} // if
-			} // for
-
-			if(dc != code_map.end()) {
-				sprintf(buffer, "\tdependency: %s(%s)\n",
-					dc->first.c_str(), state_strings[(*ita)->state()]);
-				info_str += buffer;
+		auto c = code_map.begin();
+		for(; c != code_map.end(); ++c) {
+			if(c->second == opcode()) {
+				break;
 			} // if
 		} // for
 
-		info_str += string() + "\n";
-	} // if
+		if(c != code_map.end()) {
+			char buffer[1024];
+			sprintf(buffer, "Instruction\n\top: %s\n\tstate: %s\n\talu: %d\n"
+				"\tissue: %d\n\tlatency: %d\n\treciprocal: %d\n\tprogress: %d\n",
+				c->first.c_str(), state_strings[state()], alu(),
+				int(cycle_issued()), int(latency()), int(reciprocal()),
+				int(progress()));
+			info_str += buffer;
 
-	return info_str;
-}
+			for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
+				auto dc = code_map.begin();
+				for(; dc != code_map.end(); ++dc) {
+					if(dc->second == (*ita)->opcode()) {
+						break;
+					} // if
+				} // for
+
+				if(dc != code_map.end()) {
+					sprintf(buffer, "\tdependency: %s(%s)\n",
+						dc->first.c_str(), state_strings[(*ita)->state()]);
+					info_str += buffer;
+				} // if
+			} // for
+
+			info_str += string() + "\n";
+		} // if
+
+		return info_str;
+	} // info
 
 	/*-------------------------------------------------------------------------*
 	 * Return various instruciton properties.
@@ -415,7 +428,7 @@ private:
 	size_t issued_;
 	size_t retired_;
 
-	// tree properties
+	// graph properties
 	size_t strahler_;
 	size_t depth_;
 
