@@ -207,26 +207,19 @@ simulator_t::simulator_t(const char * ir_file)
 	} // if
 
 	/*-------------------------------------------------------------------------*
-	 * Visit functions.
+	 * Visit modules.
 	 *-------------------------------------------------------------------------*/
 
 	for(llvm::Module::iterator fita = llvm_module_->begin();
 		fita != llvm_module_->end(); ++fita) {
 
-#if 1
+#if 0
 for(llvm::Function::iterator bita = fita->begin();
 	bita != fita->end(); ++bita) {
 	llvm::errs() << "Basic Block: " << bita->getName() << " has " <<
 		bita->size() << " instructions\n";
 } // for
 #endif
-
-// visit arguments
-llvm::Function::ArgumentListType & args = fita->getArgumentList();
-for(auto aita = args.begin(); aita != args.end(); ++aita) {
-	llvm::errs() << "arg: " << aita << "\n";
-	llvm::errs() << "arg: " << *aita << "\n";
-} // for
 
 		llvm::inst_iterator iita = inst_begin(fita);
 		
@@ -258,7 +251,6 @@ for(auto aita = args.begin(); aita != args.end(); ++aita) {
 			instruction_t * inst = mita->second;
 
 			for(unsigned i(0); i<iita->getNumOperands(); ++i) {
-llvm::errs() << "operand: " << iita->getOperand(i) << "\n";
 				auto op = imap.find(iita->getOperand(i));
 				if(op != imap.end()) {
 					inst->add_dependency(op->second);

@@ -17,10 +17,9 @@
 #include <cstdio>
 #include <limits>
 
-#include <Dependency.hh>
-//#if defined(HAVE_GRAPHVIZ)
-//#include <Graphviz.hh>
-//#endif
+#if defined(HAVE_GRAPHVIZ)
+#include <Graphviz.hh>
+#endif
 
 #include <MachineState.hh>
 #include <OpCodes.hh>
@@ -52,7 +51,7 @@ struct instruction_properties_t {
  * Instruction class.
  *----------------------------------------------------------------------------*/
 
-class instruction_t : public dependency_t
+class instruction_t
 {
 public:
 
@@ -60,7 +59,6 @@ public:
 	 * Instruction state type.
 	 *-------------------------------------------------------------------------*/
 
-#if 0
 	enum state_t {
 		pending,
 		stalled,
@@ -76,25 +74,20 @@ public:
 		"executing",
 		"retired"
 	};
-#endif
 
 	/*-------------------------------------------------------------------------*
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
 
 	instruction_t(instruction_properties_t props)
-		: dependency_t(props.name), props_(props), alu_(-1), multiple_(1),
-		cycles_(0), issued_(0), retired_(0),
-#if 0
-		state_(pending),
-		strahler_(1), depth_(1),
+		: props_(props), state_(pending), alu_(-1), multiple_(1), cycles_(0),
+		issued_(0), retired_(0), strahler_(1), depth_(1),
 #if defined(HAVE_GRAPHVIZ)
 		agnode_(nullptr),
 #endif
-#endif
-		machine_state_(machine_state_t::instance()) {
+		machine_(machine_state_t::instance()) {
 
-		for(size_t i(0); i<machine_state_.current(); ++i) {
+		for(size_t i(0); i<machine_.current(); ++i) {
 			stream_ << ' ';
 		} // for
 
@@ -111,14 +104,12 @@ public:
 			offset = props_.ir.find_first_of('\n');
 		} // while
 
-#if 0
 #if defined(HAVE_GRAPHVIZ)
 		graphviz_t & graph = graphviz_t::instance();
 		// add graphviz node
 		char _this[1024];
 		sprintf(_this, "%p", (void *)(this));
 		agnode_ = graph.add_node(_this, props_.name.c_str());
-#endif
 #endif
 	} // instruction_t
 
@@ -128,15 +119,13 @@ public:
 
 	~instruction_t() {}
 
-#if 0
 	/*-------------------------------------------------------------------------*
 	 * Add instruction dependency.
 	 *-------------------------------------------------------------------------*/
 
-	void add_dependency(dependency_t * d) {
-		depends_.push_back(d);
+	void add_dependency(instruction_t * inst) {
+		depends_.push_back(inst);
 	} // add_dependency
-#endif
 
 	/*-------------------------------------------------------------------------*
 	 * Update the tree properties for the subexpression represented by this
@@ -212,7 +201,7 @@ public:
 	void issue(int32_t alu) {
 		alu_ = alu;
 		cycles_ = 0;
-		issued_ = machine_state_.current();
+		issued_ = machine_.current();
 		state_ = staging;
 	} // issue
 
@@ -243,10 +232,9 @@ public:
 
 		// this checks to see if a dependency was retired on this cycle,
 		// meaning that this instruction can't advance until next cycle.
-		if(machine_state_.current() > 0 &&
-			depends_retired == machine_state_.current()) {
+		if(machine_.current() > 0 && depends_retired == machine_.current()) {
 			state_ = stalled;
-			issued_ = machine_state_.current() + 1;
+			issued_ = machine_.current() + 1;
 			stream_ << '-';
 			return;
 		} // if
@@ -264,11 +252,11 @@ public:
 
 		// record when instruction retired.
 		if(state_ == retired) {
-			retired_ = machine_state_.current();
+			retired_ = machine_.current();
 		} // if
 
 		// write cycle digit to stream.
-		stream_ << machine_state_.counter();
+		stream_ << machine_.counter();
 	} // advance
 
 	/*-------------------------------------------------------------------------*
@@ -310,7 +298,7 @@ public:
 	std::string string() {
 		std::string tmp(stream_.str());
 
-		while(tmp.size() < machine_state_.current()+10) {
+		while(tmp.size() < machine_.current()+10) {
 			tmp += ' ';
 		} // while
 
@@ -431,14 +419,14 @@ private:
 	size_t strahler_;
 	size_t depth_;
 
-	std::vector<dependency_t *> depends_;
+	std::vector<instruction_t *> depends_;
 	std::stringstream stream_;
 
 #if defined(HAVE_GRAPHVIZ)
 	Agnode_t * agnode_;
 #endif
 
-	machine_state_t & machine_state_;
+	machine_state_t & machine_;
 }; // class instruction_t
 
 } // namespace ska
