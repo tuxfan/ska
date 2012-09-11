@@ -37,7 +37,7 @@ struct instruction_properties_t {
 		reciprocal(std::numeric_limits<float>::max()),
 		opcode(std::numeric_limits<unsigned>::max()),
 		optype(std::numeric_limits<unsigned>::max()),
-		ir("") {}
+		ir(""), name("") {}
 
 	size_t latency;
 	float reciprocal;
