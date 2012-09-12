@@ -340,6 +340,7 @@ public:
 	 * Return debugging information.
 	 *-------------------------------------------------------------------------*/
 
+#if 0
 	std::string info() {
 		std::string info_str("");
 
@@ -379,12 +380,18 @@ public:
 
 		return info_str;
 	} // info
+#endif
 
 	/*-------------------------------------------------------------------------*
-	 * Return various instruciton properties.
+	 * Return the latency of this instruction.
 	 *-------------------------------------------------------------------------*/
 
 	size_t latency() const { return props_.latency; }
+
+	/*-------------------------------------------------------------------------*
+	 * Return the issue latency of this instruction.
+	 *-------------------------------------------------------------------------*/
+
 	size_t reciprocal() const { return size_t(props_.reciprocal); }
 
 	/*-------------------------------------------------------------------------*

@@ -55,7 +55,7 @@ public:
 	 * Destructor.
 	 *-------------------------------------------------------------------------*/
 
-	~dependency_t() {}
+	virtual ~dependency_t() {}
 
 	/*-------------------------------------------------------------------------* 
 	 * Add dependency.
@@ -90,6 +90,13 @@ public:
 	size_t depth() const { return depth_; }
 
 	/*-------------------------------------------------------------------------* 
+	 * These are not meaningful for pure dependencies.
+	 *-------------------------------------------------------------------------*/
+
+	virtual size_t cycle_issued() const { return 0; }
+	virtual size_t cycle_retired() const { return 0; }
+
+	/*-------------------------------------------------------------------------* 
 	 * Return the Graphviz node associated with this instruction.
 	 *-------------------------------------------------------------------------*/
 
@@ -97,6 +104,11 @@ public:
 	Agnode_t * agnode() {
 		return agnode_;
 	} // agnode
+#endif
+
+#if 0
+	virtual std::string info() {
+	} // info
 #endif
 
 protected:

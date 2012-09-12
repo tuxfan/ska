@@ -36,6 +36,8 @@
 #include <MachineState.hh>
 #include <Statistics.hh>
 
+#include <Dependency.hh>
+
 #if defined(HAVE_GRAPHVIZ)
 #include <Graphviz.hh>
 #endif
