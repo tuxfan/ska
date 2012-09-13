@@ -66,6 +66,8 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	typedef std::map<llvm::Value *, instruction_t *> instruction_map_t;
+	typedef std::map<llvm::Value *, dependency_t *> dependency_map_t;
+
 	typedef std::vector<instruction_t *> instruction_vector_t;
 	typedef std::list<instruction_t *> instruction_list_t;
 
@@ -223,12 +225,14 @@ for(llvm::Function::iterator bita = fita->begin();
 } // for
 #endif
 
+#if 0
 // visit arguments
 llvm::Function::ArgumentListType & args = fita->getArgumentList();
 for(auto aita = args.begin(); aita != args.end(); ++aita) {
 	llvm::errs() << "arg: " << aita << "\n";
 	llvm::errs() << "arg: " << *aita << "\n";
 } // for
+#endif
 
 		llvm::inst_iterator iita = inst_begin(fita);
 		
@@ -244,10 +248,21 @@ for(auto aita = args.begin(); aita != args.end(); ++aita) {
 #endif
 
 		/*----------------------------------------------------------------------*
-		 * Create the instruction map for this module and add them to the
-		 * instruciton map.  This will allow us to lookup instructions by
-		 * llvm::Value when we need to add dependency information.
+		 * Create the dependency map for this module and all instructions.
+		 * This will allow us to lookup instructions by llvm::Value when
+		 * we need to add dependency information.
 		 *----------------------------------------------------------------------*/
+
+		dependency_map_t dmap;
+
+		llvm::Function::ArgumentListType & args = fita->getArgumentList();
+		for(auto aita = args.begin(); aita != args.end(); ++aita) {
+			dmap[&*aita] = new dependency_t(aita->getName().str());
+		} // for
+
+		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
+			dmap[&*iita] = new instruction_t(decode(&*iita));
+		} // for
 
 		instruction_map_t imap;
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
@@ -268,22 +283,42 @@ for(auto aita = args.begin(); aita != args.end(); ++aita) {
 			} // if
 
 			instruction_t * inst = mita->second;
+			dependency_t * dep = mita->second;
 
+#if 0
 			for(unsigned i(0); i<iita->getNumOperands(); ++i) {
 llvm::errs() << "operand: " << iita->getOperand(i) << "\n";
 				auto op = imap.find(iita->getOperand(i));
 				if(op != imap.end()) {
 					inst->add_dependency(op->second);
+					dep->add_dependency(op->second);
 #if defined(HAVE_GRAPHVIZ)
 					graph.add_edge(inst->agnode(), op->second->agnode());	
 #endif
 				} // if
 			} // for
+#endif
+			for(unsigned i(0); i<iita->getNumOperands(); ++i) {
+llvm::errs() << "operand: " << iita->getOperand(i) << "\n";
+				auto op = dmap.find(iita->getOperand(i));
+				if(op != dmap.end()) {
+					dep->add_dependency(op->second);
+#if defined(HAVE_GRAPHVIZ)
+					graph.add_edge(dep->agnode(), op->second->agnode());	
+#endif
+				} // if
+			} // for
 
+dep->update_graph_properties();
 			inst->update_graph_properties();
+
 			strahler_number = std::max(strahler_number,
-				inst->strahler_number());
-			expression_depth = std::max(expression_depth, inst->depth());
+				dep->strahler_number());
+			expression_depth = std::max(expression_depth, dep->depth());
+
+//			strahler_number = std::max(strahler_number,
+//				inst->strahler_number());
+//			expression_depth = std::max(expression_depth, inst->depth());
 		} // for
 
 		std::cerr << "strahler: " << strahler_number << std::endl;

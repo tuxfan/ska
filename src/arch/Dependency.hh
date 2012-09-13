@@ -65,6 +65,23 @@ public:
 		depends_.push_back(d);
 	} // add_dependency
 
+	const std::vector<dependency_t *> & dependencies() const {
+		return depends_;
+	} // dependencies
+
+	/*-------------------------------------------------------------------------*
+	 * Update the graph properties for the subexpression represented by this
+	 * instruction.
+	 *
+	 * Depth - simple depth from instruction to leaf.
+	 *
+	 * Strahler Number - a measure of the branching complexity of the
+	 * graph of dependencies of an instruction.
+	 *-------------------------------------------------------------------------*/
+
+	virtual void update_graph_properties() {
+	} // update_graph_properties
+
 	/*-------------------------------------------------------------------------* 
 	 * Return the current state.
 	 *-------------------------------------------------------------------------*/

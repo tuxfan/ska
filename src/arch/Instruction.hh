@@ -17,9 +17,13 @@
 #include <cstdio>
 #include <limits>
 
+#if 0
 #if defined(HAVE_GRAPHVIZ)
 #include <Graphviz.hh>
 #endif
+#endif
+
+#include <Dependency.hh>
 
 #include <MachineState.hh>
 #include <OpCodes.hh>
@@ -51,7 +55,7 @@ struct instruction_properties_t {
  * Instruction class.
  *----------------------------------------------------------------------------*/
 
-class instruction_t
+class instruction_t : public dependency_t
 {
 public:
 
@@ -59,6 +63,7 @@ public:
 	 * Instruction state type.
 	 *-------------------------------------------------------------------------*/
 
+#if 0
 	enum state_t {
 		pending,
 		stalled,
@@ -74,16 +79,27 @@ public:
 		"executing",
 		"retired"
 	};
+#endif
 
 	/*-------------------------------------------------------------------------*
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
 
 	instruction_t(instruction_properties_t props)
-		: props_(props), state_(pending), alu_(-1), multiple_(1), cycles_(0),
-		issued_(0), retired_(0), strahler_(1), depth_(1),
+		: dependency_t(props.name),
+		props_(props),
+//		state_(pending),
+		alu_(-1),
+		multiple_(1),
+		cycles_(0),
+		issued_(0),
+		retired_(0),
+//		strahler_(1),
+//		depth_(1),
+#if 0
 #if defined(HAVE_GRAPHVIZ)
 		agnode_(nullptr),
+#endif
 #endif
 		machine_(machine_state_t::instance()) {
 
@@ -104,12 +120,14 @@ public:
 			offset = props_.ir.find_first_of('\n');
 		} // while
 
+#if 0
 #if defined(HAVE_GRAPHVIZ)
 		graphviz_t & graph = graphviz_t::instance();
 		// add graphviz node
 		char _this[1024];
 		sprintf(_this, "%p", (void *)(this));
 		agnode_ = graph.add_node(_this, props_.name.c_str());
+#endif
 #endif
 	} // instruction_t
 
@@ -138,6 +156,7 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	void update_graph_properties() {
+std::cerr << "instruction update_graph_properties called" << std::endl;		
 		if(!is_memory_op(props_.opcode)) {
 			size_t _strahler_max(1);
 			size_t _depth_max(1);
@@ -163,13 +182,17 @@ public:
 	 * Return the Strahler number.
 	 *-------------------------------------------------------------------------*/
 
+#if 0
 	size_t strahler_number() const { return strahler_; }
+#endif
 
 	/*-------------------------------------------------------------------------*
 	 * Return the depth.
 	 *-------------------------------------------------------------------------*/
 
+#if 0
 	size_t depth() const { return depth_; }
+#endif
 
 	/*-------------------------------------------------------------------------*
 	 * Check data dependencies.
@@ -189,13 +212,17 @@ public:
 	 * Return current state.
 	 *-------------------------------------------------------------------------*/
 
+#if 0
 	state_t state() { return state_; }
+#endif
 
 	/*-------------------------------------------------------------------------*
 	 * Set current state.
 	 *-------------------------------------------------------------------------*/
 
+#if 0
 	void set_state(state_t s) { state_ = s; }
+#endif
 
 	/*-------------------------------------------------------------------------*
 	 * Return the alu assinged to this instruction.
@@ -278,9 +305,11 @@ public:
 	 * Return dependency vector.
 	 *-------------------------------------------------------------------------*/
 
+#if 0
 	const std::vector<instruction_t *> & dependencies() {
 		return depends_;
 	} // dependencies
+#endif
 
 	/*-------------------------------------------------------------------------*
 	 * Set multiple issue state.
@@ -418,17 +447,19 @@ public:
 	 * Return the Graphviz node assocaited with this instruction
 	 *-------------------------------------------------------------------------*/
 
+#if 0
 #if defined(HAVE_GRAPHVIZ)
 	Agnode_t * agnode() {
 		return agnode_;
 	} // agnode
+#endif
 #endif
 
 private:
 
 	instruction_properties_t props_;
 
-	state_t state_;
+//	state_t state_;
 	int32_t alu_;
 	int32_t multiple_;
 	size_t cycles_;
@@ -436,14 +467,16 @@ private:
 	size_t retired_;
 
 	// graph properties
-	size_t strahler_;
-	size_t depth_;
+//	size_t strahler_;
+//	size_t depth_;
 
 	std::vector<instruction_t *> depends_;
 	std::stringstream stream_;
 
+#if 0
 #if defined(HAVE_GRAPHVIZ)
 	Agnode_t * agnode_;
+#endif
 #endif
 
 	machine_state_t & machine_;
