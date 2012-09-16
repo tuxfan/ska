@@ -217,7 +217,8 @@ simulator_t::simulator_t(const char * ir_file)
 	for(llvm::Module::iterator fita = llvm_module_->begin();
 		fita != llvm_module_->end(); ++fita) {
 
-#if 1
+#if 0
+// visit basic blocks
 for(llvm::Function::iterator bita = fita->begin();
 	bita != fita->end(); ++bita) {
 	llvm::errs() << "Basic Block: " << bita->getName() << " has " <<
@@ -257,17 +258,22 @@ for(auto aita = args.begin(); aita != args.end(); ++aita) {
 
 		llvm::Function::ArgumentListType & args = fita->getArgumentList();
 		for(auto aita = args.begin(); aita != args.end(); ++aita) {
+			llvm::errs() << *aita << "\n";
 			dmap[&*aita] = new dependency_t(aita->getName().str());
 		} // for
 
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
+			llvm::errs() << *iita << "\n";
 			dmap[&*iita] = new instruction_t(decode(&*iita));
 		} // for
 
+#if 0
+// FIXME: Remove when dependency implementation working
 		instruction_map_t imap;
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
 			imap[&*iita] = new instruction_t(decode(&*iita));
 		} // for
+#endif
 
 		/*----------------------------------------------------------------------*
 		 * Add dependency information and update graph properties.
@@ -276,13 +282,20 @@ for(auto aita = args.begin(); aita != args.end(); ++aita) {
 		size_t strahler_number(1);
 		size_t expression_depth(1);
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
-			auto mita = imap.find(&*iita);
+//			auto mita = imap.find(&*iita);
+			auto mita = dmap.find(&*iita);
 
+#if 0
 			if(mita == imap.end()) {
 				Warn("Sanity check failed: did not find instruction");
 			} // if
+#endif
 
-			instruction_t * inst = mita->second;
+			if(mita == dmap.end()) {
+				Warn("Sanity check failed: did not find instruction");
+			} // if
+
+//			instruction_t * inst = mita->second;
 			dependency_t * dep = mita->second;
 
 #if 0
@@ -310,7 +323,7 @@ llvm::errs() << "operand: " << iita->getOperand(i) << "\n";
 			} // for
 
 dep->update_graph_properties();
-			inst->update_graph_properties();
+//			inst->update_graph_properties();
 
 			strahler_number = std::max(strahler_number,
 				dep->strahler_number());
