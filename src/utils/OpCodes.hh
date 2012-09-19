@@ -16,14 +16,33 @@
 
 namespace ska {
 
-bool is_memory_op(unsigned opcode) {
+bool is_memory_access_op(unsigned opcode) {
+#if 0
 	return opcode >= llvm::Instruction::Alloca &&
 		opcode < llvm::Instruction::Trunc;
+#endif
+	return (opcode >= llvm::Instruction::Alloca &&
+		opcode < llvm::Instruction::Store) ||
+		opcode == llvm::Instruction::GetElementPtr;
 } // is_memory_op
 
 bool is_call_op(unsigned opcode) {
 	return opcode == llvm::Instruction::Call;
 } // is_call_op
+
+bool is_phi_op(unsigned opcode) {
+	return opcode == llvm::Instruction::PHI;
+} // is_phi_op
+
+#if 1
+bool is_pruned_op(unsigned opcode) {
+	return opcode == llvm::Instruction::GetElementPtr;
+} // is_pruned_op
+#endif
+
+unsigned dummy_op() {
+	return unsigned(llvm::Instruction::LandingPad) + 1;
+} // dummy_op
 
 std::map<std::string, unsigned> code_map = {
 	// Terminator operators

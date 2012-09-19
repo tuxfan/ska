@@ -17,14 +17,7 @@
 #include <cstdio>
 #include <limits>
 
-#if 0
-#if defined(HAVE_GRAPHVIZ)
-#include <Graphviz.hh>
-#endif
-#endif
-
 #include <Dependency.hh>
-
 #include <MachineState.hh>
 #include <OpCodes.hh>
 #include <LogUtils.hh>
@@ -60,53 +53,13 @@ class instruction_t : public dependency_t
 public:
 
 	/*-------------------------------------------------------------------------*
-	 * Instruction state type.
-	 *-------------------------------------------------------------------------*/
-
-#if 0
-	enum state_t {
-		pending,
-		stalled,
-		staging,
-		executing,
-		retired
-	}; // enum state_t
-
-	const char * state_strings[5] = {
-		"pending",
-		"stalled",
-		"staging",
-		"executing",
-		"retired"
-	};
-#endif
-
-	/*-------------------------------------------------------------------------*
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
 
 	instruction_t(instruction_properties_t props)
-		: dependency_t(props.name),
-		props_(props),
-//		state_(pending),
-		alu_(-1),
-		multiple_(1),
-		cycles_(0),
-		issued_(0),
-		retired_(0),
-//		strahler_(1),
-//		depth_(1),
-#if 0
-#if defined(HAVE_GRAPHVIZ)
-		agnode_(nullptr),
-#endif
-#endif
+		: dependency_t(props.name), props_(props), alu_(-1),
+		multiple_(1), cycles_(0), issued_(0), retired_(0),
 		machine_(machine_state_t::instance()) {
-
-		for(size_t i(0); i<machine_.current(); ++i) {
-			stream_ << ' ';
-		} // for
-
 		// remove weird returns from IR
 		size_t offset = props_.ir.find_first_of('\n');
 		while(offset != std::string::npos) {
@@ -119,16 +72,6 @@ public:
 			props_.ir.replace(offset, 1, 1, ' ');
 			offset = props_.ir.find_first_of('\n');
 		} // while
-
-#if 0
-#if defined(HAVE_GRAPHVIZ)
-		graphviz_t & graph = graphviz_t::instance();
-		// add graphviz node
-		char _this[1024];
-		sprintf(_this, "%p", (void *)(this));
-		agnode_ = graph.add_node(_this, props_.name.c_str());
-#endif
-#endif
 	} // instruction_t
 
 	/*-------------------------------------------------------------------------*
@@ -138,26 +81,33 @@ public:
 	~instruction_t() {}
 
 	/*-------------------------------------------------------------------------*
-	 * Add instruction dependency.
+	 * Reset instruction to default state.
+	 *
+	 * This does not reset any of the static properties of the instruction.
 	 *-------------------------------------------------------------------------*/
 
-	void add_dependency(instruction_t * inst) {
-		depends_.push_back(inst);
-	} // add_dependency
+	void reset() {
+		state_ = pending;
+		alu_ = -1;
+		multiple_ = 1;
+		cycles_ = 0;
+		issued_ = 0;
+		retired_ = 0;
+		stream_.str("");
+	} // reset
 
 	/*-------------------------------------------------------------------------*
-	 * Update the graph properties for the subexpression represented by this
+	 * Update the tree properties for the subexpression represented by this
 	 * instruction.
 	 *
 	 * Depth - simple depth from instruction to leaf.
 	 *
 	 * Strahler Number - a measure of the branching complexity of the
-	 * graph of dependencies of an instruction.
+	 * tree of dependencies of an instruction.
 	 *-------------------------------------------------------------------------*/
 
-	void update_graph_properties() {
-std::cerr << "instruction update_graph_properties called" << std::endl;		
-		if(!is_memory_op(props_.opcode)) {
+	void update_tree_properties() {
+		if(!is_memory_access_op(props_.opcode)) {
 			size_t _strahler_max(1);
 			size_t _depth_max(1);
 			for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
@@ -176,23 +126,127 @@ std::cerr << "instruction update_graph_properties called" << std::endl;
 			strahler_ = _num_with_smax > 1 ? _strahler_max + 1 : _strahler_max;
 			depth_ = _depth_max + 1;
 		} // if
-	} // update_graph_properties
+
+		switch(props_.opcode) {
+			case llvm::Instruction::Load:
+				set_style("filled");
+				set_fill_color("lightblue1");
+				break;
+			case llvm::Instruction::Store:
+				set_style("filled");
+				set_fill_color("goldenrod1");
+				break;
+			case llvm::Instruction::FAdd:
+			case llvm::Instruction::FSub:
+			case llvm::Instruction::FMul:
+			case llvm::Instruction::FDiv:
+			case llvm::Instruction::FRem:
+				set_style("filled");
+				set_fill_color("lightseagreen");
+				break;
+		} // switch
+	} // update_tree_properties
 
 	/*-------------------------------------------------------------------------*
-	 * Return the Strahler number.
 	 *-------------------------------------------------------------------------*/
 
-#if 0
-	size_t strahler_number() const { return strahler_; }
-#endif
-
-	/*-------------------------------------------------------------------------*
-	 * Return the depth.
-	 *-------------------------------------------------------------------------*/
+	bool in_tree() {
+		bool _in_tree(true);
 
 #if 0
-	size_t depth() const { return depth_; }
+		// remove for loop construct
+		bool for_loop(false);
+		if(opcode() == llvm::Instruction::Br && num_dependencies() == 1) {
+			dependency_t * dep = dependency(0);
+			if(dep->opcode() == llvm::Instruction::ICmp &&
+				dep->num_dependencies() == 1) {
+				dep = dep->dependency(0);
+				if(dep->opcode() == llvm::Instruction::Trunc &&
+					dep->num_dependencies() == 1) {
+					dep = dep->dependency(0);
+					if(dep->opcode() == llvm::Instruction::Add &&
+						dep->num_dependencies() == 1) {
+						dep = dep->dependency(0);
+						if(dep->opcode() == llvm::Instruction::PHI &&
+							dep->num_dependencies() == 1) {
+							dep = dep->dependency(0);
+							if(dep->opcode() == llvm::Instruction::Add) {
+								std::cerr << "FOUND FOR LOOP" << std::endl;
+								for_loop = true;
+							} // if
+						} // if
+					} // if
+				} // if
+			} // if
+		} // if
+
+		if(for_loop) {
+			prune();
+			dependency_t * dep = dependency(0);
+			dep->prune();
+			dep = dep->dependency(0);
+			dep->prune();
+			dep = dep->dependency(0);
+			dep->prune();
+			dep = dep->dependency(0);
+			dep->prune();
+		} // if
+		
+		// remove while loop construct
+		bool while_loop(false);
+		if(opcode() == llvm::Instruction::Br && num_dependencies() == 1) {
+			dependency_t * dep = dependency(0);
+			if(dep->opcode() == llvm::Instruction::ICmp &&
+				dep->num_dependencies() == 1) {
+				dep = dep->dependency(0);
+				if(dep->opcode() == llvm::Instruction::GetElementPtr &&
+					dep->num_dependencies() == 1) {
+					dep = dep->dependency(0);
+					if(dep->opcode() == llvm::Instruction::PHI &&
+						dep->num_dependencies() == 1) {
+						dep = dep->dependency(0);
+						if(dep->opcode() == llvm::Instruction::GetElementPtr) {
+							std::cerr << "FOUND WHILE LOOP" << std::endl;
+							while_loop = true;
+						} // if
+					} // if
+				} // if
+			} // if
+		} // if
+
+		if(while_loop) {
+			prune();
+			dependency_t * dep = dependency(0);
+			dep->prune();
+			dep = dep->dependency(0);
+			dep->prune();
+			dep = dep->dependency(0);
+			dep->prune();
+		} // if
+		
+#if 0
+		// weird little dangling branch
+		bool dangling_branch(false);
+		if(opcode() == llvm::Instruction::Br && num_dependencies() == 1) {
+			dependency_t * dep = dependency(0);
+			if(dep->opcode() == llvm::Instruction::ICmp &&
+				dep->num_dependencies() == 0) {
+					dangling_branch = true;
+			} // if
+		} // if
+
+		if(dangling_branch) {
+			prune();
+			dependency_t * dep = dependency(0);
+			dep->prune();
+		} // if
+
+		_in_tree = _in_tree && dependency_t::in_tree();
+		_in_tree = _in_tree && !is_pruned_op(props_.opcode);
 #endif
+#endif
+		return _in_tree;
+	} // in_tree
 
 	/*-------------------------------------------------------------------------*
 	 * Check data dependencies.
@@ -209,22 +263,6 @@ std::cerr << "instruction update_graph_properties called" << std::endl;
 	} // ready
 
 	/*-------------------------------------------------------------------------*
-	 * Return current state.
-	 *-------------------------------------------------------------------------*/
-
-#if 0
-	state_t state() { return state_; }
-#endif
-
-	/*-------------------------------------------------------------------------*
-	 * Set current state.
-	 *-------------------------------------------------------------------------*/
-
-#if 0
-	void set_state(state_t s) { state_ = s; }
-#endif
-
-	/*-------------------------------------------------------------------------*
 	 * Return the alu assinged to this instruction.
 	 *-------------------------------------------------------------------------*/
 
@@ -239,6 +277,12 @@ std::cerr << "instruction update_graph_properties called" << std::endl;
 		cycles_ = 0;
 		issued_ = machine_.current();
 		state_ = staging;
+
+		// add space up to current cycle
+		stream_.str("");
+		for(size_t i(0); i<machine_.current(); ++i) {
+			stream_ << ' ';
+		} // for
 	} // issue
 
 	/*-------------------------------------------------------------------------*
@@ -302,16 +346,6 @@ std::cerr << "instruction update_graph_properties called" << std::endl;
 	size_t progress() const { return cycles_; }
 
 	/*-------------------------------------------------------------------------*
-	 * Return dependency vector.
-	 *-------------------------------------------------------------------------*/
-
-#if 0
-	const std::vector<instruction_t *> & dependencies() {
-		return depends_;
-	} // dependencies
-#endif
-
-	/*-------------------------------------------------------------------------*
 	 * Set multiple issue state.
 	 *-------------------------------------------------------------------------*/
 
@@ -366,52 +400,6 @@ std::cerr << "instruction update_graph_properties called" << std::endl;
 	} // string
 
 	/*-------------------------------------------------------------------------*
-	 * Return debugging information.
-	 *-------------------------------------------------------------------------*/
-
-#if 0
-	std::string info() {
-		std::string info_str("");
-
-		auto c = code_map.begin();
-		for(; c != code_map.end(); ++c) {
-			if(c->second == opcode()) {
-				break;
-			} // if
-		} // for
-
-		if(c != code_map.end()) {
-			char buffer[1024];
-			sprintf(buffer, "Instruction\n\top: %s\n\tstate: %s\n\talu: %d\n"
-				"\tissue: %d\n\tlatency: %d\n\treciprocal: %d\n\tprogress: %d\n",
-				c->first.c_str(), state_strings[state()], alu(),
-				int(cycle_issued()), int(latency()), int(reciprocal()),
-				int(progress()));
-			info_str += buffer;
-
-			for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
-				auto dc = code_map.begin();
-				for(; dc != code_map.end(); ++dc) {
-					if(dc->second == (*ita)->opcode()) {
-						break;
-					} // if
-				} // for
-
-				if(dc != code_map.end()) {
-					sprintf(buffer, "\tdependency: %s(%s)\n",
-						dc->first.c_str(), state_strings[(*ita)->state()]);
-					info_str += buffer;
-				} // if
-			} // for
-
-			info_str += string() + "\n";
-		} // if
-
-		return info_str;
-	} // info
-#endif
-
-	/*-------------------------------------------------------------------------*
 	 * Return the latency of this instruction.
 	 *-------------------------------------------------------------------------*/
 
@@ -443,41 +431,17 @@ std::cerr << "instruction update_graph_properties called" << std::endl;
 			std::numeric_limits<size_t>::max();
 	} // cycle_retired
 
-	/*-------------------------------------------------------------------------*
-	 * Return the Graphviz node assocaited with this instruction
-	 *-------------------------------------------------------------------------*/
-
-#if 0
-#if defined(HAVE_GRAPHVIZ)
-	Agnode_t * agnode() {
-		return agnode_;
-	} // agnode
-#endif
-#endif
-
 private:
 
 	instruction_properties_t props_;
 
-//	state_t state_;
 	int32_t alu_;
 	int32_t multiple_;
 	size_t cycles_;
 	size_t issued_;
 	size_t retired_;
 
-	// graph properties
-//	size_t strahler_;
-//	size_t depth_;
-
-	std::vector<instruction_t *> depends_;
 	std::stringstream stream_;
-
-#if 0
-#if defined(HAVE_GRAPHVIZ)
-	Agnode_t * agnode_;
-#endif
-#endif
 
 	machine_state_t & machine_;
 }; // class instruction_t

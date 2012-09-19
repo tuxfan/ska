@@ -16,7 +16,11 @@
 
 namespace ska {
 
-const unsigned TypeAnyID = llvm::Type::NumTypeIDs + 1;
+static const unsigned TypeAnyID = llvm::Type::NumTypeIDs + 1;
+
+unsigned any_type() {
+	return TypeAnyID;
+} // dummy_type
 
 std::map<std::string, unsigned> type_map = {
 	// Primitive Types

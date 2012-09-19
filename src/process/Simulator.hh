@@ -83,20 +83,20 @@ public:
 
 	~simulator_t();
 
-private:
-
 	/*-------------------------------------------------------------------------*
 	 * Run the simulator on a set of LLVM instructions.
 	 *-------------------------------------------------------------------------*/
 
-	void run(llvm::inst_iterator & begin, llvm::inst_iterator & end,
-		instruction_vector_t & module);
+	void process(llvm::inst_iterator begin, llvm::inst_iterator end,
+		const dependency_map_t & dmap, instruction_vector_t & retired);
+
+private:
 
 	/*-------------------------------------------------------------------------*
 	 * Update statistic based on the execution of 'instruction'.
 	 *-------------------------------------------------------------------------*/
 
-	void update_stats(llvm::Instruction * instruction);
+	void update_opcount(llvm::Instruction * instruction);
 
 	/*-------------------------------------------------------------------------*
 	 * Compute the number of bytes associated with a given llvm::Type.  This
@@ -120,16 +120,11 @@ private:
 simulator_t::simulator_t(const char * ir_file)
 	: llvm_module_(nullptr), core_(nullptr)
 {
-	parameters_t & arch = parameters_t::instance();
-//	machine_state_t & machine = machine_state_t::instance();
-//	statistics_t & stats = statistics_t::instance();
-	instruction_map_t processed;
-	std::ostream & output = file_io_t::instance().out_stream();
-
 	/*-------------------------------------------------------------------------*
 	 * Write header information.
 	 *-------------------------------------------------------------------------*/
 
+	std::ostream & output = file_io_t::instance().out_stream();
 	output << "#---------------------------------------" <<
 		"---------------------------------------#" << std::endl;
 	output << "# Static Kernel Analyzer (SKA)" << std::endl;
@@ -140,6 +135,7 @@ simulator_t::simulator_t(const char * ir_file)
 		DEFINE_TO_STRING(SKA_VERSION) << std::endl;
 
 	std::string architecture;
+	parameters_t & arch = parameters_t::instance();
 	arch.getval(architecture, "name");
 	output << "KEYWORD_ARCHITECTURE " << architecture <<
 		std::endl << std::endl;
@@ -214,34 +210,16 @@ simulator_t::simulator_t(const char * ir_file)
 	 * Visit functions.
 	 *-------------------------------------------------------------------------*/
 
+	instruction_vector_t retired;
+	machine_state_t & machine = machine_state_t::instance();
+	statistics_t & stats = statistics_t::instance();
 	for(llvm::Module::iterator fita = llvm_module_->begin();
 		fita != llvm_module_->end(); ++fita) {
 
-#if 0
-// visit basic blocks
-for(llvm::Function::iterator bita = fita->begin();
-	bita != fita->end(); ++bita) {
-	llvm::errs() << "Basic Block: " << bita->getName() << " has " <<
-		bita->size() << " instructions\n";
-} // for
-#endif
-
-#if 0
-// visit arguments
-llvm::Function::ArgumentListType & args = fita->getArgumentList();
-for(auto aita = args.begin(); aita != args.end(); ++aita) {
-	llvm::errs() << "arg: " << aita << "\n";
-	llvm::errs() << "arg: " << *aita << "\n";
-} // for
-#endif
-
-		llvm::inst_iterator iita = inst_begin(fita);
-		
-		if(iita == inst_end(fita)) {
+		// skip degnerate functions and declarations
+		if(inst_begin(fita) == inst_end(fita)) {
 			continue;
 		} // if
-
-// FIXME: New implementation
 
 #if defined(HAVE_GRAPHVIZ)
 		graphviz_t & graph = graphviz_t::instance();					
@@ -256,63 +234,31 @@ for(auto aita = args.begin(); aita != args.end(); ++aita) {
 
 		dependency_map_t dmap;
 
+		// function arguments
 		llvm::Function::ArgumentListType & args = fita->getArgumentList();
 		for(auto aita = args.begin(); aita != args.end(); ++aita) {
-			llvm::errs() << *aita << "\n";
 			dmap[&*aita] = new dependency_t(aita->getName().str());
 		} // for
 
+		// instructions
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
-			llvm::errs() << *iita << "\n";
 			dmap[&*iita] = new instruction_t(decode(&*iita));
 		} // for
 
-#if 0
-// FIXME: Remove when dependency implementation working
-		instruction_map_t imap;
-		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
-			imap[&*iita] = new instruction_t(decode(&*iita));
-		} // for
-#endif
-
 		/*----------------------------------------------------------------------*
-		 * Add dependency information and update graph properties.
+		 * Add dependency information
 		 *----------------------------------------------------------------------*/
 
-		size_t strahler_number(1);
-		size_t expression_depth(1);
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
-//			auto mita = imap.find(&*iita);
-			auto mita = dmap.find(&*iita);
+			auto dita = dmap.find(&*iita);
 
-#if 0
-			if(mita == imap.end()) {
-				Warn("Sanity check failed: did not find instruction");
-			} // if
-#endif
-
-			if(mita == dmap.end()) {
+			if(dita == dmap.end()) {
 				Warn("Sanity check failed: did not find instruction");
 			} // if
 
-//			instruction_t * inst = mita->second;
-			dependency_t * dep = mita->second;
+			dependency_t * dep = dita->second;
 
-#if 0
 			for(unsigned i(0); i<iita->getNumOperands(); ++i) {
-llvm::errs() << "operand: " << iita->getOperand(i) << "\n";
-				auto op = imap.find(iita->getOperand(i));
-				if(op != imap.end()) {
-					inst->add_dependency(op->second);
-					dep->add_dependency(op->second);
-#if defined(HAVE_GRAPHVIZ)
-					graph.add_edge(inst->agnode(), op->second->agnode());	
-#endif
-				} // if
-			} // for
-#endif
-			for(unsigned i(0); i<iita->getNumOperands(); ++i) {
-llvm::errs() << "operand: " << iita->getOperand(i) << "\n";
 				auto op = dmap.find(iita->getOperand(i));
 				if(op != dmap.end()) {
 					dep->add_dependency(op->second);
@@ -321,27 +267,41 @@ llvm::errs() << "operand: " << iita->getOperand(i) << "\n";
 #endif
 				} // if
 			} // for
-
-dep->update_graph_properties();
-//			inst->update_graph_properties();
-
-			strahler_number = std::max(strahler_number,
-				dep->strahler_number());
-			expression_depth = std::max(expression_depth, dep->depth());
-
-//			strahler_number = std::max(strahler_number,
-//				inst->strahler_number());
-//			expression_depth = std::max(expression_depth, inst->depth());
 		} // for
 
-		std::cerr << "strahler: " << strahler_number << std::endl;
-		std::cerr << "depth: " << expression_depth << std::endl;
+		/*----------------------------------------------------------------------*
+		 * Update tree properties
+		 *----------------------------------------------------------------------*/
+
+		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
+			auto dita = dmap.find(&*iita);
+
+			if(dita == dmap.end()) {
+				Warn("Sanity check failed: did not find instruction");
+			} // if
+
+			dita->second->update_tree_properties();
+		} // for
+
+		// prune the tree
+		for(auto dita = dmap.begin(); dita != dmap.end(); ++dita) {
+			dependency_t * dep = dita->second;
+			char buffer[1024];
+			sprintf(buffer, "(%d)", int(dep->strahler_number()));
+			std::string label(dep->name() + buffer);
+			dep->set_label(label.c_str());
+#if 0
+			if(!dep->in_tree()) {
+				dep->prune();
+			} // if
+#endif
+		} // for
 
 #if defined(HAVE_GRAPHVIZ)
-		graph.write("test.gv");
+		std::string gvname(fita->getName().str() + ".gv");
+		graph.write(gvname.c_str());
 #endif
 
-#if 0
 		output << "#---------------------------------------" <<
 			"---------------------------------------#" << std::endl;
 		output << "# Module Section: " << fita->getName().str() << std::endl;
@@ -350,255 +310,14 @@ dep->update_graph_properties();
 		output << "BEGIN_MODULE" << std::endl;
 		output << "KEYWORD_NAME " << fita->getName().str() << std::endl;
 
-		instruction_list_t active;
-		instruction_vector_t instructions;
+		/*----------------------------------------------------------------------* 
+		 * Simulate instruction execution.
+		 *----------------------------------------------------------------------*/
 
-		// clear singleton states
-		machine.clear();
-		stats.clear();
-
-		llvm::Value * value = nullptr;
-		instruction_t * inst = nullptr;
-
-		size_t strahler_number(1);
-		size_t expression_depth(1);
-
-	/*-------------------------------------------------------------------------*
-	 * Visit instructions.
-	 *-------------------------------------------------------------------------*/
-
-		while(iita != inst_end(fita) || active.size() > 0) {
-			size_t issued(0);
-			bool issue(true);
-			std::vector<instruction_t *> cycle_issue;
-
-			while(iita != inst_end(fita) && issue &&
-				issued < core.max_issue()) {
-				value = &*iita;
-
-				/*----------------------------------------------------------------*
-				 * Create instruction and add dependencies
-				 *----------------------------------------------------------------*/
-
-				if(inst == nullptr) {
-
-					inst = new instruction_t(decode(&*iita));
-
-					for(unsigned i(0); i<iita->getNumOperands(); ++i) {
-						auto op = processed.find(iita->getOperand(i));
-						if(op != processed.end()) {
-							inst->add_dependency(op->second);
-						} // if
-					} // for
-
-					/*-------------------------------------------------------------*
-					 * Keep track of branching complexity.
-					 *-------------------------------------------------------------*/
-
-					inst->update_graph_properties();
-					strahler_number = std::max(strahler_number,
-						inst->strahler_number());
-					expression_depth = std::max(expression_depth,
-						inst->depth());
-
-					/*-------------------------------------------------------------*
-					 * If an instruction that was previously issed and stalled
-					 * is now ready to execute, we can try for multiple-issue.
-					 *-------------------------------------------------------------*/
-
-					if(issued == 0) {
-						// Check for pending instructions from previous cycles
-						// NOTE: This has to happen before the current instruciton
-						// is added to active!
-						for(auto a = active.begin(); a != active.end(); ++a) {
-							if((*a)->state() == instruction_t::stalled &&
-								(*a)->ready()) {
-								// reset state to staging
-								(*a)->set_state(instruction_t::staging);
-
-								// add to instructions issued this cycle
-								cycle_issue.push_back(*a);
-
-								// update count
-								++issued;
-							} // if
-						} // for
-					} // if
-
-					/*-------------------------------------------------------------*
-					 * Add instruction to active list
-					 *-------------------------------------------------------------*/
-
-					active.push_back(inst);
-				} // if
-
-				/*-------------------------------------------------------------*
-				 * Check for dependencies of this instruction
-				 *
-				 * If the currently queued instruction has any dependencies
-				 * that have not retired, multiple issue cannot happen.
-				 *-------------------------------------------------------------*/
-
-				issue = inst->ready();
-
-				/*-------------------------------------------------------------*
-				 * Check for dependencies within this issue
-				 *
-				 * If the current instruction depends on any other instructions
-				 * that are to be issued this cycle, multiple issue cannot
-				 * happen because the current instruction will immediately
-				 * stall.
-				 *-------------------------------------------------------------*/
-
-				bool cycle_dependency(false);
-				if(issued > 0) {
-					for(auto cita = cycle_issue.begin();
-						cita != cycle_issue.end(); ++cita) {
-						for(auto dita = inst->dependencies().begin();
-							dita != inst->dependencies().end(); ++dita) {
-								if(*dita == *cita) {
-									cycle_dependency = true;
-									break;
-								} // if
-						} // for
-
-						if(cycle_dependency) {
-							break;
-						} // if
-					} // for
-				} // if
-
-				/*-------------------------------------------------------------*
-				 * Check for stalls
-				 *
-				 * If any instruction is stalled, no new instructions
-				 * can be issued.
-				 *-------------------------------------------------------------*/
-
-				bool cycle_stall(false);
-				if(!cycle_dependency) {
-					for(auto a = active.begin(); /* (*a) != inst && */
-						a != active.end(); ++a) {
-						// check for any type of stall from an active instruction
-						if((*a)->state() == instruction_t::stalled) {
-							cycle_stall = true;
-							break;
-						} // if
-					} // for
-				} // if
-
-				/*-------------------------------------------------------------*
-				 * Check to see if this instruction will stall on issue.
-				 *
-				 * The previous check will not catch this because the
-				 * instruction hasn't yet been advanced.
-				 *-------------------------------------------------------------*/
-
-				if(issued > 0 && !issue) {
-					cycle_stall = true;
-				} // if
-
-				/*-------------------------------------------------------------*
-				 * Try to issue
-				 *-------------------------------------------------------------*/
-
-				int32_t id = core.accept(inst);
-				if(!cycle_dependency && !cycle_stall && id >= 0) {
-
-					/*##############################################################
-					 ###############################################################
-					 # Everything that makes it to this point actually gets
-					 # issued and executed.
-					 ###############################################################
-					 *#############################################################*/
-				
-					/*-------------------------------------------------------------*
-					 * Update statistics
-					 *-------------------------------------------------------------*/
-
-					update_stats(&*iita);
-				
-					/*-------------------------------------------------------------*
-					 * Add instruction to this issue
-					 *-------------------------------------------------------------*/
-				
-					cycle_issue.push_back(inst);
-
-					/*-------------------------------------------------------------*
-					 * Add instruction to hash
-					 *-------------------------------------------------------------*/
-
-					processed[value] = inst;
-
-					/*-------------------------------------------------------------*
-					 * Add instruction to issued instructions
-					 *-------------------------------------------------------------*/
-
-					instructions.push_back(inst);
-
-					/*-------------------------------------------------------------*
-					 * Advance LLVM instruction stream
-					 *-------------------------------------------------------------*/
-
-					++issued;
-					++iita;
-					inst = nullptr;
-				}
-				else {
-					// cleanup failed multiple issue attempt
-					if(cycle_stall || issued > 0) {
-
-						// remove current instruction from active list
-						for(auto a = active.begin(); a != active.end(); ++a) {
-							if((*a) == inst) {
-								active.erase(a);
-								break;
-							} // if
-						} // for
-
-						// free the ALU for the current instruction
-						if(id != -1) {
-							core.release(id);
-						} // if
-
-						// delete the instruction
-						delete inst;
-						inst = nullptr;
-					} // if
-
-					issue = false;
-					continue;
-				} // if
-
-				// if multiple issue was possible, update the affected
-				// instruction states
-				if(issued > 1) {
-					for(auto cita = cycle_issue.begin();
-						cita != cycle_issue.end(); ++cita) {
-						(*cita)->set_multiple(issued);
-					} // for
-				} // if
-			} // while
-
-			// update executing instructions
-			auto a = active.begin();
-			while(a != active.end()) {
-				(*a)->advance();
-
-				if((*a)->state() == instruction_t::retired) {
-					active.erase(a++);
-				}
-				else {
-					++a;
-				} // if
-			} // while
-
-			// set state for next cycle
-			core.advance();
-		} // while
+		process(inst_begin(fita), inst_end(fita), dmap, retired);
 
 		output << "# Primitive Statistics" << std::endl;
-		output << "KEYWORD_INSTRUCTIONS " << instructions.size() << std::endl;
+		output << "KEYWORD_INSTRUCTIONS " << retired.size() << std::endl;
 		output << "KEYWORD_CYCLES " << machine.current() << std::endl;
 		output << "KEYWORD_STACK_ALLOCATIONS " <<
 			stats["allocas"] << std::endl;
@@ -611,23 +330,22 @@ dep->update_graph_properties();
 		output << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
 		output << "# Derived Statistics" << std::endl;
 		output << "KEYWORD_CYCLES_PER_INSTRUCTION " <<
-			instructions.size()/double(machine.current()) << std::endl;
+			retired.size()/double(machine.current()) << std::endl;
 		output << "KEYWORD_BALANCE " <<
 			stats["flops"]/double(stats["load bytes"]) << std::endl;
-		output << "KEYWORD_STRAHLER " << strahler_number << std::endl;
-		output << "KEYWORD_DEPTH " << expression_depth << std::endl;
+		output << "KEYWORD_STRAHLER " << stats["strahler"] << std::endl;
+		output << "KEYWORD_DEPTH " << stats["depth"] << std::endl;
 		output << "KEYWORD_BETA " <<
-			double(strahler_number)/expression_depth << std::endl;
+			double(stats["strahler"])/stats["depth"] << std::endl;
 		output << "# Pipeline" << std::endl;
 		output << "BEGIN_INSTRUCTION_STREAM" << std::endl;
 
-		for(auto out = instructions.begin(); out != instructions.end(); ++out) {
+		for(auto out = retired.begin(); out != retired.end(); ++out) {
 			output << (*out)->string() << std::endl;
 		} // for
 
 		output << "END_INSTRUCTION_STREAM" << std::endl;
 		output << "END_MODULE" << std::endl;
-#endif
 	} // for
 } // simulator_t::simulator_t
 
@@ -636,11 +354,245 @@ simulator_t::~simulator_t()
 	delete core_;
 } // simulator_t::~simulator_t
 
-void simulator_t::run(llvm::inst_iterator & begin, llvm::inst_iterator & end,
-	instruction_vector_t & module) {
-} // simulator_t::run
+void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
+	const dependency_map_t & dmap, instruction_vector_t & retired) {
+	machine_state_t & machine = machine_state_t::instance();
+	statistics_t & stats = statistics_t::instance();
 
-void simulator_t::update_stats(llvm::Instruction * instruction) {
+	// clear states
+	machine.clear();
+	stats.clear();
+	retired.clear();
+
+	/*----------------------------------------------------------------------*
+	 * Visit instructions.
+	 *----------------------------------------------------------------------*/
+
+	instruction_t * inst(nullptr);
+	instruction_list_t active;
+	auto iita = begin;
+	while(iita != end || active.size() > 0) {
+		size_t issued(0);
+		bool issue(true);
+		std::vector<instruction_t *> cycle_issue;
+
+		while(iita != end && issue && issued < core_->max_issue()) {
+
+			/*----------------------------------------------------------------*
+			 * Create instruction and add dependencies
+			 *----------------------------------------------------------------*/
+
+			if(inst == nullptr) {
+
+				//inst = new instruction_t(decode(&*iita));
+				auto dita(dmap.find(&*iita));
+
+				if(dita == dmap.end()) {
+					ExitOnError("Instruction not found", ska::AssertionFailed);
+				} // if
+
+				inst = dynamic_cast<instruction_t *>(dita->second);
+
+				/*-------------------------------------------------------------*
+				 * Keep track of branching complexity and depth.
+				 *-------------------------------------------------------------*/
+
+				stats["strahler"] = std::max(stats["strahler"],
+					inst->strahler_number());
+				stats["depth"] = std::max(stats["depth"],
+					inst->depth());
+
+				/*-------------------------------------------------------------*
+				 * If an instruction that was previously issed and stalled
+				 * is now ready to execute, we can try for multiple-issue.
+				 *-------------------------------------------------------------*/
+
+				if(issued == 0) {
+					// Check for pending instructions from previous cycles
+					// NOTE: This has to happen before the current instruciton
+					// is added to active!
+					for(auto a = active.begin(); a != active.end(); ++a) {
+						if((*a)->state() == instruction_t::stalled &&
+							(*a)->ready()) {
+							// reset state to staging
+							(*a)->set_state(instruction_t::staging);
+
+							// add to instructions issued this cycle
+							cycle_issue.push_back(*a);
+
+							// update count
+							++issued;
+						} // if
+					} // for
+				} // if
+
+				/*-------------------------------------------------------------*
+				 * Add instruction to active list
+				 *-------------------------------------------------------------*/
+
+				active.push_back(inst);
+			} // if
+
+			/*-------------------------------------------------------------*
+			 * Check for dependencies of this instruction
+			 *
+			 * If the currently queued instruction has any dependencies
+			 * that have not retired, multiple issue cannot happen.
+			 *-------------------------------------------------------------*/
+
+			issue = inst->ready();
+
+			/*-------------------------------------------------------------*
+			 * Check for dependencies within this issue
+			 *
+			 * If the current instruction depends on any other instructions
+			 * that are to be issued this cycle, multiple issue cannot
+			 * happen because the current instruction will immediately
+			 * stall.
+			 *-------------------------------------------------------------*/
+
+			bool cycle_dependency(false);
+			if(issued > 0) {
+				for(auto cita = cycle_issue.begin();
+					cita != cycle_issue.end(); ++cita) {
+					for(auto dita = inst->dependencies().begin();
+						dita != inst->dependencies().end(); ++dita) {
+							if(*dita == *cita) {
+								cycle_dependency = true;
+								break;
+							} // if
+					} // for
+
+					if(cycle_dependency) {
+						break;
+					} // if
+				} // for
+			} // if
+
+			/*-------------------------------------------------------------*
+			 * Check for stalls
+			 *
+			 * If any instruction is stalled, no new instructions
+			 * can be issued.
+			 *-------------------------------------------------------------*/
+
+			bool cycle_stall(false);
+			if(!cycle_dependency) {
+				for(auto a = active.begin(); /* (*a) != inst && */
+					a != active.end(); ++a) {
+					// check for any type of stall from an active instruction
+					if((*a)->state() == instruction_t::stalled) {
+						cycle_stall = true;
+						break;
+					} // if
+				} // for
+			} // if
+
+			/*-------------------------------------------------------------*
+			 * Check to see if this instruction will stall on issue.
+			 *
+			 * The previous check will not catch this because the
+			 * instruction hasn't yet been advanced.
+			 *-------------------------------------------------------------*/
+
+			if(issued > 0 && !issue) {
+				cycle_stall = true;
+			} // if
+
+			/*-------------------------------------------------------------*
+			 * Try to issue
+			 *-------------------------------------------------------------*/
+
+			int32_t id = core_->accept(inst);
+			if(!cycle_dependency && !cycle_stall && id >= 0) {
+
+				/*##############################################################
+				 ###############################################################
+				 # Everything that makes it to this point actually gets
+				 # issued and executed.
+				 ###############################################################
+				 *#############################################################*/
+			
+				/*-------------------------------------------------------------*
+				 * Update statistics
+				 *-------------------------------------------------------------*/
+
+				update_opcount(&*iita);
+			
+				/*-------------------------------------------------------------*
+				 * Add instruction to this issue
+				 *-------------------------------------------------------------*/
+			
+				cycle_issue.push_back(inst);
+
+				/*-------------------------------------------------------------*
+				 * Add instruction to processed instructions.
+				 *-------------------------------------------------------------*/
+
+				retired.push_back(inst);
+
+				/*-------------------------------------------------------------*
+				 * Advance LLVM instruction stream.
+				 *-------------------------------------------------------------*/
+
+				++issued;
+				++iita;
+				inst = nullptr;
+			}
+			else {
+				// cleanup failed multiple issue attempt
+				if(cycle_stall || issued > 0) {
+
+					// remove current instruction from active list
+					for(auto a = active.begin(); a != active.end(); ++a) {
+						if((*a) == inst) {
+							active.erase(a);
+							break;
+						} // if
+					} // for
+
+					// free the ALU for the current instruction
+					if(id != -1) {
+						core_->release(id);
+					} // if
+
+					// reset instruction
+					inst = nullptr;
+				} // if
+
+				issue = false;
+				continue;
+			} // if
+
+			// if multiple issue was possible, update the affected
+			// instruction states
+			if(issued > 1) {
+				for(auto cita = cycle_issue.begin();
+					cita != cycle_issue.end(); ++cita) {
+					(*cita)->set_multiple(issued);
+				} // for
+			} // if
+		} // while
+
+		// update executing instructions
+		auto a = active.begin();
+		while(a != active.end()) {
+			(*a)->advance();
+
+			if((*a)->state() == instruction_t::retired) {
+				active.erase(a++);
+			}
+			else {
+				++a;
+			} // if
+		} // while
+
+		// set state for next cycle
+		core_->advance();
+	} // while
+} // simulator_t::process
+
+void simulator_t::update_opcount(llvm::Instruction * instruction) {
 	statistics_t & stats = statistics_t::instance();
 
 	switch(instruction->getOpcode()) {
@@ -781,7 +733,7 @@ void simulator_t::update_stats(llvm::Instruction * instruction) {
 				ExitOnError("Unhandled Instruction", ska::UnknownCase);
 			} // scope
 	} // switch
-} // simulator_t::update_stats
+} // simulator_t::update_opcount
 
 size_t simulator_t::bytes(llvm::Type * type) {
 	switch(type->getTypeID()) {

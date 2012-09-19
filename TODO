@@ -12,6 +12,8 @@
 -	Add type information to Strahler number computation in preparation of
 	register support.
 
+-  Add tree pruning for graphviz.
+
 # Not so urgent:
 
 -	Add register allocation heuristics.  This could be difficult...
