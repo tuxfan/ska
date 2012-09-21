@@ -15,9 +15,13 @@
 #include <Parameters.hh>
 #include <Simulator.hh>
 
-#define USAGE(s)															\
-	std::cerr << "usage: " << (s) << " [-o output file]" <<	\
-	" architecture ir" << std::endl;									\
+#define USAGE(s)																				\
+	std::cerr << "Usage: " << (s) << " -v [-l log file]" <<						\
+	" [-o output file]" <<	" architecture ir" <<									\
+	std::endl << std::endl << "Options:" << std::endl <<							\
+	"  -v      Turn on verbose output (default: stderr)" << std::endl <<		\
+	"  -l file Specify a file for log output (implies -v)" << std::endl <<	\
+	"  -o file Specify a file for pipeline output" << std::endl;				\
 	std::exit(1);
 
 int main(int argc, char ** argv) {
@@ -39,13 +43,16 @@ int main(int argc, char ** argv) {
 	extern char * optarg;
 	extern int optind;
 
-	while((ch = getopt(argc, argv, "o:l:")) != -1) {
+	while((ch = getopt(argc, argv, "vo:l:")) != -1) {
 		switch(ch) {
 			case 'o':
-				file_io_t::instance().set_out_stream(optarg);
+				ska::file_io_t::instance().set_out_stream(optarg);
 				break;
 			case 'l':
-				file_io_t::instance().set_log_stream(optarg);
+				ska::file_io_t::instance().set_log_stream(optarg);
+				break;
+			case 'v':
+				ska::file_io_t::instance().set_verbose();
 				break;
 			default:
 				USAGE(program.c_str());

@@ -141,11 +141,24 @@ simulator_t::simulator_t(const char * ir_file)
 		std::endl << std::endl;
 	
 	/*-------------------------------------------------------------------------*
+	 * Start log information.
+	 *-------------------------------------------------------------------------*/
+
+	std::ostream & log = file_io_t::instance().log_stream();
+	log << "#---------------------------------------" <<
+		"---------------------------------------#" << std::endl;
+	log << "# Static Kernel Analyzer (SKA) Log Output" << std::endl;
+	log << "#---------------------------------------" <<
+		"---------------------------------------#" << std::endl;
+
+	/*-------------------------------------------------------------------------*
 	 * Initialize core.
 	 *-------------------------------------------------------------------------*/
 	
 	size_t max_issue;
 	arch.getval(max_issue, "core::max_issue");
+
+	log << " --- Creating Core ---" << std::endl;
 	core_ = new core_t(max_issue);
 
 	size_t lus;
@@ -164,6 +177,9 @@ simulator_t::simulator_t(const char * ir_file)
 		char * ops = new char[tmp.size()+1];
 		strcpy(ops, tmp.c_str());
 
+		log << " LU " << i << std::endl;
+		log << " ops handled: " << ops << std::endl;
+
 		char * tok = strtok(ops, " ");
 
 		while(tok != nullptr) {
@@ -180,6 +196,8 @@ simulator_t::simulator_t(const char * ir_file)
 
 		char * types = new char[tmp.size()+1];
 		strcpy(types, tmp.c_str());
+
+		log << " types handled: " << types << std::endl << std::endl;
 
 		tok = strtok(types, " ");
 
@@ -199,6 +217,8 @@ simulator_t::simulator_t(const char * ir_file)
 	 * Get parsed LLVM IR.
 	 *-------------------------------------------------------------------------*/
 
+	log << " --- Reading IR File ---" << std::endl;
+	log << " " << ir_file << std::endl << std::endl;
 	llvm_module_ = ParseIRFile(ir_file, llvm_err_, llvm_context_);
 
 	if(llvm_module_ == nullptr) {
@@ -213,8 +233,12 @@ simulator_t::simulator_t(const char * ir_file)
 	instruction_vector_t retired;
 	machine_state_t & machine = machine_state_t::instance();
 	statistics_t & stats = statistics_t::instance();
+
+	log << " --- Processing Module ---" << std::endl;
 	for(llvm::Module::iterator fita = llvm_module_->begin();
 		fita != llvm_module_->end(); ++fita) {
+
+		log << " Function " << fita->getName().str() << std::endl;
 
 		// skip degnerate functions and declarations
 		if(inst_begin(fita) == inst_end(fita)) {
@@ -232,6 +256,7 @@ simulator_t::simulator_t(const char * ir_file)
 		 * we need to add dependency information.
 		 *----------------------------------------------------------------------*/
 
+		log << "  creating dependency map" << std::endl;
 		dependency_map_t dmap;
 
 		// function arguments
@@ -273,6 +298,7 @@ simulator_t::simulator_t(const char * ir_file)
 		 * Update tree properties
 		 *----------------------------------------------------------------------*/
 
+		log << "  updating tree properties" << std::endl;
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
 			auto dita = dmap.find(&*iita);
 
@@ -314,8 +340,10 @@ simulator_t::simulator_t(const char * ir_file)
 		 * Simulate instruction execution.
 		 *----------------------------------------------------------------------*/
 
+		log << "  beginning simulation" << std::endl;
 		process(inst_begin(fita), inst_end(fita), dmap, retired);
 
+		log << "  writing output" << std::endl;
 		output << "# Primitive Statistics" << std::endl;
 		output << "KEYWORD_INSTRUCTIONS " << retired.size() << std::endl;
 		output << "KEYWORD_CYCLES " << machine.current() << std::endl;
@@ -358,6 +386,7 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 	const dependency_map_t & dmap, instruction_vector_t & retired) {
 	machine_state_t & machine = machine_state_t::instance();
 	statistics_t & stats = statistics_t::instance();
+	std::ostream & log = file_io_t::instance().log_stream();
 
 	// clear states
 	machine.clear();
@@ -425,12 +454,6 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 						} // if
 					} // for
 				} // if
-
-				/*-------------------------------------------------------------*
-				 * Add instruction to active list
-				 *-------------------------------------------------------------*/
-
-				active.push_back(inst);
 			} // if
 
 			/*-------------------------------------------------------------*
@@ -506,6 +529,9 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 			int32_t id = core_->accept(inst);
 			if(!cycle_dependency && !cycle_stall && id >= 0) {
 
+				log << "  issued " << inst->name() <<
+					"(" << machine.current() << ")" << std::endl;
+
 				/*##############################################################
 				 ###############################################################
 				 # Everything that makes it to this point actually gets
@@ -519,6 +545,12 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 
 				update_opcount(&*iita);
 			
+				/*-------------------------------------------------------------*
+				 * Add instruction to active list
+				 *-------------------------------------------------------------*/
+
+				active.push_back(inst);
+
 				/*-------------------------------------------------------------*
 				 * Add instruction to this issue
 				 *-------------------------------------------------------------*/
@@ -540,17 +572,16 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 				inst = nullptr;
 			}
 			else {
+				// remove current instruction from active list
+				for(auto a = active.begin(); a != active.end(); ++a) {
+					if((*a) == inst) {
+						active.erase(a);
+						break;
+					} // if
+				} // for
+
 				// cleanup failed multiple issue attempt
 				if(cycle_stall || issued > 0) {
-
-					// remove current instruction from active list
-					for(auto a = active.begin(); a != active.end(); ++a) {
-						if((*a) == inst) {
-							active.erase(a);
-							break;
-						} // if
-					} // for
-
 					// free the ALU for the current instruction
 					if(id != -1) {
 						core_->release(id);

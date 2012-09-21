@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <fstream>
+#include <fstream>
+
+namespace ska {
 
 class file_io_t
 {
@@ -12,6 +15,10 @@ public:
 		static file_io_t f;
 		return f;
 	} // instance
+
+	void set_verbose() {
+		log_stream_->rdbuf(std::cerr.rdbuf());
+	} // set_verbose
 
 	void set_log_stream(const char * name) {
 		if(log_file_ != nullptr) {
@@ -53,11 +60,11 @@ private:
 	file_io_t()
 		: log_file_(nullptr), out_file_(nullptr),
 		log_stream_(nullptr), out_stream_(nullptr) {
-		std::streambuf * log_stream_buf = std::cerr.rdbuf();
-		std::streambuf * out_stream_buf = std::cout.rdbuf();
+		log_stream_ = new std::ostream(std::cerr.rdbuf());
+		out_stream_ = new std::ostream(std::cout.rdbuf());
 
-		log_stream_ = new std::ostream(log_stream_buf);
-		out_stream_ = new std::ostream(out_stream_buf);
+		// default log output is /dev/null
+		set_log_stream("/dev/null");
 	}
 
 	file_io_t(const file_io_t &) {}
@@ -82,5 +89,7 @@ private:
 	std::ostream * log_stream_;
 	std::ostream * out_stream_;
 }; // file_io_t
+
+} // namespace ska
 
 #endif // FileIO_hh

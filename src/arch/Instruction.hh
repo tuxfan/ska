@@ -107,7 +107,7 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	void update_tree_properties() {
-		if(!is_memory_access_op(props_.opcode)) {
+//		if(!is_memory_access_op(props_.opcode)) {
 			size_t _strahler_max(1);
 			size_t _depth_max(1);
 			for(auto ita = depends_.begin(); ita != depends_.end(); ++ita) {
@@ -125,7 +125,7 @@ public:
 
 			strahler_ = _num_with_smax > 1 ? _strahler_max + 1 : _strahler_max;
 			depth_ = _depth_max + 1;
-		} // if
+//		} // if
 
 		switch(props_.opcode) {
 			case llvm::Instruction::Load:
