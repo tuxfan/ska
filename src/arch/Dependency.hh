@@ -41,7 +41,7 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	dependency_t(std::string name, state_t state = retired)
-		: name_(name), state_(state), strahler_(1), depth_(1)
+		: name_(name), state_(state), strahler_(1), depth_(0)
 #if defined(HAVE_GRAPHVIZ)
 		, agnode_(nullptr)
 #endif
