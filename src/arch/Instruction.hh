@@ -58,7 +58,7 @@ public:
 
 	instruction_t(instruction_properties_t props)
 		: dependency_t(props.name), props_(props), alu_(-1),
-		multiple_(1), cycles_(0), issued_(0), retired_(0),
+		multiple_(1), cycles_(0), stalls_(0), issued_(0), retired_(0),
 		machine_(machine_state_t::instance()) {
 		// remove weird returns from IR
 		size_t offset = props_.ir.find_first_of('\n');
@@ -143,6 +143,10 @@ public:
 			case llvm::Instruction::FRem:
 				set_style("filled");
 				set_fill_color("lightseagreen");
+				break;
+			case llvm::Instruction::Call:
+				set_style("filled");
+				set_fill_color("seagreen1");
 				break;
 		} // switch
 	} // update_tree_properties
@@ -302,6 +306,7 @@ public:
 			if((*ita)->state() != retired) {
 				state_ = stalled;
 				stream_ << '-';
+				++stalls_;
 				return;
 			} // if
 
@@ -316,6 +321,7 @@ public:
 			state_ = stalled;
 			issued_ = machine_.current() + 1;
 			stream_ << '-';
+			++stalls_;
 			return;
 		} // if
 
@@ -431,6 +437,14 @@ public:
 			std::numeric_limits<size_t>::max();
 	} // cycle_retired
 
+	/*-------------------------------------------------------------------------*
+	 * Return number of cycles this instruction stalled.
+	 *-------------------------------------------------------------------------*/
+
+	size_t stalls() const {
+		return stalls_;
+	} // stalls
+
 private:
 
 	instruction_properties_t props_;
@@ -438,6 +452,7 @@ private:
 	int32_t alu_;
 	int32_t multiple_;
 	size_t cycles_;
+	size_t stalls_;
 	size_t issued_;
 	size_t retired_;
 

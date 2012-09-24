@@ -352,6 +352,14 @@ simulator_t::simulator_t(const char * ir_file)
 		output << "KEYWORD_STACK_ALLOCATION_BYTES " <<
 			stats["alloca bytes"] << std::endl;
 		output << "KEYWORD_FLOPS " << stats["flops"] << std::endl;
+
+		// count stall cycles
+		size_t stalls(0);
+		for(auto rita = retired.begin(); rita != retired.end(); ++rita) {
+			stalls += (*rita)->stalls();
+		} // for
+
+		output << "KEYWORD_STALLS " << stalls << std::endl;
 		output << "KEYWORD_LOADS " << stats["loads"] << std::endl;
 		output << "KEYWORD_LOAD_BYTES " << stats["load bytes"] << std::endl;
 		output << "KEYWORD_STORES " << stats["stores"] << std::endl;
