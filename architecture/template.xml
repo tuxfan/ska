@@ -1041,6 +1041,15 @@
 	<real>1</real>
 </value>
 
+<!-- float -->
+<value key="latency::sqrtf::float">
+	<size>56</size>
+</value>
+
+<value key="reciprocal::sqrtf::float">
+	<real>1</real>
+</value>
+
 <!-- double -->
 <value key="latency::sqrt::double">
 	<size>114</size>

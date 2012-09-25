@@ -15,7 +15,7 @@ bin_SCRIPTS = \
 
 CLEANFILES = ${bin_SCRIPTS}
 
-INCLUDES = -I${top_srcdir}/src/include \
+AM_CPPFLAGS = -I${top_srcdir}/src/include \
 	@EXTRA_CPPFLAGS@
 
 ska_SOURCES = \

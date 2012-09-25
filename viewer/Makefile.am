@@ -10,7 +10,7 @@
 bin_PROGRAMS = \
 	skaview
 
-INCLUDES = -I${top_srcdir}/viewer \
+AM_CPPFLAGS = -I${top_srcdir}/viewer \
 	@VIEWER_CPPFLAGS@
 
 EXTRA_DIST = \

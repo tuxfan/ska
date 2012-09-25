@@ -367,9 +367,13 @@ simulator_t::simulator_t(const char * ir_file)
 		output << "# Derived Statistics" << std::endl;
 		output << "KEYWORD_CYCLES_PER_INSTRUCTION " <<
 			retired.size()/double(machine.current()) << std::endl;
-		output << "KEYWORD_BALANCE " <<
-			stats["flops"]/double(stats["load bytes"]) << std::endl;
+
+		double balance = stats["load bytes"] == 0 ? 0.0 :
+			stats["flops"]/double(stats["load bytes"]);
+		output << "KEYWORD_BALANCE " << balance << std::endl;
 		output << "KEYWORD_STRAHLER " << stats["strahler"] << std::endl;
+		output << "KEYWORD_LEWIN " <<
+			double(retired.size())/stats["depth"] << std::endl;
 		output << "KEYWORD_DEPTH " << stats["depth"] << std::endl;
 		output << "KEYWORD_BETA " <<
 			double(stats["strahler"])/stats["depth"] << std::endl;
