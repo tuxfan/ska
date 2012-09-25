@@ -10,10 +10,6 @@
 #ifndef Simulator_hh
 #define Simulator_hh
 
-#if defined(USE_MANGLED_CALL_NAMES)
-#include <cxxabi.h>
-#endif
-
 #include <string>
 #include <cstring>
 #include <vector>
@@ -324,8 +320,9 @@ simulator_t::simulator_t(const char * ir_file)
 		} // for
 
 #if defined(HAVE_GRAPHVIZ)
-		std::string gvname(fita->getName().str() + ".gv");
-		graph.write(gvname.c_str());
+		std::string gvname =
+			try_demangle_and_strip(fita->getName().str()) + ".gv";
+		graph.write(gvname);
 #endif
 
 		output << "#---------------------------------------" <<

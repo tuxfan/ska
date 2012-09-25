@@ -61,7 +61,7 @@ simd_flags="-msse -msse2 -msse3 -msse4.1 -msse4.2 -msse4 -msse4a -mavx -mavx2"
 if [ -n "$SKAIR_FLAGS" ] ; then
 	opt_flags=$SKAIR_FLAGS
 else
-	opt_flags="-O3"
+	opt_flags="-O2"
 fi
 
 #------------------------------------------------------------------------------#

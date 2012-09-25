@@ -1,6 +1,10 @@
 #ifndef Decode_hh
 #define Decode_hh
 
+#if defined(USE_MANGLED_CALL_NAMES)
+	#include <cxxabi.h>
+#endif
+
 #include <llvm/Instruction.h>
 
 #include <Parameters.hh>
@@ -402,7 +406,8 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 			std::string call;
 			std::string name = cinst->getCalledFunction()->getName().str();
 
-#if defined(USE_MANGLED_CALL_NAMES)
+			name = try_demangle_and_strip(name);
+#if defined(USE_MANGLED_CALL_NAMES) && 0
 			int status;
 			char * um_name = abi::__cxa_demangle(name.c_str(), 0, 0, &status);
 			name = um_name;

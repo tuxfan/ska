@@ -187,6 +187,10 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	// FIXME: May need to check that a valid layout exists.
+	void write(const std::string & name) {
+		write(name.c_str());
+	} // write
+
 	void write(const char * name) {
 		FILE * file = fopen(name, "w");
 

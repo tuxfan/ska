@@ -17,6 +17,8 @@
 #include <typeinfo>
 #include <string>
 
+#include <cxxabi.h>
+
 #include <sys/stat.h>
 
 namespace ska {
@@ -74,6 +76,25 @@ std::string try_file(const char * file, const char * var = nullptr) {
 /*----------------------------------------------------------------------------*
  * Miscellaneous
  *----------------------------------------------------------------------------*/
+
+std::string try_demangle(const std::string & name) {
+	std::string dname = name;
+
+	if(name[0] == '_' && name[1] == 'Z') {
+		int status;
+		char * um_name = abi::__cxa_demangle(name.c_str(), 0, 0, &status);
+		dname = um_name;
+		delete um_name;
+	} // if
+
+	return dname;
+} // try_demangle
+
+std::string try_demangle_and_strip(const std::string & name) {
+	std::string dname = try_demangle(name);
+	dname = dname.substr(0, dname.find_first_of("("));
+	return dname;
+} // try_demangle_and_strip
 
 uint32_t nanodelay(uint32_t i);
 double waste_time(std::size_t n);
