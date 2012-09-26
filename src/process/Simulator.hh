@@ -234,7 +234,8 @@ simulator_t::simulator_t(const char * ir_file)
 	for(llvm::Module::iterator fita = llvm_module_->begin();
 		fita != llvm_module_->end(); ++fita) {
 
-		log << " Function " << fita->getName().str() << std::endl;
+		std::string fname = try_demangle_and_strip(fita->getName().str());
+		log << " Function " << fname << std::endl;
 
 		// skip degnerate functions and declarations
 		if(inst_begin(fita) == inst_end(fita)) {
@@ -320,18 +321,16 @@ simulator_t::simulator_t(const char * ir_file)
 		} // for
 
 #if defined(HAVE_GRAPHVIZ)
-		std::string gvname =
-			try_demangle_and_strip(fita->getName().str()) + ".gv";
-		graph.write(gvname);
+		graph.write(fname + ".gv");
 #endif
 
 		output << "#---------------------------------------" <<
 			"---------------------------------------#" << std::endl;
-		output << "# Module Section: " << fita->getName().str() << std::endl;
+		output << "# Module Section: " << fname << std::endl;
 		output << "#---------------------------------------" <<
 			"---------------------------------------#" << std::endl;
 		output << "BEGIN_MODULE" << std::endl;
-		output << "KEYWORD_NAME " << fita->getName().str() << std::endl;
+		output << "KEYWORD_NAME " << fname << std::endl;
 
 		/*----------------------------------------------------------------------* 
 		 * Simulate instruction execution.
@@ -344,11 +343,6 @@ simulator_t::simulator_t(const char * ir_file)
 		output << "# Primitive Statistics" << std::endl;
 		output << "KEYWORD_INSTRUCTIONS " << retired.size() << std::endl;
 		output << "KEYWORD_CYCLES " << machine.current() << std::endl;
-		output << "KEYWORD_STACK_ALLOCATIONS " <<
-			stats["allocas"] << std::endl;
-		output << "KEYWORD_STACK_ALLOCATION_BYTES " <<
-			stats["alloca bytes"] << std::endl;
-		output << "KEYWORD_FLOPS " << stats["flops"] << std::endl;
 
 		// count stall cycles
 		size_t stalls(0);
@@ -357,6 +351,13 @@ simulator_t::simulator_t(const char * ir_file)
 		} // for
 
 		output << "KEYWORD_STALLS " << stalls << std::endl;
+
+		output << "KEYWORD_STACK_ALLOCATIONS " <<
+			stats["allocas"] << std::endl;
+		output << "KEYWORD_STACK_ALLOCATION_BYTES " <<
+			stats["alloca bytes"] << std::endl;
+		output << "KEYWORD_FLOPS " << stats["flops"] << std::endl;
+
 		output << "KEYWORD_LOADS " << stats["loads"] << std::endl;
 		output << "KEYWORD_LOAD_BYTES " << stats["load bytes"] << std::endl;
 		output << "KEYWORD_STORES " << stats["stores"] << std::endl;
