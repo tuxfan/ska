@@ -285,7 +285,7 @@ simulator_t::simulator_t(const char * ir_file)
 				if(op != dmap.end()) {
 					dep->add_dependency(op->second);
 #if defined(HAVE_GRAPHVIZ)
-					graph.add_edge(dep->agnode(), op->second->agnode());	
+					graph.add_edge(dep->agnode(), op->second->agnode());
 #endif
 				} // if
 			} // for

@@ -18,6 +18,8 @@ const char * gv_fill_color = "fillcolor";
 const char * gv_fill_color_default = "lightgrey";
 const char * gv_font_color = "fontcolor";
 const char * gv_font_color_default = "black";
+const char * gv_dir = "dir";
+const char * gv_dir_default = "back";
 
 #define GV_GRAPH const_cast<char *>(gv_graph)
 #define GV_LABEL const_cast<char *>(gv_label)
@@ -30,6 +32,10 @@ const char * gv_font_color_default = "black";
 #define GV_FILL_COLOR_DEFAULT const_cast<char *>(gv_fill_color_default)
 #define GV_FONT_COLOR const_cast<char *>(gv_font_color)
 #define GV_FONT_COLOR_DEFAULT const_cast<char *>(gv_font_color_default)
+#define GV_DIR const_cast<char *>(gv_dir)
+#define GV_DIR_DEFAULT const_cast<char *>(gv_dir_default)
+
+
 
 /*----------------------------------------------------------------------------*
  * Class for creating Graphviz trees.
@@ -62,12 +68,15 @@ public:
 
 		graph_ = agopen(GV_GRAPH, AGDIGRAPH);
 
-		// set default attributes
+		// set default node attributes
 		agnodeattr(graph_, GV_LABEL, GV_LABEL_DEFAULT);
 		agnodeattr(graph_, GV_COLOR, GV_COLOR_DEFAULT);
 		agnodeattr(graph_, GV_STYLE, GV_STYLE_DEFAULT);
 		agnodeattr(graph_, GV_FILL_COLOR, GV_FILL_COLOR_DEFAULT);
 		agnodeattr(graph_, GV_FONT_COLOR, GV_FONT_COLOR_DEFAULT);
+
+		// set default edge attributes
+		agedgeattr(graph_, GV_DIR, GV_DIR_DEFAULT);
 	} // clear
 
 	/*-------------------------------------------------------------------------*
@@ -170,6 +179,15 @@ public:
 	Agedge_t * add_edge(Agnode_t * parent, Agnode_t * child) {
 		return agedge(graph_, parent, child);	
 	} // add_edge
+
+	void set_edge_attribute(Agedge_t * edge, const char * attr,
+		const char * value) {
+		char _attr[1024];
+		char _value[1024];
+		sprintf(_attr, "%s", attr);
+		sprintf(_value, "%s", value);
+		agset(edge, _attr, _value);
+	} // set_edge_attribute
 
 	/*-------------------------------------------------------------------------*
 	 * Compute a layout using the specified engine.
