@@ -4,6 +4,15 @@
 # All rights reserved.
 ################################################################################
 
+# get version info
+raw_version=`config/make_lib_version`
+major=`echo $raw_version | sed 's,:, ,g' | awk '{print $1}'`
+minor=`echo $raw_version | sed 's,:, ,g' | awk '{print $3}'`
+build=`echo $raw_version | sed 's,:, ,g' | awk '{print $2}'`
+
+libska="libska_"$major"_"$minor"_"$build
+libskadash="libska-"$major"."$minor"."$build
+
 # OS X sucks!
 find_exec="find" && [ `uname -o` == "Darwin" ] && find_exec="find -E"
 src_str=".*\.\(c*\|f90\)" && [ `uname -o` == "Darwin" ] && \
@@ -23,12 +32,14 @@ echo "#-------------------------------------------------------------------------
 echo "# General Settings"
 echo "#------------------------------------------------------------------------------#"
 echo
+#echo "lib_LTLIBRARIES = $libskadash.la"
 echo "lib_LTLIBRARIES = libska.la"
 echo
 echo "AM_CPPFLAGS = -I\${top_srcdir}/src/include \\"
 echo "	-I\${top_builddir}/local \\"
 echo "   @EXTRA_CPPFLAGS@"
 echo
+#echo $libska"_includedir = \${includedir}"
 echo "libska_includedir = \${includedir}"
 
 echo
@@ -36,6 +47,7 @@ echo "#-------------------------------------------------------------------------
 echo "# Headers"
 echo "#------------------------------------------------------------------------------#"
 echo
+#echo $libska"_include_HEADERS = \\"
 echo "libska_include_HEADERS = \\"
 
 numfiles=`$find_exec src -type f -regex '.*\.h*' | wc -l`
@@ -54,6 +66,7 @@ echo "#-------------------------------------------------------------------------
 echo "# Sources"
 echo "#------------------------------------------------------------------------------#"
 echo
+#echo $libska"_la_SOURCES = \\"
 echo "libska_la_SOURCES = \\"
 
 numfiles=`$find_exec src -type f -regex $src_str | wc -l`
@@ -68,6 +81,8 @@ for file in `$find_exec src -type f -regex $src_str | sort` ; do
 done
 
 echo
-echo "libska_la_LDFLAGS = -version-info @VERSION_INFORMATION@ \\"
+#echo $libska"_la_LDFLAGS = -version-info $raw_version \\"
+echo "libska_la_LDFLAGS = -version-info $raw_version \\"
 echo "	@EXTRA_LDFLAGS@"
+#echo $libska"_la_LIBADD = @EXTRA_LIBS@"
 echo "libska_la_LIBADD = @EXTRA_LIBS@"

@@ -352,12 +352,14 @@ simulator_t::simulator_t(const char * ir_file)
 
 		output << "KEYWORD_STALLS " << stalls << std::endl;
 
+		output << "KEYWORD_FLOPS " << stats["flops"] << std::endl;
+		output << "KEYWORD_IOPS " << stats["iops"] << std::endl;
+		output << "KEYWORD_BRANCHES " << stats["branches"] << std::endl;
+
 		output << "KEYWORD_STACK_ALLOCATIONS " <<
 			stats["allocas"] << std::endl;
 		output << "KEYWORD_STACK_ALLOCATION_BYTES " <<
 			stats["alloca bytes"] << std::endl;
-		output << "KEYWORD_FLOPS " << stats["flops"] << std::endl;
-
 		output << "KEYWORD_LOADS " << stats["loads"] << std::endl;
 		output << "KEYWORD_LOAD_BYTES " << stats["load bytes"] << std::endl;
 		output << "KEYWORD_STORES " << stats["stores"] << std::endl;
@@ -640,10 +642,9 @@ void simulator_t::update_opcount(llvm::Instruction * instruction) {
 		case llvm::Instruction::Ret:
 			break;
 		case llvm::Instruction::Br:
-			break;
 		case llvm::Instruction::Switch:
-			break;
 		case llvm::Instruction::IndirectBr:
+			stats["branches"]++;
 			break;
 		case llvm::Instruction::Invoke:
 			break;
@@ -652,30 +653,37 @@ void simulator_t::update_opcount(llvm::Instruction * instruction) {
 		case llvm::Instruction::Unreachable:
 			break;
 		case llvm::Instruction::Add:
+			stats["iops"]++;
 			break;
 		case llvm::Instruction::FAdd:
 			stats["flops"]++;
 			break;
 		case llvm::Instruction::Sub:
+			stats["iops"]++;
 			break;
 		case llvm::Instruction::FSub:
 			stats["flops"]++;
 			break;
 		case llvm::Instruction::Mul:
+			stats["iops"]++;
 			break;
 		case llvm::Instruction::FMul:
 			stats["flops"]++;
 			break;
 		case llvm::Instruction::UDiv:
+			stats["iops"]++;
 			break;
 		case llvm::Instruction::SDiv:
+			stats["iops"]++;
 			break;
 		case llvm::Instruction::FDiv:
 			stats["flops"]++;
 			break;
 		case llvm::Instruction::URem:
+			stats["iops"]++;
 			break;
 		case llvm::Instruction::SRem:
+			stats["iops"]++;
 			break;
 		case llvm::Instruction::FRem:
 			stats["flops"]++;
@@ -742,8 +750,10 @@ void simulator_t::update_opcount(llvm::Instruction * instruction) {
 		case llvm::Instruction::BitCast:
 			break;
 		case llvm::Instruction::ICmp:
+			stats["iops"]++;
 			break;
 		case llvm::Instruction::FCmp:
+			stats["flops"]++;
 			break;
 		case llvm::Instruction::PHI:
 			break;
