@@ -375,8 +375,11 @@ simulator_t::simulator_t(const char * ir_file)
 		output << "KEYWORD_LEWIN " <<
 			double(retired.size())/stats["depth"] << std::endl;
 		output << "KEYWORD_DEPTH " << stats["depth"] << std::endl;
+//		output << "KEYWORD_BETA " <<
+//			double(stats["strahler"])/stats["depth"] << std::endl;
 		output << "KEYWORD_BETA " <<
-			double(stats["strahler"])/stats["depth"] << std::endl;
+			double(retired.size())/stats["strahler"] << std::endl;
+			//double(stats["strahler"])/retired.size() << std::endl;
 		output << "# Pipeline" << std::endl;
 		output << "BEGIN_INSTRUCTION_STREAM" << std::endl;
 
