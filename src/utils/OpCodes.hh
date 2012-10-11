@@ -111,7 +111,7 @@ std::map<std::string, unsigned> code_map = {
 	{ "extractelement",	llvm::Instruction::ExtractElement }, // 53
 	{ "insertelement",	llvm::Instruction::InsertElement }, // 54
 	{ "shufflevector",	llvm::Instruction::ShuffleVector }, // 55
-	{ "extractvector",	llvm::Instruction::ExtractValue }, // 56
+	{ "extractvalue",		llvm::Instruction::ExtractValue }, // 56
 	{ "insertvalue",		llvm::Instruction::InsertValue }, // 57
 	{ "landingpad",		llvm::Instruction::LandingPad } // 58
 };

@@ -96,7 +96,7 @@
 
 <!-- BRU: instructions -->
 <value key="lu::3::instructions">
-	<string>ret br switch indirectbr invoke resume unreachable phi call select vaarg</string>
+	<string>ret br switch indirectbr invoke resume unreachable phi call select vaarg landingpad</string>
 </value>
 
 <!-- BRU: types -->
@@ -124,7 +124,7 @@
 
 <!-- VU: instructions -->
 <value key="lu::5::instructions">
-	<string>extractelement insertelement shufflevector exractvalue insertvalue</string>
+	<string>extractelement insertelement shufflevector extractvalue insertvalue</string>
 </value>
 
 <!-- VU: types -->
