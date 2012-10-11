@@ -210,6 +210,8 @@ int viewpipeline_t::instructionAreaWidth()
 			digits = std::max<int>(digits, instructions_[i].size());
 		} // for
 	}
+	
+	digits = std::min<int>(digits, 40);
 
 	int space = 5 + fontMetrics().width(QLatin1Char('9')) * digits;
 
