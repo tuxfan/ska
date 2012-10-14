@@ -6,7 +6,7 @@
 # CFLAGS
 #------------------------------------------------------------------------------#
 
-CXXFLAGS="-g -O0 -m64 -std=c++11 -pedantic -Werror -Wall -fno-exceptions"
+CXXFLAGS="-g -O0 -m64 -std=c++11 -pedantic -Werror -Wall"
 
 #------------------------------------------------------------------------------#
 # HashMark library
