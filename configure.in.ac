@@ -52,6 +52,7 @@ CONFIG_PROG_RCC
 #------------------------------------------------------------------------------#
 
 CONFIG_GENERIC_ENABLE(debug, DEBUG)
+CONFIG_GENERIC_ENABLE(color, COLOR)
 
 #------------------------------------------------------------------------------#
 # With options

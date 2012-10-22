@@ -18,6 +18,7 @@
 
 #include <FileIO.hh>
 #include <ErrCodes.hh>
+#include <ColorUtils.hh>
 
 namespace ska {
 
@@ -35,25 +36,29 @@ std::string rstrip(const char * file) {
 	return tmp.substr(tmp.rfind(C)+1);
 } // rstrip
 
-#define ExitOnError(s, e)											\
-	file_io_t::instance().log_stream() << s << std::endl;	\
-   file_io_t::instance().log_stream() << std::flush;		\
+#define ExitOnError(s, e)															\
+	file_io_t::instance().log_stream() << OUTPUT_RED(s) << std::endl;	\
+   file_io_t::instance().log_stream() << std::flush;						\
 	std::exit((e));
 
-#define Warn(s)																			\
-	file_io_t::instance().log_stream() << "Warning: " << s << std::endl;
+#define Warn(s)																	\
+	file_io_t::instance().log_stream() <<									\
+		OUTPUT_YELLOW("Warning: ") << OUTPUT_CYAN(s) << std::endl;
 
 // Assert
 #define Assert(b, s)									\
 	if(!(b)) {											\
-		ExitOnError("Assertion Failed: " << s,	\
+		ExitOnError("Assertion Failed " << s,	\
 		ska::AssertionFailed);						\
 	} // if
 
 // WeakAssert
-#define WeakAssert(b, s)							\
-	if(!(b)) {											\
-		Warn("Weak Assertion Failed: " << s);	\
+#define WeakAssert(b, s)								\
+	if(!(b)) {												\
+		file_io_t::instance().log_stream() <<		\
+		OUTPUT_YELLOW("Warning: ") <<					\
+		OUTPUT_RED("weak assertion failed ") <<	\
+		OUTPUT_BROWN(s) << std::endl;					\
 	} // if
 
 } // namespace ska

@@ -36,12 +36,7 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 	properties.opcode = opcode;
 	properties.optype = optype;
 	
-	if(is_call_op(opcode)) {
-		llvm::CallInst * cinst = llvm::cast<llvm::CallInst>(instruction);
-		properties.name =
-			call_name(cinst->getCalledFunction()->getName().str());
-	}
-	else {
+	if(!is_call_op(opcode)) {
 		properties.name = code_name(opcode);
 	} // if
 
@@ -399,12 +394,16 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 
 		case llvm::Instruction::Call:
 			{
-			arch.getval(properties.latency, "latency::call");
-			arch.getval(properties.reciprocal, "reciprocal::call");
 			llvm::CallInst * cinst = llvm::cast<llvm::CallInst>(instruction);
 
-			std::string call;
-			std::string name = cinst->getCalledFunction()->getName().str();
+			llvm::Function * func = cinst->getCalledFunction();
+			std::string name = func == nullptr ? "unknown" :
+				func->getName().str();
+
+			// set defaults
+			arch.getval(properties.latency, "latency::call");
+			arch.getval(properties.reciprocal, "reciprocal::call");
+			properties.name = call_name(name);
 
 			name = try_demangle_and_strip(name);
 #if defined(USE_MANGLED_CALL_NAMES) && 0
@@ -420,7 +419,7 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 				name = x86_call_map[name];
 			} // if
 
-			call = name;
+			std::string call = name;
 			switch(optype) {
 				case llvm::Type::PointerTyID:
 					call += "::pointer";
@@ -438,7 +437,7 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 					call += "::vector";
 					break;
 				default:
-					Warn("Call Unhandled Type: " << optype);
+					Warn("Call Unhandled Type " << optype);
 					break;
 			} // switch
 
@@ -447,9 +446,11 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 
 			// getval returns true for success, false for failure
 			if(ierr != 1) {
-				Warn("Unrecognized Call: " << name);
+				Warn("Unrecognized Call " << name << std::endl <<
+					properties.ir);
 				properties.latency = 1;
 				properties.reciprocal = 1;
+				properties.name = unknown;
 			} // if
 
 			break;
