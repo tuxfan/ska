@@ -1,6 +1,6 @@
-diff -rupN -x SKA -x build -x aclocal.m4 -x autom4te.cache -x configure /Users/bergen/devel/llvm/llvm-base/autoconf/configure.ac /Users/bergen/devel/llvm/llvm-ska/autoconf/configure.ac
---- /Users/bergen/devel/llvm/llvm-base/autoconf/configure.ac	2012-10-23 16:30:33.000000000 -0600
-+++ /Users/bergen/devel/llvm/llvm-ska/autoconf/configure.ac	2012-10-23 16:37:46.000000000 -0600
+diff -rupN -x SKA -x build -x aclocal.m4 -x autom4te.cache -x configure llvm-base/autoconf/configure.ac llvm-ska/autoconf/configure.ac
+--- llvm-base/autoconf/configure.ac	2012-10-23 16:30:33.000000000 -0600
++++ llvm-ska/autoconf/configure.ac	2012-10-24 10:00:52.000000000 -0600
 @@ -704,7 +704,7 @@ if test "$enableval" = host-only ; then
    enableval=host
  fi
@@ -18,9 +18,9 @@ diff -rupN -x SKA -x build -x aclocal.m4 -x autom4te.cache -x configure /Users/b
          host) case "$llvm_cv_target_arch" in
              x86)         TARGETS_TO_BUILD="X86 $TARGETS_TO_BUILD" ;;
              x86_64)      TARGETS_TO_BUILD="X86 $TARGETS_TO_BUILD" ;;
-diff -rupN -x SKA -x build -x aclocal.m4 -x autom4te.cache -x configure /Users/bergen/devel/llvm/llvm-base/lib/Target/LLVMBuild.txt /Users/bergen/devel/llvm/llvm-ska/lib/Target/LLVMBuild.txt
---- /Users/bergen/devel/llvm/llvm-base/lib/Target/LLVMBuild.txt	2012-10-23 16:30:28.000000000 -0600
-+++ /Users/bergen/devel/llvm/llvm-ska/lib/Target/LLVMBuild.txt	2012-10-23 21:05:46.000000000 -0600
+diff -rupN -x SKA -x build -x aclocal.m4 -x autom4te.cache -x configure llvm-base/lib/Target/LLVMBuild.txt llvm-ska/lib/Target/LLVMBuild.txt
+--- llvm-base/lib/Target/LLVMBuild.txt	2012-10-23 16:30:28.000000000 -0600
++++ llvm-ska/lib/Target/LLVMBuild.txt	2012-10-24 10:05:45.000000000 -0600
 @@ -16,7 +16,7 @@
  ;===------------------------------------------------------------------------===;
  

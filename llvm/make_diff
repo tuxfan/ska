@@ -1,7 +1,14 @@
 #! /usr/bin/env bash
 
+base="$2"
+new="$3"
+cwd=`pwd`
+
 stamp=patch_`date "+%Y%m%d%H%M%S"`
 
-diff -rupN -x SKA -x build -x aclocal.m4 -x autom4te.cache -x configure $1 $2 | sed '/Binary\ files\ /d' > $stamp
+cd $1
 
-cp $stamp patch_current
+diff -rupN -x SKA -x build -x aclocal.m4 -x autom4te.cache -x configure \
+	$base/ $new/ | sed '/Binary\ files\ /d' > $cwd/$stamp
+
+cp $cwd/$stamp $cwd/patch_current
