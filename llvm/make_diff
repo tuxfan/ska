@@ -1,0 +1,5 @@
+#! /usr/bin/env bash
+
+stamp=patch_`date "+%Y%m%d%H%M%S"`
+
+diff -rupN -x SKA -x build $1 $2 > $stamp
