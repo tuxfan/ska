@@ -2,4 +2,6 @@
 
 stamp=patch_`date "+%Y%m%d%H%M%S"`
 
-diff -rupN -x SKA -x build $1 $2 > $stamp
+diff -rupN -x SKA -x build -x aclocal.m4 -x autom4te.cache -x configure $1 $2 | sed '/Binary\ files\ /d' > $stamp
+
+cp $stamp patch_current
