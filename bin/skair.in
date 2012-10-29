@@ -55,7 +55,7 @@ shift $(($OPTIND - 1))
 if [ -n "$SKAIR_CPPFLAGS" ] ; then
 	opt_flags=$SKAIR_CPPFLAGS
 else
-	opt_flags="-g -O2"
+	opt_flags="-O2"
 fi
 
 #------------------------------------------------------------------------------#
