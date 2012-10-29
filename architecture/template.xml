@@ -1038,7 +1038,7 @@
 </value>
 
 <value key="reciprocal::sqrt::float">
-	<real>1</real>
+	<real>46</real>
 </value>
 
 <!-- float -->
@@ -1047,7 +1047,7 @@
 </value>
 
 <value key="reciprocal::sqrtf::float">
-	<real>1</real>
+	<real>46</real>
 </value>
 
 <!-- double -->
@@ -1056,7 +1056,7 @@
 </value>
 
 <value key="reciprocal::sqrt::double">
-	<real>1</real>
+	<real>57</real>
 </value>
 
 <!-- vector -->
@@ -1065,7 +1065,7 @@
 </value>
 
 <value key="reciprocal::sqrt::vector">
-	<real>1</real>
+	<real>57</real>
 </value>
 
 <!-- ==================================

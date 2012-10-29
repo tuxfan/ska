@@ -75,7 +75,7 @@ CONFIG_GENERIC_LIB(llvm, LLVM, [llvm::Pass::createPass((llvm::AnalysisID) 0)],
 
 EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS $LLVM_CPPFLAGS"
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LLVM_LDFLAGS"
-EXTRA_LIBS="$EXTRA_LIBS $LLVM_LIBS"
+EXTRA_LIBS="$EXTRA_LIBS $LLVM_DEPENDS"
 
 #------------------------------------------------------------------------------#
 # Xerces
