@@ -71,7 +71,7 @@ fi
 CPPFLAGS="$CPPFLAGS -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS"
 
 CONFIG_GENERIC_LIB(llvm, LLVM, [llvm::Pass::createPass((llvm::AnalysisID) 0)],
-	C++, [$LLVM_DEPENDS])
+	C++, [], [$LLVM_DEPENDS])
 
 EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS $LLVM_CPPFLAGS"
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LLVM_LDFLAGS"
@@ -107,6 +107,17 @@ CONFIG_GENERIC_LIB(qt, QT, [QApplication::beep()], C++)
 VIEWER_CPPFLAGS="$QT_CPPFLAGS"
 VIEWER_LDFLAGS="$QT_LDFLAGS"
 VIEWER_LIBS="$QT_LIBS"
+
+#------------------------------------------------------------------------------#
+# Qwt
+#------------------------------------------------------------------------------#
+
+CONFIG_GENERIC_LIB(qwt, QWT, [QwtPlot((QWidget *) 0)], C++,
+	[$QT_CPPFLAGS/Qt])
+
+VIEWER_CPPFLAGS="$VIEWER_CPPFLAGS $QWT_CPPFLAGS"
+VIEWER_LDFLAGS="$VIEWER_LDFLAGS $QWT_LDFLAGS"
+VIEWER_LIBS="$VIEWER_LIBS $QWT_LIBS"
 
 #------------------------------------------------------------------------------#
 # Set extras

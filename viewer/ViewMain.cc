@@ -197,6 +197,17 @@ void viewmain_t::open(QString & fileName)
 					} // while
 				} // if
 
+				if(line.contains("BEGIN_SLOPE_DATA")) {
+					line = stream.readLine();
+					while(!stream.atEnd() &&
+						!line.contains("END_SLOPE_DATA")) {
+						QStringList coordinates = line.split(' ');
+						module.x_points.append(coordinates[0].toDouble());
+						module.y_points.append(coordinates[1].toDouble());
+						line = stream.readLine();
+					} // while
+				} // if
+
 				line = stream.readLine();
 			} // while
 

@@ -113,7 +113,29 @@ std::map<std::string, unsigned> code_map = {
 	{ "shufflevector",	llvm::Instruction::ShuffleVector }, // 55
 	{ "extractvalue",		llvm::Instruction::ExtractValue }, // 56
 	{ "insertvalue",		llvm::Instruction::InsertValue }, // 57
-	{ "landingpad",		llvm::Instruction::LandingPad } // 58
+	{ "landingpad",		llvm::Instruction::LandingPad }, // 58
+
+	// Call operators
+	/* These are not part of the normal LLVM IR instruction set.
+		For now, we need them to be able to map call functions
+		to the appropriate LU.  In the future, we may move to
+		a more complex representation where instructions run
+		across multiple LUs. */
+	{ "malloc",				llvm::Instruction::LandingPad + 1 },
+	{ "free",				llvm::Instruction::LandingPad + 2 },
+	{ "printf",				llvm::Instruction::LandingPad + 3 },
+	{ "rand",				llvm::Instruction::LandingPad + 4 },
+	{ "pow",					llvm::Instruction::LandingPad + 5 },
+	{ "log",					llvm::Instruction::LandingPad + 6 },
+
+	{ "fabs",				llvm::Instruction::LandingPad + 7 },
+	{ "fabsf",				llvm::Instruction::LandingPad + 7 },
+
+	{ "sqrt",				llvm::Instruction::LandingPad + 8 },
+	{ "sqrtf",				llvm::Instruction::LandingPad + 8 },
+
+	{ "rsqrt",				llvm::Instruction::LandingPad + 9 },
+	{ "hadd",				llvm::Instruction::LandingPad + 10 }
 };
 
 std::string code_name(unsigned code) {

@@ -10,7 +10,8 @@ dnl CONFIG_GENERIC_LIB($1 = string name,
 dnl                    $2 = macro name,
 dnl                    $3 = library symbol,
 dnl                    $4 = language,
-dnl                    $5 = dependencies)
+dnl                    $5 = cppflags)
+dnl                    $6 = ldflags)
 dnl ------------------------------------------------------------------------ dnl
 
 AC_DEFUN([CONFIG_GENERIC_LIB], [
@@ -92,10 +93,10 @@ AC_DEFUN([CONFIG_GENERIC_LIB], [
 		old_LDFLAGS=$LDFLAGS
 
 		if test -z "$$2_FRAMEWORK" ; then
-			CPPFLAGS="$CPPFLAGS $lib_CPPFLAGS"
+			CPPFLAGS="$CPPFLAGS $5 $lib_CPPFLAGS"
 			LDFLAGS="$LDFLAGS $lib_LDFLAGS"
 		else
-			CPPFLAGS="$CPPFLAGS $$2_FRAMEWORK"
+			CPPFLAGS="$CPPFLAGS $5 $$2_FRAMEWORK"
 			LDFLAGS="$LDFLAGS"
 			check_lib="c"
 		fi
@@ -112,7 +113,7 @@ AC_DEFUN([CONFIG_GENERIC_LIB], [
 		AC_CHECK_HEADER($check_header, [lib_h=yes], [lib_h=no], /* check */)
 
 		old_LIBS="$LIBS"
-		LIBS="$$2_LIBS $5 $LIBS"
+		LIBS="$$2_LIBS $6 $LIBS"
 		AC_MSG_CHECKING(linkability of \"$3\" with $$2_FRAMEWORK $$2_LIBS)
 		AC_LINK_IFELSE([AC_LANG_SOURCE([[
 #include <$check_header>
@@ -133,7 +134,7 @@ int main () { $3; }
 
 			if test -z "$$2_FRAMEWORK" ; then
 				AC_SUBST($2_LDFLAGS, [$lib_LDFLAGS])
-				FOUND_LIBS="$$2_LIBS $5"
+				FOUND_LIBS="$$2_LIBS $6"
 				AC_SUBST($2_LIBS, [$FOUND_LIBS])
 			else
 				AC_SUBST($2_LIBS, [$$2_FRAMEWORK])

@@ -17,12 +17,16 @@ struct module_data_t : public QMap<QString, QString> {
 		issues.clear();
 		pipelines = "";
 		instructions.clear();
+		x_points.clear();
+		y_points.clear();
 	} // clear
 
 	QStringList cycles;
 	QStringList issues;
 	QString pipelines;
 	QStringList instructions;
+	QVector<double> x_points;
+	QVector<double> y_points;
 }; // struct module_data_t
 
 struct program_version_t {

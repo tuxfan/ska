@@ -33,12 +33,14 @@ struct instruction_properties_t {
 		: latency(std::numeric_limits<size_t>::max()),
 		reciprocal(std::numeric_limits<float>::max()),
 		opcode(std::numeric_limits<unsigned>::max()),
+		callcode(std::numeric_limits<unsigned>::max()),
 		optype(std::numeric_limits<unsigned>::max()),
 		ir(""), name("") {}
 
 	size_t latency;
 	float reciprocal;
 	unsigned opcode;
+	unsigned callcode;
 	unsigned optype;
 	std::string ir;
 	std::string name;
@@ -362,6 +364,12 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	unsigned opcode() const { return props_.opcode; }
+
+	/*-------------------------------------------------------------------------*
+	 * Return the LLVM OpCode of the call if this is a call instruction.
+	 *-------------------------------------------------------------------------*/
+
+	unsigned callcode() const { return props_.callcode; }
 
 	/*-------------------------------------------------------------------------*
 	 * Return the LLVM TypeID of the instruction.

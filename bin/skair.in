@@ -18,7 +18,7 @@ Options:
    -o  Specify the output file name (default is 'input'.ll).
 
 Environment:
-   SKAIR_FLAGS  Extra compile flags.
+   SKAIR_CPPFLAGS  Extra compile flags.
 EOF
 exit
 }
@@ -49,19 +49,13 @@ done
 shift $(($OPTIND - 1))
 
 #------------------------------------------------------------------------------#
-# Default flags
-#------------------------------------------------------------------------------#
-
-simd_flags="-msse -msse2 -msse3 -msse4.1 -msse4.2 -msse4 -msse4a -mavx -mavx2"
-
-#------------------------------------------------------------------------------#
 # Check for user-supplied compiler flags
 #------------------------------------------------------------------------------#
 
-if [ -n "$SKAIR_FLAGS" ] ; then
-	opt_flags=$SKAIR_FLAGS
+if [ -n "$SKAIR_CPPFLAGS" ] ; then
+	opt_flags=$SKAIR_CPPFLAGS
 else
-	opt_flags="-O2"
+	opt_flags="-g -O2"
 fi
 
 #------------------------------------------------------------------------------#
@@ -96,5 +90,5 @@ fi
 #------------------------------------------------------------------------------#
 
 echo "Generating LLVM IR with:"
-echo "$cmd $simd_flags $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1"
-$cmd $simd_flags $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1
+echo "$cmd $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1"
+$cmd $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1

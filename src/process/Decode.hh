@@ -36,6 +36,7 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 	properties.opcode = opcode;
 	properties.optype = optype;
 	
+	// FIXME: DOES THIS NEED TO BE HERE?
 	if(!is_call_op(opcode)) {
 		properties.name = code_name(opcode);
 	} // if
@@ -405,14 +406,8 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 			arch.getval(properties.reciprocal, "reciprocal::call");
 			properties.name = call_name(name);
 
+			// demangle call name
 			name = try_demangle_and_strip(name);
-#if defined(USE_MANGLED_CALL_NAMES) && 0
-			int status;
-			char * um_name = abi::__cxa_demangle(name.c_str(), 0, 0, &status);
-			name = um_name;
-			delete um_name;
-			name = name.substr(0, name.find_first_of("("));
-#endif
 
 			// check for x86 intrinsics
 			if(x86_match(name)) {
@@ -441,8 +436,12 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 					break;
 			} // switch
 
+			// try to read values from architecture file
 			int32_t ierr = arch.getval(properties.latency, "latency::" + call);
 			ierr |= arch.getval(properties.reciprocal, "reciprocal::" + call);
+
+			// set the code for the called function
+			properties.callcode = code_map[name];
 
 			// getval returns true for success, false for failure
 			if(ierr != 1) {

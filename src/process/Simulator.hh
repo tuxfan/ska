@@ -306,6 +306,8 @@ simulator_t::simulator_t(const char * ir_file)
 			dita->second->update_tree_properties();
 		} // for
 
+// FIXME: NEED TO SEE IF THIS IS NECESSARY
+
 		// prune the tree
 		for(auto dita = dmap.begin(); dita != dmap.end(); ++dita) {
 			dependency_t * dep = dita->second;
@@ -381,6 +383,8 @@ simulator_t::simulator_t(const char * ir_file)
 			double(retired.size())/stats["strahler"] << std::endl;
 			//double(stats["strahler"])/retired.size() << std::endl;
 		output << "# Pipeline" << std::endl;
+
+		// instruction stream
 		output << "BEGIN_INSTRUCTION_STREAM" << std::endl;
 
 		for(auto out = retired.begin(); out != retired.end(); ++out) {
@@ -388,6 +392,17 @@ simulator_t::simulator_t(const char * ir_file)
 		} // for
 
 		output << "END_INSTRUCTION_STREAM" << std::endl;
+
+		// slope information
+		output << "BEGIN_SLOPE_DATA" << std::endl;
+
+		size_t r(retired.size());
+		for(auto out = retired.begin(); out != retired.end(); ++out) {
+			output << (*out)->cycle_issued() + 1 << " " << r-- << std::endl;
+		} // for
+
+		output << "END_SLOPE_DATA" << std::endl;
+
 		output << "END_MODULE" << std::endl;
 	} // for
 } // simulator_t::simulator_t
@@ -423,12 +438,11 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 		while(iita != end && issue && issued < core_->max_issue()) {
 
 			/*-------------------------------------------------------------------*
-			 * Create instruction and add dependencies
+			 * Lookup instruction
 			 *-------------------------------------------------------------------*/
 
 			if(inst == nullptr) {
 
-				//inst = new instruction_t(decode(&*iita));
 				auto dita(dmap.find(&*iita));
 
 				if(dita == dmap.end()) {
@@ -538,10 +552,15 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 			} // if
 
 			/*-------------------------------------------------------------------*
-			 * Try to issue
+			 * See if the core can accept this instruction.
 			 *-------------------------------------------------------------------*/
 
 			int32_t id = core_->accept(inst);
+
+			/*-------------------------------------------------------------------*
+			 * If everything is ready, do the actual issue.
+			 *-------------------------------------------------------------------*/
+			
 			if(!cycle_dependency && !cycle_stall && id >= 0) {
 
 				log << "  issued " << inst->name() <<

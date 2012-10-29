@@ -73,8 +73,16 @@ public:
 			return false;
 		}
 
+		unsigned opcode = inst->opcode();
+
+		if(is_call_op(opcode)) {
+			opcode = inst->callcode();
+		} // if
+
+//		if((type_any_ || types_.find(inst->optype()) != types_.end()) &&
+//			codes_.find(inst->opcode()) != codes_.end()) {
 		if((type_any_ || types_.find(inst->optype()) != types_.end()) &&
-			codes_.find(inst->opcode()) != codes_.end()) {
+			codes_.find(opcode) != codes_.end()) {
 			state_ = busy;
 			current_ = inst;
 			current_->issue(id_);
