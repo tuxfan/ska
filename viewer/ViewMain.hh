@@ -9,6 +9,7 @@
 #include <QtGui/QtGui>
 
 #include <ViewPipeline.hh>
+#include <ViewSlope.hh>
 #include <ViewData.hh>
 
 class viewmain_t : public QMainWindow
@@ -25,15 +26,18 @@ public:
 private slots:
 
 	void open();
+	void openSlope();
 	void load(int m);
 
 private:
 
 	// GUI elements
 	QAction * openAction_;
+	QAction * slopeAction_;
 	QAction * quitAction_;
 
 	viewpipeline_t * pipeline_;
+	viewslope_t * slope_;
 
 	QMenu * fileMenu_;
 

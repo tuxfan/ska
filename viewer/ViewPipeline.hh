@@ -15,7 +15,7 @@ class viewpipeline_t : public QPlainTextEdit
 
 public:
 
-	viewpipeline_t(QWidget * parent = 0);
+	viewpipeline_t(QWidget * parent = nullptr);
 
 	void load(const QStringList & cycles, const QStringList & issues,
 		const QString & pipelines, const QStringList & instructions);

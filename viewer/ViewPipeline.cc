@@ -10,7 +10,6 @@
 #include <ViewIssue.hh>
 #include <ViewInstruction.hh>
 #include <ViewHighlight.hh>
-#include <ViewSlope.hh>
 
 /*----------------------------------------------------------------------------*
  * viewpipeline_t constructor.
@@ -29,7 +28,6 @@ viewpipeline_t::viewpipeline_t(QWidget * parent)
 	issueArea_ = new viewissue_t(this);
 	instructionArea_ = new viewinstruction_t(this);
 	highlightArea_ = new viewhighlight_t(this);
-	//slopeArea_ = new viewslope_t(this);
 
 	// set-up callbacks
 	connect(this, SIGNAL(blockCountChanged(int)),

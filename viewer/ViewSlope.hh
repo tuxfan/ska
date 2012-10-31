@@ -1,3 +1,8 @@
+/*----------------------------------------------------------------------------*
+ * Copyright (c) 2012 Los Alamos National Security, LLC
+ * All rights reserved
+ *----------------------------------------------------------------------------*/
+
 #ifndef ViewSlope_hh
 #define ViewSlope_hh
 
@@ -5,11 +10,26 @@
 #include<qwt/qwt_plot_curve.h>
 #include<qwt/qwt_scale_map.h>
 
+/*----------------------------------------------------------------------------*
+ * viewslope_t class
+ *----------------------------------------------------------------------------*/
+
 class viewslope_t : public QFrame
 {
 public:
 
-	viewslope_t(const QVector<double> & x_points,
+	viewslope_t(QWidget * parent = nullptr) {
+		setFrameStyle(QFrame::Box);
+
+		// set plot style
+		plot_.setStyle(QwtPlotCurve::Lines);
+		plot_.setPen(QPen(Qt::red, 1));
+
+		// set initial size
+		resize(300, 300);
+	} // viewslope_t
+
+	void load(const QVector<double> & x_points,
 		const QVector<double> & y_points) {
 
 		double xmin(std::numeric_limits<double>::max());
@@ -27,18 +47,11 @@ public:
 			ymax = std::max(ymax, y_points[i]);
 		} // for
 
-		xmap_.setScaleInterval(xmin, xmax);
-		ymap_.setScaleInterval(ymin, ymax);
-
-		setFrameStyle(QFrame::Box | QFrame::Raised);
-		setLineWidth(2);
-		setMidLineWidth(3);
-
-		// set plot style
-		plot_.setStyle(QwtPlotCurve::Lines);
+		xmap_.setScaleInterval(xmin-1, xmax+1);
+		ymap_.setScaleInterval(ymin-1, ymax+1);
 
 		plot_.setRawSamples(x_points.data(), y_points.data(), x_points.size());
-	} // viewslope_t
+	} // load
 
 protected:
 
@@ -54,7 +67,7 @@ protected:
 		QRect r = contentsRect();
 
 		xmap_.setPaintInterval(r.left(), r.right());
-		ymap_.setPaintInterval(r.top(), r.bottom());
+		ymap_.setPaintInterval(r.bottom(), r.top());
 
 		painter->setRenderHint(QPainter::Antialiasing,
 			plot_.testRenderHint(QwtPlotItem::RenderAntialiased));

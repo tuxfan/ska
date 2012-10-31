@@ -17,6 +17,13 @@ viewmain_t::viewmain_t()
 	connect(openAction_, SIGNAL(triggered()), this, SLOT(open()));
 
 	/*-------------------------------------------------------------------------*
+	 * Show slope action
+	 *------------------------------------------------------------------------*/
+	slopeAction_ = new QAction(QIcon(":/icons/open.png"), tr("&Slope"), this);
+	slopeAction_->setShortcut(tr("Ctrl+1"));
+	connect(slopeAction_, SIGNAL(triggered()), this, SLOT(openSlope()));
+
+	/*-------------------------------------------------------------------------*
 	 * Quit action
 	 *------------------------------------------------------------------------*/
 	quitAction_ = new QAction(tr("&Quit"), this);
@@ -67,6 +74,7 @@ viewmain_t::viewmain_t()
 	fill_[fill]->setFixedWidth(10);
 
 	fileBar_->addAction(openAction_);
+	fileBar_->addAction(slopeAction_);
 
 	++fill;
 	fill_[fill] = new QWidget(this);
@@ -106,6 +114,11 @@ viewmain_t::viewmain_t()
 	 *------------------------------------------------------------------------*/
 	pipeline_ = new viewpipeline_t;
 	setCentralWidget(pipeline_);
+
+	/*-------------------------------------------------------------------------*
+	 * Pipeline (main widget)
+	 *------------------------------------------------------------------------*/
+	slope_ = new viewslope_t;
 
 	/*-------------------------------------------------------------------------*
 	 * Misc.
@@ -229,6 +242,15 @@ void viewmain_t::open(QString & fileName)
 } // viewmain_t::open
 
 /*----------------------------------------------------------------------------*
+ * OpenSlope
+ *----------------------------------------------------------------------------*/
+
+void viewmain_t::openSlope()
+{
+	slope_->show();
+} // viewmain_t::openSlope
+
+/*----------------------------------------------------------------------------*
  * Load
  *----------------------------------------------------------------------------*/
 
@@ -246,4 +268,7 @@ void viewmain_t::load(int m)
 	// load data
 	pipeline_->load(modules_[m].cycles, modules_[m].issues,
 		modules_[m].pipelines, modules_[m].instructions);
+
+	// load slope data
+	slope_->load(modules_[m].x_points, modules_[m].y_points);
 } // viewmain_t::load
