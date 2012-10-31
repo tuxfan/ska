@@ -50,6 +50,7 @@ private:
 	QWidget * issueArea_;
 	QWidget * instructionArea_;
 	QWidget * highlightArea_;
+	QWidget * slopeArea_;
 
 	QStringList cycles_;
 	QStringList issues_;
