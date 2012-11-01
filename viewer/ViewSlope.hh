@@ -7,6 +7,8 @@
 #define ViewSlope_hh
 
 #include<QtGui/QFrame>
+#include<qwt/qwt_plot.h>
+#include<qwt/qwt_plot_canvas.h>
 #include<qwt/qwt_plot_curve.h>
 #include<qwt/qwt_scale_map.h>
 
@@ -14,23 +16,31 @@
  * viewslope_t class
  *----------------------------------------------------------------------------*/
 
-class viewslope_t : public QFrame
+class viewslope_t : public QwtPlot
 {
 public:
 
-	viewslope_t(QWidget * parent = nullptr) {
-		setFrameStyle(QFrame::Box);
+	viewslope_t(QWidget * parent = nullptr)
+		: QwtPlot(parent) {
+		canvas()->setFrameStyle(QFrame::Box | QFrame::Plain);
+
+		plot_ = new QwtPlotCurve("");
+		plot_->attach(this);
 
 		// set plot style
-		plot_.setStyle(QwtPlotCurve::Lines);
-		plot_.setPen(QPen(Qt::red, 1));
+		plot_->setStyle(QwtPlotCurve::Lines);
+		plot_->setPen(QPen(Qt::red, 1));
 
 		// set initial size
 		resize(300, 300);
 	} // viewslope_t
 
-	void load(const QVector<double> & x_points,
+	void load(const QString & dataset, const QVector<double> & x_points,
 		const QVector<double> & y_points) {
+
+		// set the window title
+		QString title = "Slope view (" + dataset + ")";
+		setWindowTitle(title);
 
 		double xmin(std::numeric_limits<double>::max());
 		double xmax(std::numeric_limits<double>::min());
@@ -50,7 +60,7 @@ public:
 		xmap_.setScaleInterval(xmin-1, xmax+1);
 		ymap_.setScaleInterval(ymin-1, ymax+1);
 
-		plot_.setRawSamples(x_points.data(), y_points.data(), x_points.size());
+		plot_->setRawSamples(x_points.data(), y_points.data(), x_points.size());
 	} // load
 
 protected:
@@ -70,13 +80,13 @@ protected:
 		ymap_.setPaintInterval(r.bottom(), r.top());
 
 		painter->setRenderHint(QPainter::Antialiasing,
-			plot_.testRenderHint(QwtPlotItem::RenderAntialiased));
-		plot_.draw(painter, xmap_, ymap_, r);	
+			plot_->testRenderHint(QwtPlotItem::RenderAntialiased));
+		plot_->draw(painter, xmap_, ymap_, r);	
 	} // drawContents
 
 private:
 
-	QwtPlotCurve plot_;	
+	QwtPlotCurve * plot_;	
 	QwtScaleMap xmap_;
 	QwtScaleMap ymap_;
 

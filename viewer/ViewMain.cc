@@ -270,5 +270,6 @@ void viewmain_t::load(int m)
 		modules_[m].pipelines, modules_[m].instructions);
 
 	// load slope data
-	slope_->load(modules_[m].x_points, modules_[m].y_points);
+	slope_->load(modules_[m]["name"], modules_[m].x_points,
+		modules_[m].y_points);
 } // viewmain_t::load
