@@ -17,6 +17,14 @@ Options:
    -h  Show this message.
    -o  Specify the output file name (default is 'input'.ll).
 
+Pass-through compiler options:
+	-I  Specify the search path (multiple pathes may be specified)
+	-D  Specify a define (multiple defines may be specified)
+	-W  Specify a warning option (multiple options may be specified)
+	-m  Specify a machine option (multiple options may be specified)
+	-O  Specify the optimization level
+	-g  Enable debugging inforamtion
+
 Environment:
    SKAIR_CPPFLAGS  Extra compile flags.
 EOF
@@ -24,6 +32,7 @@ exit
 }
 
 output=""
+cppflags=""
 
 [ $# -lt 1 ] && usage
 
@@ -31,16 +40,33 @@ output=""
 # Parse command line
 #------------------------------------------------------------------------------#
 
-while getopts "ho:" opt ; do
+OPTERR=0
+
+while getopts ":hI:D:W:m:O:g:o:" opt ; do
 	case $opt in
 	h)
 		usage
 	;;
+	O)
+		cppflags="$cppflags -O$OPTARG"
+	;;
+	I)
+		cppflags="$cppflags -I$OPTARG"
+	;;
+	D)
+		cppflags="$cppflags -D$OPTARG"
+	;;
+	W)
+		cppflags="$cppflags -W$OPTARG"
+	;;
+	m)
+		cppflags="$cppflags -m$OPTARG"
+	;;
+	g)
+		cppflags="$cppflags -g"
+	;;
 	o)
 		output=$OPTARG
-	;;
-	\?)
-		usage
 	;;
 	esac
 done
@@ -53,10 +79,12 @@ shift $(($OPTIND - 1))
 #------------------------------------------------------------------------------#
 
 if [ -n "$SKAIR_CPPFLAGS" ] ; then
-	opt_flags=$SKAIR_CPPFLAGS
-else
-	opt_flags="-O2"
+	cppflags=$SKAIR_CPPFLAGS
+elif [ -z "$cppflags" ] ; then
+	cppflags="-O2"
 fi
+
+cppflags=`echo $cppflags | sed 's,^ ,,'`
 
 #------------------------------------------------------------------------------#
 # Parse language type from file suffix.
@@ -90,5 +118,5 @@ fi
 #------------------------------------------------------------------------------#
 
 echo "Generating LLVM IR with:"
-echo "$cmd $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1"
-$cmd $opt_flags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1
+echo "$cmd $cppflags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1"
+$cmd $cppflags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1
