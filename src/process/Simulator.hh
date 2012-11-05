@@ -403,6 +403,22 @@ simulator_t::simulator_t(const char * ir_file)
 
 		output << "END_SLOPE_DATA" << std::endl;
 
+#if defined(HAVE_GRAPHVIZ)
+		std::ifstream gvfile(fname + ".gv");
+		if(gvfile.is_open()) {
+			output << "BEGIN_GRAPH_DATA" << std::endl;
+
+			std::string line;
+			while(gvfile.good()) {
+				std::getline(gvfile, line);
+				output << line << std::endl;
+			} // while
+
+			output << "END_GRAPH_DATA" << std::endl;
+			gvfile.close();
+		} // if
+#endif
+
 		output << "END_MODULE" << std::endl;
 	} // for
 } // simulator_t::simulator_t
