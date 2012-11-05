@@ -9,6 +9,9 @@
 
 # Urgent:
 
+-  Add drag mouse control
+-  Add instruction centering
+
 -	Add type information to Strahler number computation in preparation of
 	register support.
 

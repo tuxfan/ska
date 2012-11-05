@@ -20,7 +20,7 @@ typedef viewhighlight_T<viewslope_t> viewhighlight_t;
 viewslope_t::viewslope_t(QWidget * parent)
 	: QwtPlot(parent), plot_(nullptr), highlightArea_(nullptr),
 	highlight_(0, 0, 0, 0), points_(0), current_(0), ratio_(1),
-	left_(50), right_(0), top_(2), bottom_(0)
+	left_(0), right_(0), top_(0), bottom_(0)
 {
 	canvas()->setFrameStyle(QFrame::Box | QFrame::Plain);
 
