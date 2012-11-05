@@ -24,6 +24,14 @@ viewmain_t::viewmain_t()
 	connect(slopeAction_, SIGNAL(triggered()), this, SLOT(openSlope()));
 
 	/*-------------------------------------------------------------------------*
+	 * Show metrics action
+	 *------------------------------------------------------------------------*/
+	metricsAction_ = new QAction(QIcon(":/icons/metrics.png"),
+		tr("&Metrics"), this);
+	metricsAction_->setShortcut(tr("Ctrl+2"));
+	connect(metricsAction_, SIGNAL(triggered()), this, SLOT(openMetrics()));
+
+	/*-------------------------------------------------------------------------*
 	 * Quit action
 	 *------------------------------------------------------------------------*/
 	quitAction_ = new QAction(tr("&Quit"), this);
@@ -75,6 +83,7 @@ viewmain_t::viewmain_t()
 
 	fileBar_->addAction(openAction_);
 	fileBar_->addAction(slopeAction_);
+	fileBar_->addAction(metricsAction_);
 
 	++fill;
 	fill_[fill] = new QWidget(this);
@@ -116,9 +125,14 @@ viewmain_t::viewmain_t()
 	setCentralWidget(pipeline_);
 
 	/*-------------------------------------------------------------------------*
-	 * Pipeline (main widget)
+	 * Slope view
 	 *------------------------------------------------------------------------*/
 	slope_ = new viewslope_t;
+
+	/*-------------------------------------------------------------------------*
+	 * Metrics view
+	 *------------------------------------------------------------------------*/
+	metrics_ = new viewmetrics_t;
 
 	connect(pipeline_, SIGNAL(updateRequest(QRect,int)),
 		slope_, SLOT(updateHighlightArea(QRect,int)));
@@ -237,6 +251,28 @@ void viewmain_t::open(QString & fileName)
 
 	for(auto ita = modules_.begin(); ita != modules_.end(); ++ita) {
 		selector_->addItem((*ita)["name"]);
+
+		// this is a convenient place to update metrics string
+		(*ita).metrics = "";
+		(*ita).metrics += "Instructions: " + (*ita)["instructions"] + "\n";
+		(*ita).metrics += "Cycles: " + (*ita)["cycles"] + "\n";
+		(*ita).metrics += "Stalls: " + (*ita)["stalls"] + "\n";
+		(*ita).metrics += "Flops: " + (*ita)["flops"] + "\n";
+		(*ita).metrics += "Iops: " + (*ita)["iops"] + "\n";
+		(*ita).metrics += "Branches: " + (*ita)["branches"] + "\n";
+		(*ita).metrics +=
+			"Stack Allocations: " + (*ita)["stack allocations"] + "\n";
+		(*ita).metrics +=
+			"Stack Allocation Bytes: " + (*ita)["stack allocation bytes"] + "\n";
+		(*ita).metrics += "Loads: " + (*ita)["loads"] + "\n";
+		(*ita).metrics += "Load Bytes: " + (*ita)["load bytes"] + "\n";
+		(*ita).metrics += "Stores: " + (*ita)["stores"] + "\n";
+		(*ita).metrics += "Store Bytes: " + (*ita)["store bytes"] + "\n";
+		(*ita).metrics +=
+			"Cycles per Instruction: " + (*ita)["cycles per instruction"] + "\n";
+		(*ita).metrics += "Algorithmic Balance: " + (*ita)["balance"] + "\n";
+		(*ita).metrics += "Lewin Number: " + (*ita)["lewin"] + "\n";
+		(*ita).metrics += "Depth: " + (*ita)["depth"] + "\n";
 	} // for
 
 	selector_->setEnabled(true);
@@ -254,6 +290,15 @@ void viewmain_t::openSlope()
 {
 	slope_->show();
 } // viewmain_t::openSlope
+
+/*----------------------------------------------------------------------------*
+ * OpenMetrics
+ *----------------------------------------------------------------------------*/
+
+void viewmain_t::openMetrics()
+{
+	metrics_->show();
+} // viewmain_t::openMetrics
 
 /*----------------------------------------------------------------------------*
  * Load
@@ -277,4 +322,7 @@ void viewmain_t::load(int m)
 	// load slope data
 	slope_->load(modules_[m]["name"], modules_[m].x_points,
 		modules_[m].y_points);
+	
+	// load metrics data
+	metrics_->load(modules_[m]["name"], modules_[m].metrics);
 } // viewmain_t::load

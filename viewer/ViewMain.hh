@@ -10,6 +10,7 @@
 
 #include <ViewPipeline.hh>
 #include <ViewSlope.hh>
+#include <ViewMetrics.hh>
 #include <ViewData.hh>
 
 class viewmain_t : public QMainWindow
@@ -27,6 +28,7 @@ private slots:
 
 	void open();
 	void openSlope();
+	void openMetrics();
 	void load(int m);
 
 private:
@@ -34,10 +36,12 @@ private:
 	// GUI elements
 	QAction * openAction_;
 	QAction * slopeAction_;
+	QAction * metricsAction_;
 	QAction * quitAction_;
 
 	viewpipeline_t * pipeline_;
 	viewslope_t * slope_;
+	viewmetrics_t * metrics_;
 
 	QMenu * fileMenu_;
 

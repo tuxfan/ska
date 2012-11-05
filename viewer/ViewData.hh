@@ -25,6 +25,7 @@ struct module_data_t : public QMap<QString, QString> {
 	QStringList issues;
 	QString pipelines;
 	QStringList instructions;
+	QString metrics;
 	QVector<double> x_points;
 	QVector<double> y_points;
 }; // struct module_data_t

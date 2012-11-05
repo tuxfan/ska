@@ -30,6 +30,7 @@ skaview_SOURCES = \
 	${top_srcdir}/viewer/ViewInstruction.hh \
 	${top_srcdir}/viewer/ViewIssue.hh \
 	${top_srcdir}/viewer/ViewMain.hh \
+	${top_srcdir}/viewer/ViewMetrics.hh \
 	${top_srcdir}/viewer/ViewPipeline.hh \
 	${top_srcdir}/viewer/ViewSlope.hh \
 	${top_srcdir}/viewer/ViewUtils.hh \

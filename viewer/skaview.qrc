@@ -7,5 +7,6 @@
 <qresource>
 	<file>icons/open.png</file>
 	<file>icons/slope.png</file>
+	<file>icons/metrics.png</file>
 </qresource>
 </RCC>

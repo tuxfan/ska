@@ -65,6 +65,7 @@ void viewslope_t::load(const QString & dataset,
 	} // for
 
 	plot_->setRawSamples(x_points.data(), y_points.data(), x_points.size());
+	replot();
 } // viewslope_t::load
 
 void viewslope_t::highlightAreaPaintEvent(QPaintEvent * event)
@@ -98,8 +99,7 @@ void viewslope_t::resizeEvent(QResizeEvent * event) {
 
 	QRect cr = contentsRect();
 	ratio_ = (cr.height() - (top_ + bottom_ + width_))/double(points_);
-
-	highlight_.setHeight(int(ratio_));
+	highlight_.setHeight(std::max(2, int(ratio_)));
 	highlight_.setWidth(cr.width() - (left_+right_));
 	highlightArea_->setGeometry(highlight_);
 } // viewslope_t::resizeEvent
