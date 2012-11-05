@@ -12,7 +12,7 @@ Requirements:
 * C++ compiler with c++11 support
 * llvm >= 3.1
 * qt4 (development libraries and headers)
-* qwt (development libraries and headers)
+* qwt >= 6.0 (development libraries and headers)
 * graphviz (development libraries and headers)
 
 To create LLVM IR input files for SKA you'll need dragonegg >= 3.1

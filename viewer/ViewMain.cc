@@ -120,6 +120,11 @@ viewmain_t::viewmain_t()
 	 *------------------------------------------------------------------------*/
 	slope_ = new viewslope_t;
 
+	connect(pipeline_, SIGNAL(updateRequest(QRect,int)),
+		slope_, SLOT(updateHighlightArea(QRect,int)));
+	connect(pipeline_, SIGNAL(highlightMove(int)),
+		slope_, SLOT(moveHighlight(int)));
+
 	/*-------------------------------------------------------------------------*
 	 * Misc.
 	 *------------------------------------------------------------------------*/

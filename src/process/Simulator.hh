@@ -398,7 +398,7 @@ simulator_t::simulator_t(const char * ir_file)
 
 		size_t r(retired.size());
 		for(auto out = retired.begin(); out != retired.end(); ++out) {
-			output << (*out)->cycle_issued() + 1 << " " << r-- << std::endl;
+			output << (*out)->cycle_issued() << " " << r-- << std::endl;
 		} // for
 
 		output << "END_SLOPE_DATA" << std::endl;

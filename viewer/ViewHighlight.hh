@@ -8,29 +8,30 @@
 
 #include <QtGui/QtGui>
 
-class viewhighlight_t : public QWidget
+template<typename parent_t>
+class viewhighlight_T : public QWidget
 {
 public:
 
-	viewhighlight_t(viewpipeline_t * pipeline) : QWidget(pipeline) {
-		pipeline_ = pipeline;
+	viewhighlight_T(parent_t * parent) : QWidget(parent) {
+		parent_ = parent;
 		setAttribute(Qt::WA_TransparentForMouseEvents);
-	} // viewhighlight_t
+	} // viewhighlight_T
 
 	QSize sizeHint() const {
-		return QSize(pipeline_->highlightAreaWidth(), 0);
+		return QSize(parent_->highlightAreaWidth(), 0);
 	} // sizeHint
 
 protected:
 
 	void paintEvent(QPaintEvent * event) {
-		pipeline_->highlightAreaPaintEvent(event);
+		parent_->highlightAreaPaintEvent(event);
 	} // paintEvent
 
 private:
 
-	viewpipeline_t * pipeline_;
+	parent_t * parent_;
 
-}; // class viewhighlight_t
+}; // class viewhighlight_T
 
 #endif // ViewHighlight_h

@@ -11,6 +11,8 @@
 #include <ViewInstruction.hh>
 #include <ViewHighlight.hh>
 
+typedef viewhighlight_T<viewpipeline_t> viewhighlight_t;
+
 /*----------------------------------------------------------------------------*
  * viewpipeline_t constructor.
  *----------------------------------------------------------------------------*/
@@ -269,6 +271,7 @@ void viewpipeline_t::mouseMoveEvent(QMouseEvent * event)
 	blockNumber = blockNumber == 0 ? 1 : blockNumber;
 	while(blockNumber < instructions_.size() && block.isValid()) {
 		if(blockBoundingGeometry(block).contains(event->x(), event->y())) {
+			emit highlightMove(blockNumber);
 			highlight_.moveTo(0, top - (int)blockBoundingRect(block).height());
 			highlightArea_->setGeometry(highlight_);
 			highlightArea_->repaint();
@@ -280,7 +283,7 @@ void viewpipeline_t::mouseMoveEvent(QMouseEvent * event)
 		bottom = top + (int) blockBoundingRect(block).height();
 		++blockNumber;
 	} // while
-} // viewpipeline_t::mousePressEvent
+} // viewpipeline_t::mouseMoveEvent
 
 /*----------------------------------------------------------------------------*
  * Update widget width.

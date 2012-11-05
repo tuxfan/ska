@@ -30,6 +30,10 @@ public:
 	int instructionAreaWidth();
 	int highlightAreaWidth();
 
+signals:
+	
+	void highlightMove(int y);
+
 protected:
 
 	void resizeEvent(QResizeEvent * event);
