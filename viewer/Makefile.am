@@ -20,7 +20,7 @@ EXTRA_DIST = \
 moc_%.cc: %.hh
 	@MOC@ $< -o $@
 
-qrc_%.cc: %.qrc
+qrc_%.cc: %.qrc ${top_srcdir}/viewer/icons/*.png
 	@RCC@ $< -o $@
 
 skaview_SOURCES = \
@@ -46,3 +46,6 @@ nodist_skaview_SOURCES = \
 
 skaview_LDFLAGS = @VIEWER_LDFLAGS@
 skaview_LDADD = @VIEWER_LIBS@
+
+clean-local:
+	rm -rf ${top_builddir}/viewer/qrc_skaview.cc

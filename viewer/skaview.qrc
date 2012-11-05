@@ -6,5 +6,6 @@
 
 <qresource>
 	<file>icons/open.png</file>
+	<file>icons/slope.png</file>
 </qresource>
 </RCC>

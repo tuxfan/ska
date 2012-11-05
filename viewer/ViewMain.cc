@@ -19,7 +19,7 @@ viewmain_t::viewmain_t()
 	/*-------------------------------------------------------------------------*
 	 * Show slope action
 	 *------------------------------------------------------------------------*/
-	slopeAction_ = new QAction(QIcon(":/icons/open.png"), tr("&Slope"), this);
+	slopeAction_ = new QAction(QIcon(":/icons/slope.png"), tr("&Slope"), this);
 	slopeAction_->setShortcut(tr("Ctrl+1"));
 	connect(slopeAction_, SIGNAL(triggered()), this, SLOT(openSlope()));
 
