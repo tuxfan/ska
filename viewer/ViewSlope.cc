@@ -8,6 +8,7 @@
 #include<QtGui/QFrame>
 #include<qwt/qwt_plot.h>
 #include<qwt/qwt_plot_canvas.h>
+#include<qwt/qwt_plot_layout.h>
 #include<qwt/qwt_plot_curve.h>
 #include<qwt/qwt_scale_map.h>
 
@@ -18,7 +19,8 @@ typedef viewhighlight_T<viewslope_t> viewhighlight_t;
 
 viewslope_t::viewslope_t(QWidget * parent)
 	: QwtPlot(parent), plot_(nullptr), highlightArea_(nullptr),
-	highlight_(left_, top_, 268, 5), points_(0), current_(0), ratio_(1)
+	highlight_(0, 0, 0, 0), points_(0), current_(0), ratio_(1),
+	left_(50), right_(0), top_(2), bottom_(0)
 {
 	canvas()->setFrameStyle(QFrame::Box | QFrame::Plain);
 
@@ -64,7 +66,11 @@ void viewslope_t::load(const QString & dataset,
 		ymax = std::max(ymax, y_points[i]);
 	} // for
 
+	setAxisScale(yLeft, ymin, ymax);
+	setAxisScale(xBottom, xmin, xmax);
+
 	plot_->setRawSamples(x_points.data(), y_points.data(), x_points.size());
+	updateOffsets();
 	replot();
 } // viewslope_t::load
 
@@ -89,17 +95,34 @@ void viewslope_t::updateHighlightArea(const QRect & rect, int dy)
 
 void viewslope_t::moveHighlight(int y) {
 	current_ = y;
-	highlight_.moveTo(left_, int(y*ratio_ - 0.5*ratio_ + top_));
+
+	highlight_.moveTo(left_, int(y*ratio_ - 0.5*ratio_ + top_ + pad_));
+
 	highlightArea_->setGeometry(highlight_);
 	highlightArea_->repaint();
 } // viewslope_t::mouseMoveEvent
 
 void viewslope_t::resizeEvent(QResizeEvent * event) {
 	QwtPlot::resizeEvent(event);
-
-	QRect cr = contentsRect();
-	ratio_ = (cr.height() - (top_ + bottom_ + width_))/double(points_);
-	highlight_.setHeight(std::max(2, int(ratio_)));
-	highlight_.setWidth(cr.width() - (left_+right_));
-	highlightArea_->setGeometry(highlight_);
+	updateOffsets();
 } // viewslope_t::resizeEvent
+
+void viewslope_t::updateOffsets()
+{
+	QRect cr = contentsRect();
+	QRect ccr = canvas()->contentsRect();
+
+	left_ = cr.right() - (width_ + ccr.width());
+	right_ = cr.right() - width_;
+	top_ = cr.top() + width_;
+	bottom_ = cr.top() + width_ + ccr.height();
+
+	int yExtents = std::abs(bottom_ - top_) - (2*pad_);
+	int xExtents = std::abs(right_ - left_) + 1;
+
+	ratio_ = yExtents/double(points_);
+
+	highlight_.setHeight(std::max(2, int(ratio_)));
+	highlight_.setWidth(xExtents);
+	highlightArea_->setGeometry(highlight_);
+} // viewslope_t::updateOffsets

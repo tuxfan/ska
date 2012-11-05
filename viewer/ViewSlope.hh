@@ -41,6 +41,8 @@ protected:
 
 private:
 
+	void updateOffsets();
+
 	QwtPlotCurve * plot_;	
 	QWidget * highlightArea_;
 	QRect highlight_;
@@ -48,11 +50,12 @@ private:
 	int current_;
 	double ratio_;
 
-	static const int left_ = 45;
-	static const int right_ = -2;
-	static const int top_ = 2;
-	static const int bottom_ = 45;
+	int left_;
+	int right_;
+	int top_;
+	int bottom_;
 	static const int width_ = 2;
+	static const int pad_ = 3;
 
 }; // class viewslope_t
 
