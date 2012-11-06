@@ -11,24 +11,30 @@ public:
 	} // viewgraph_t
 
 	void load(const QString & dataset, const QString & data) {
-		char * _data = strdup(data.toStdString().data());
-		Agraph_t * G;
+		Agraph_t * graph;
 		GVC_t * gvc;
 
 		gvc = gvContext();
-		G = agmemread(_data);
-		gvLayout (gvc, G, "dot");
 
-//		gvRenderData(gvc, G, "bmp", &result, &length);
-gvRenderFilename (gvc, G, "png", "skaview_gv.png");
-QImage image("skaview_gv.png");
-setPixmap(QPixmap::fromImage(image));
-#if 0
-gvRenderData (GVC_t *gvc, Agraph_t* g, char *format, char **result,
-      unsigned int *length)
-#endif
-
+		// read the graph
+		char * _data = strdup(data.toStdString().data());
+		graph = agmemread(_data);
 		free(_data);
+
+		gvLayout (gvc, graph, "dot");
+
+		// this is lame, for now we have to write to a temporary
+		// file for the rendering and then read it back in.
+		gvRenderFilename(gvc, graph, "png", "skaview_gv.png");
+		QImage image("skaview_gv.png");
+		int err = system("rm -rf skaview_gv.png");	
+		if(err == -1 || err == 127) {
+			// FIXME: error
+		} // if
+
+		setPixmap(QPixmap::fromImage(image));
+		setScaledContents(true);
+
 	} // load
 
 private:
