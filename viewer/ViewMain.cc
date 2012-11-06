@@ -32,6 +32,14 @@ viewmain_t::viewmain_t()
 	connect(metricsAction_, SIGNAL(triggered()), this, SLOT(openMetrics()));
 
 	/*-------------------------------------------------------------------------*
+	 * Show metrics action
+	 *------------------------------------------------------------------------*/
+	graphAction_ = new QAction(QIcon(":/icons/graph.png"),
+		tr("&Graph"), this);
+	graphAction_->setShortcut(tr("Ctrl+3"));
+	connect(graphAction_, SIGNAL(triggered()), this, SLOT(openGraph()));
+
+	/*-------------------------------------------------------------------------*
 	 * Quit action
 	 *------------------------------------------------------------------------*/
 	quitAction_ = new QAction(tr("&Quit"), this);
@@ -84,6 +92,7 @@ viewmain_t::viewmain_t()
 	fileBar_->addAction(openAction_);
 	fileBar_->addAction(slopeAction_);
 	fileBar_->addAction(metricsAction_);
+	fileBar_->addAction(graphAction_);
 
 	++fill;
 	fill_[fill] = new QWidget(this);
@@ -133,6 +142,11 @@ viewmain_t::viewmain_t()
 	 * Metrics view
 	 *------------------------------------------------------------------------*/
 	metrics_ = new viewmetrics_t;
+
+	/*-------------------------------------------------------------------------*
+	 * Graph view
+	 *------------------------------------------------------------------------*/
+	graph_ = new viewgraph_t;
 
 	connect(pipeline_, SIGNAL(updateRequest(QRect,int)),
 		slope_, SLOT(updateHighlightArea(QRect,int)));
@@ -240,6 +254,15 @@ void viewmain_t::open(QString & fileName)
 					} // while
 				} // if
 
+				if(line.contains("BEGIN_GRAPH_DATA")) {
+					line = stream.readLine();
+					while(!stream.atEnd() &&
+						!line.contains("END_GRAPH_DATA")) {
+						module.graph += line;	
+						line = stream.readLine();
+					} // while
+				} // if
+
 				line = stream.readLine();
 			} // while
 
@@ -301,6 +324,15 @@ void viewmain_t::openMetrics()
 } // viewmain_t::openMetrics
 
 /*----------------------------------------------------------------------------*
+ * OpenGraph
+ *----------------------------------------------------------------------------*/
+
+void viewmain_t::openGraph()
+{
+	graph_->show();
+} // viewmain_t::openGraph
+
+/*----------------------------------------------------------------------------*
  * Load
  *----------------------------------------------------------------------------*/
 
@@ -325,4 +357,7 @@ void viewmain_t::load(int m)
 	
 	// load metrics data
 	metrics_->load(modules_[m]["name"], modules_[m].metrics);
+
+	// load graph data
+	graph_->load(modules_[m]["name"], modules_[m].graph);
 } // viewmain_t::load

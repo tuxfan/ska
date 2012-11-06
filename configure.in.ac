@@ -98,15 +98,19 @@ EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS $GRAPHVIZ_CPPFLAGS"
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $GRAPHVIZ_LDFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $GRAPHVIZ_LIBS"
 
+VIEWER_CPPFLAGS="$GRAPHVIZ_CPPFLAGS"
+VIEWER_LDFLAGS="$GRAPHVIZ_LDFLAGS"
+VIEWER_LIBS="$GRAPHVIZ_LIBS"
+
 #------------------------------------------------------------------------------#
 # Qt
 #------------------------------------------------------------------------------#
 
 CONFIG_GENERIC_LIB(qt, QT, [QApplication::beep()], C++)
 
-VIEWER_CPPFLAGS="$QT_CPPFLAGS $QT_CPPFLAGS/Qt"
-VIEWER_LDFLAGS="$QT_LDFLAGS"
-VIEWER_LIBS="$QT_LIBS"
+VIEWER_CPPFLAGS="$VIEWER_CPPFLAGS $QT_CPPFLAGS $QT_CPPFLAGS/Qt"
+VIEWER_LDFLAGS="$VIEWER_LDFLAGS $QT_LDFLAGS"
+VIEWER_LIBS="$VIEWER_LIBS $QT_LIBS"
 
 #------------------------------------------------------------------------------#
 # Qwt

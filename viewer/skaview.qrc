@@ -8,5 +8,6 @@
 	<file>icons/open.png</file>
 	<file>icons/slope.png</file>
 	<file>icons/metrics.png</file>
+	<file>icons/graph.png</file>
 </qresource>
 </RCC>

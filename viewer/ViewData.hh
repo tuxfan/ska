@@ -17,6 +17,8 @@ struct module_data_t : public QMap<QString, QString> {
 		issues.clear();
 		pipelines = "";
 		instructions.clear();
+		metrics = "";
+		graph = "";
 		x_points.clear();
 		y_points.clear();
 	} // clear
@@ -26,6 +28,7 @@ struct module_data_t : public QMap<QString, QString> {
 	QString pipelines;
 	QStringList instructions;
 	QString metrics;
+	QString graph;
 	QVector<double> x_points;
 	QVector<double> y_points;
 }; // struct module_data_t
