@@ -58,12 +58,6 @@ viewmain_t::viewmain_t()
 	selector_->setEnabled(false);
 
 	/*-------------------------------------------------------------------------*
-	 * Status information
-	 *------------------------------------------------------------------------*/
-	status_ = new QLabel(this);
-	status_->setText("No Data Loaded");
-
-	/*-------------------------------------------------------------------------*
 	 * Search
 	 *------------------------------------------------------------------------*/
 	searchBox_ = new QLineEdit("", this);
@@ -104,16 +98,10 @@ viewmain_t::viewmain_t()
 	++fill;
 	fill_[fill] = new QWidget(this);
 	fileBar_->addWidget(fill_[fill]);
-	fill_[fill]->setFixedWidth(10);
+	//fill_[fill]->setFixedWidth(10);
+	fill_[fill]->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 
 	fileBar_->addWidget(selector_);
-
-	++fill;
-	fill_[fill] = new QWidget(this);
-	fileBar_->addWidget(fill_[fill]);
-	fill_[fill]->setFixedWidth(10);
-
-	fileBar_->addWidget(status_);
 
 	++fill;
 	fill_[fill] = new QWidget(this);
@@ -212,7 +200,9 @@ void viewmain_t::open(QString & fileName)
 		} // if
 
 		if(line.contains("KEYWORD_ARCHITECTURE")) {
-			architecture_ = line.split(" ")[1];
+			QStringList words = line.split(" ");
+			words.removeFirst();
+			architecture_ = words.join(" ");
 		} // if
 
 		if(line.contains("BEGIN_MODULE")) {
@@ -340,12 +330,6 @@ void viewmain_t::load(int m)
 {
 	QString balance;
 	balance.setNum(modules_[m]["balance"].toDouble());
-
-	// update status
-	QString state =
-		"Cycles: " + modules_[m]["cycles"] +
-		", Balance: " + balance;
-	status_->setText(state);
 
 	// load data
 	pipeline_->load(modules_[m].cycles, modules_[m].issues,

@@ -53,7 +53,6 @@ private:
 
 	QLabel * loaded_;
 	QComboBox * selector_;
-	QLabel * status_;
 	QLineEdit * searchBox_;
 
 	QWidget * fill_[10];
