@@ -1,10 +1,11 @@
 #ifndef ViewGraph_hh
 #define ViewGraph_hh
 
-#include <QtGui/QMainWindow>
-#include <QtGui/QLabel>
-#include <QtGui/QScrollArea>
 #include <QtGui/QAction>
+#include <QtGui/QLabel>
+#include <QtGui/QMainWindow>
+#include <QtGui/QPrinter>
+#include <QtGui/QScrollArea>
 #include <QtGui/QToolBar>
 
 class viewgraph_t : public QMainWindow
@@ -20,6 +21,7 @@ public:
 
 private slots:
 
+	void print();
 	void zoom_in();
 	void zoom_out();
 	void zoom_reset();
@@ -29,6 +31,11 @@ private:
 	void scaleImage(double factor);
 	void adjustScrollBar(QScrollBar * scrollBar, double factor);
 
+#ifndef QT_NO_PRINTER
+	QPrinter printer_;
+#endif
+
+	QAction * print_;
 	QAction * zin_;
 	QAction * zout_;
 	QAction * reset_;

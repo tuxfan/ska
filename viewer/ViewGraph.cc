@@ -2,6 +2,8 @@
  *
  *----------------------------------------------------------------------------*/
 
+#include <QtGui/QPrintDialog>
+#include <QtGui/QPainter>
 #include <QtGui/QScrollBar>
 #include <graphviz/gvc.h>
 
@@ -22,6 +24,11 @@ viewgraph_t::viewgraph_t(QWidget * parent)
 	scrollArea_->setWidget(imageLabel_);
 	setCentralWidget(scrollArea_);
 
+	// create print
+	print_ = new QAction(QIcon(":/icons/print.png"), tr("&Print"), this);
+	print_->setShortcut(tr("Ctrl+p"));
+	connect(print_, SIGNAL(triggered()), this , SLOT(print()));
+
 	// create zoom in
 	zin_ = new QAction(QIcon(":/icons/zin.png"), tr("Zoom &In"), this);
 	zin_->setShortcut(tr("Ctrl++"));
@@ -40,6 +47,7 @@ viewgraph_t::viewgraph_t(QWidget * parent)
 	// create toolbar
 	fileBar_ = addToolBar(tr("File"));
 
+	fileBar_->addAction(print_);
 	fileBar_->addAction(zin_);
 	fileBar_->addAction(zout_);
 	fileBar_->addAction(reset_);
@@ -73,6 +81,25 @@ void viewgraph_t::load(const QString & dataset, const QString & data)
 	imageLabel_->setPixmap(QPixmap::fromImage(image));
 	imageLabel_->adjustSize();
 } // viewgraph_t::load
+
+void viewgraph_t::print()
+{
+	Q_ASSERT(imageLabel_->pixmap());
+
+#ifndef QT_NO_PRINTER
+	QPrintDialog dialog(&printer_, this);
+
+	if(dialog.exec()) {
+		QPainter painter(&printer_);
+		QRect rect = painter.viewport();
+		QSize size = imageLabel_->pixmap()->size();
+		size.scale(rect.size(), Qt::KeepAspectRatio);
+		painter.setViewport(rect.x(), rect.y(), size.width(), size.height());
+		painter.setWindow(imageLabel_->pixmap()->rect());
+		painter.drawPixmap(0, 0, *imageLabel_->pixmap());
+	} // if
+#endif
+} // viewgraph_t::print
 
 void viewgraph_t::zoom_in()
 {
