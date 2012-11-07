@@ -4,6 +4,7 @@
 #include <QtGui/QAction>
 #include <QtGui/QLabel>
 #include <QtGui/QMainWindow>
+#include <QtGui/QMouseEvent>
 #include <QtGui/QPrinter>
 #include <QtGui/QScrollArea>
 #include <QtGui/QToolBar>
@@ -18,6 +19,13 @@ public:
 	viewgraph_t(QWidget * parent = nullptr);
 
 	void load(const QString & dataset, const QString & data);
+
+protected:
+
+#if 0
+	void mousePressEvent(QMouseEvent * event);
+	void mouseMoveEvent(QMouseEvent * event);
+#endif
 
 private slots:
 
@@ -46,6 +54,7 @@ private:
 	QScrollArea * scrollArea_;
 
 	double scale_;
+	QPoint pos_;
 
 }; // class viewgraph_t
 

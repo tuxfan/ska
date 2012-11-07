@@ -2,6 +2,8 @@
  *
  *----------------------------------------------------------------------------*/
 
+#include <iostream>
+
 #include <QtGui/QPrintDialog>
 #include <QtGui/QPainter>
 #include <QtGui/QScrollBar>
@@ -81,6 +83,26 @@ void viewgraph_t::load(const QString & dataset, const QString & data)
 	imageLabel_->setPixmap(QPixmap::fromImage(image));
 	imageLabel_->adjustSize();
 } // viewgraph_t::load
+
+#if 0
+void viewgraph_t::mousePressEvent(QMouseEvent * event)
+{
+	QMainWindow::mousePressEvent(event);
+	pos_ = event->pos();
+} // viewgraph_t::mousePressEvent
+
+void viewgraph_t::mouseMoveEvent(QMouseEvent * event)
+{
+	QMainWindow::mouseMoveEvent(event);
+
+	if(event->buttons().testFlag(Qt::LeftButton)) {
+		scrollArea_->scrollContentsBy(event->x() - pos_.x(),
+		event->y() - pos_.y());	
+		pos_.setX(event->x());
+		pos_.setY(event->y());
+	} // if
+} // viewgraph_t::mouseMoveEvent
+#endif
 
 void viewgraph_t::print()
 {
