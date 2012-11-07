@@ -9,5 +9,8 @@
 	<file>icons/slope.png</file>
 	<file>icons/metrics.png</file>
 	<file>icons/graph.png</file>
+	<file>icons/zin.png</file>
+	<file>icons/zout.png</file>
+	<file>icons/reset.png</file>
 </qresource>
 </RCC>

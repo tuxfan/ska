@@ -1,43 +1,44 @@
 #ifndef ViewGraph_hh
 #define ViewGraph_hh
 
-#include <graphviz/gvc.h>
+#include <QtGui/QMainWindow>
+#include <QtGui/QLabel>
+#include <QtGui/QScrollArea>
+#include <QtGui/QAction>
+#include <QtGui/QToolBar>
 
-class viewgraph_t : public QLabel
+class viewgraph_t : public QMainWindow
 {
+	
+	Q_OBJECT
+
 public:
 
-	viewgraph_t(QWidget * parent = nullptr) : QLabel(parent) {
-	} // viewgraph_t
+	viewgraph_t(QWidget * parent = nullptr);
 
-	void load(const QString & dataset, const QString & data) {
-		Agraph_t * graph;
-		GVC_t * gvc;
+	void load(const QString & dataset, const QString & data);
 
-		gvc = gvContext();
+private slots:
 
-		// read the graph
-		char * _data = strdup(data.toStdString().data());
-		graph = agmemread(_data);
-		free(_data);
-
-		gvLayout (gvc, graph, "dot");
-
-		// this is lame, for now we have to write to a temporary
-		// file for the rendering and then read it back in.
-		gvRenderFilename(gvc, graph, "png", "skaview_gv.png");
-		QImage image("skaview_gv.png");
-		int err = system("rm -rf skaview_gv.png");	
-		if(err == -1 || err == 127) {
-			// FIXME: error
-		} // if
-
-		setPixmap(QPixmap::fromImage(image));
-		setScaledContents(true);
-
-	} // load
+	void zoom_in();
+	void zoom_out();
+	void zoom_reset();
 
 private:
+
+	void scaleImage(double factor);
+	void adjustScrollBar(QScrollBar * scrollBar, double factor);
+
+	QAction * zin_;
+	QAction * zout_;
+	QAction * reset_;
+
+	QToolBar * fileBar_;
+
+	QLabel * imageLabel_;
+	QScrollArea * scrollArea_;
+
+	double scale_;
 
 }; // class viewgraph_t
 
