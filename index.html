@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="SKA : Static Kernel Analyzer (SKA)" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>SKA</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/tuxfan/ska">View on GitHub</a>
+
+          <h1 id="project_title">SKA</h1>
+          <h2 id="project_tagline">Static Kernel Analyzer (SKA)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/tuxfan/ska/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/tuxfan/ska/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>What is SKA?</h1>
+
+<p>The <em>static kernel analyzer (SKA)</em> combines a static, linear
+pipeline simulator (similar to the IBM <em>spu_timing</em> tool)
+with architectural heuristics to model in-order
+instruction issue and pipeline behavior.  Pipeline simulations take as
+input the <em>intermediate representation (IR)</em> from
+<em>Low-Level Virtual Machine (LLVM)</em>.
+LLVM and LLVM IR are adopted
+standards in the HPC community,
+allowing SKA to support a wide range of source inputs.  SKA also has
+support for the upcoming OpenCL
+<em>Standard Portable Intermediate Representation (SPIR)</em>, which is
+based on LLVM IR version 3.1.  Support for OpenCL kernel source
+input (in the form of SPIR) allows SKA to model a rich variety of
+important modern computing architectures, and provides users with a
+new paradigm for application optimization and design.</p>
+
+<p>The underlying hardware properties accessed by SKA during pipeline
+simulation are user-defined, allowing for both modeling of existing
+processors, and experimentation with novel resource provisioning.  Thus,
+SKA can be employed either as an analysis tool for code optimization, or
+as a co-design tool to aid in the creation of new processor
+configurations.</p>
+
+<p>Users can visualize the output of SKA pipeline
+simulations with the <em>skaview</em> program.  The novel view representations in skaview give
+the user both detailed clock-for-clock execution information, as well as
+intuitive <em>slope</em> and <em>graph</em> views for high-level detection of serious data
+and structural hazards.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">SKA maintained by <a href="https://github.com/tuxfan">tuxfan</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
