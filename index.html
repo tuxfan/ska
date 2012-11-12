@@ -62,7 +62,7 @@ the user both detailed clock-for-clock execution information, as well as
 intuitive <em>slope</em> and <em>graph</em> views for high-level detection of serious data
 and structural hazards.</p>
 
-<h2>Pipeline Simulator</h2>
+<h1>Pipeline Simulator</h1>
 
 <p>The primary functionality of ska is as a pipeline simulator of LLVM IR.  The below image shows the an annotated screen shot from skaview:</p>
 
@@ -70,7 +70,7 @@ and structural hazards.</p>
 
 <p>From left to right, this images shows the issue cycle of each instruction, the logic unit on which it executed (including multiple issue flags: D indicates dual-issue), the pipeline progress (dashes represent stalls) and the LLVM IR instruction that was executed.</p>
 
-<h3>Generating Simulations</h3>
+<h1>Generating Simulations</h1>
 
 <p>To create output suitable for viewing in skaview, begin with the source file that you wish to analyze.  In this example, we use a simple <em>saxpy</em> update:</p>
 
@@ -79,15 +79,71 @@ and structural hazards.</p>
 <span class="p">}</span> <span class="c1">// for</span>
 </pre></div>
 
-<p>Use the <em>skair</em> script on your source file to generate LLVM IR:
-% skair saxpy.c
-The <em>skair</em> script is just a wrapper for one of the GNU compilers (gcc, g++ or gfortran) with added flags to use the <a href="http://dragonegg.llvm.org">dragonegg</a> plugin, so you can add any flags that you need to compile your code, e.g.,
-% skair -O3 -I/usr/include/special -DMY_DEFINE=defined -Wall -msse saxpy.c
-will just pass the extra flags onto the compiler.</p>
+<p>Use the <em>skair</em> script on your source file to generate LLVM IR:</p>
 
-<p>The skair script outputs LLVM IR suitable for input into <em>ska</em> (the actual simulator executable).  The IR looks like <a href="http://tuxfan.github.com/ska/data/saxpy.ll">this</a>.</p>
+<p>% skair saxpy.c</p>
+
+<p>The <em>skair</em> script is just a wrapper for one of the GNU compilers (gcc, g++ or gfortran) with added flags to use the <a href="http://dragonegg.llvm.org">dragonegg</a> plugin, so you can add any flags that you need to compile your code, e.g.,</p>
+
+<p>% skair -O3 -I/usr/include/special -DMY_DEFINE=defined -Wall -msse saxpy.c</p>
+
+<p>will just pass the extra flags onto the compiler.</p>
+
+<p>The skair script outputs LLVM IR suitable for input into <em>ska</em> (the actual simulator executable).  The IR looks like this:</p>
+
+<div class="highlight"><pre><span class="c">; ModuleID = 'saxpy.c'</span>
+<span class="k">target</span> <span class="k">datalayout</span> <span class="p">=</span> <span class="s">"e-p:64:64:64-S128-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f16:16:16-f32:32:32-f64:64:64-f128:128:128-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64"</span>
+<span class="k">target</span> <span class="k">triple</span> <span class="p">=</span> <span class="s">"x86_64-apple-darwin11"</span>
+
+<span class="k">define</span> <span class="kt">void</span> <span class="vg">@saxpy</span><span class="p">(</span><span class="k">i32</span> <span class="nv">%n</span><span class="p">,</span> <span class="kt">float</span> <span class="nv">%alpha</span><span class="p">,</span> <span class="kt">float</span><span class="p">*</span> <span class="k">nocapture</span> <span class="nv">%x</span><span class="p">,</span> <span class="kt">float</span><span class="p">*</span> <span class="k">nocapture</span> <span class="nv">%y</span><span class="p">)</span> <span class="k">nounwind</span> <span class="err">uwtable</span> <span class="p">{</span>
+<span class="nl">entry:</span>
+  <span class="nv-Anonymous">%0</span> <span class="p">=</span> <span class="k">icmp</span> <span class="k">sgt</span> <span class="k">i32</span> <span class="nv">%n</span><span class="p">,</span> <span class="m">0</span>
+  <span class="k">br</span> <span class="k">i1</span> <span class="nv-Anonymous">%0</span><span class="p">,</span> <span class="kt">label</span> <span class="nv">%"3.lr.ph"</span><span class="p">,</span> <span class="kt">label</span> <span class="nv">%return</span>
+
+<span class="nl">"3.lr.ph":</span>                                        <span class="c">; preds = %entry</span>
+  <span class="nv-Anonymous">%1</span> <span class="p">=</span> <span class="k">bitcast</span> <span class="kt">float</span><span class="p">*</span> <span class="nv">%y</span> <span class="k">to</span> <span class="k">i8</span><span class="p">*</span>
+  <span class="nv-Anonymous">%2</span> <span class="p">=</span> <span class="k">bitcast</span> <span class="kt">float</span><span class="p">*</span> <span class="nv">%x</span> <span class="k">to</span> <span class="k">i8</span><span class="p">*</span>
+  <span class="k">br</span> <span class="kt">label</span> <span class="nv">%"3"</span>
+
+<span class="nl">"3":</span>                                              <span class="c">; preds = %"3", %"3.lr.ph"</span>
+  <span class="nv">%indvars.iv</span> <span class="p">=</span> <span class="k">phi</span> <span class="k">i64</span> <span class="p">[</span> <span class="m">0</span><span class="p">,</span> <span class="nv">%"3.lr.ph"</span> <span class="p">],</span> <span class="p">[</span> <span class="nv">%indvars.iv.next</span><span class="p">,</span> <span class="nv">%"3"</span> <span class="p">]</span>
+  <span class="nv-Anonymous">%3</span> <span class="p">=</span> <span class="k">shl</span> <span class="k">nsw</span> <span class="k">i64</span> <span class="nv">%indvars.iv</span><span class="p">,</span> <span class="m">2</span>
+  <span class="nv-Anonymous">%4</span> <span class="p">=</span> <span class="k">getelementptr</span> <span class="k">inbounds</span> <span class="k">i8</span><span class="p">*</span> <span class="nv-Anonymous">%1</span><span class="p">,</span> <span class="k">i64</span> <span class="nv-Anonymous">%3</span>
+  <span class="nv-Anonymous">%5</span> <span class="p">=</span> <span class="k">getelementptr</span> <span class="k">inbounds</span> <span class="k">i8</span><span class="p">*</span> <span class="nv-Anonymous">%2</span><span class="p">,</span> <span class="k">i64</span> <span class="nv-Anonymous">%3</span>
+  <span class="nv-Anonymous">%6</span> <span class="p">=</span> <span class="k">bitcast</span> <span class="k">i8</span><span class="p">*</span> <span class="nv-Anonymous">%5</span> <span class="k">to</span> <span class="kt">float</span><span class="p">*</span>
+  <span class="nv-Anonymous">%7</span> <span class="p">=</span> <span class="k">load</span> <span class="kt">float</span><span class="p">*</span> <span class="nv-Anonymous">%6</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span><span class="p">,</span> <span class="nv">!tbaa</span> <span class="nv-Anonymous">!0</span>
+  <span class="nv-Anonymous">%8</span> <span class="p">=</span> <span class="k">fmul</span> <span class="kt">float</span> <span class="nv-Anonymous">%7</span><span class="p">,</span> <span class="nv">%alpha</span>
+  <span class="nv-Anonymous">%9</span> <span class="p">=</span> <span class="k">bitcast</span> <span class="k">i8</span><span class="p">*</span> <span class="nv-Anonymous">%4</span> <span class="k">to</span> <span class="kt">float</span><span class="p">*</span>
+  <span class="nv-Anonymous">%10</span> <span class="p">=</span> <span class="k">load</span> <span class="kt">float</span><span class="p">*</span> <span class="nv-Anonymous">%9</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span><span class="p">,</span> <span class="nv">!tbaa</span> <span class="nv-Anonymous">!0</span>
+  <span class="nv-Anonymous">%11</span> <span class="p">=</span> <span class="k">fadd</span> <span class="kt">float</span> <span class="nv-Anonymous">%8</span><span class="p">,</span> <span class="nv-Anonymous">%10</span>
+  <span class="k">store</span> <span class="kt">float</span> <span class="nv-Anonymous">%11</span><span class="p">,</span> <span class="kt">float</span><span class="p">*</span> <span class="nv-Anonymous">%9</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span><span class="p">,</span> <span class="nv">!tbaa</span> <span class="nv-Anonymous">!0</span>
+  <span class="nv">%indvars.iv.next</span> <span class="p">=</span> <span class="k">add</span> <span class="k">i64</span> <span class="nv">%indvars.iv</span><span class="p">,</span> <span class="m">1</span>
+  <span class="nv">%lftr.wideiv</span> <span class="p">=</span> <span class="k">trunc</span> <span class="k">i64</span> <span class="nv">%indvars.iv.next</span> <span class="k">to</span> <span class="k">i32</span>
+  <span class="nv">%exitcond</span> <span class="p">=</span> <span class="k">icmp</span> <span class="k">eq</span> <span class="k">i32</span> <span class="nv">%lftr.wideiv</span><span class="p">,</span> <span class="nv">%n</span>
+  <span class="k">br</span> <span class="k">i1</span> <span class="nv">%exitcond</span><span class="p">,</span> <span class="kt">label</span> <span class="nv">%return</span><span class="p">,</span> <span class="kt">label</span> <span class="nv">%"3"</span>
+
+<span class="nl">return:</span>                                           <span class="c">; preds = %"3", %entry</span>
+  <span class="k">ret</span> <span class="kt">void</span>
+<span class="p">}</span>
+
+<span class="nv-Anonymous">!0</span> <span class="p">=</span> <span class="kt">metadata</span> <span class="p">!{</span><span class="kt">metadata</span> <span class="nv">!"alias set 7: float"</span><span class="p">,</span> <span class="kt">metadata</span> <span class="nv-Anonymous">!1</span><span class="p">}</span>
+<span class="nv-Anonymous">!1</span> <span class="p">=</span> <span class="kt">metadata</span> <span class="p">!{</span><span class="kt">metadata</span> <span class="nv-Anonymous">!1</span><span class="p">}</span>
+</pre></div>
+
+<p>To generate a simulation, call ska with the LLVM IR:</p>
+
+<p>% ska -o saxpy.ska k10.xml saxpy.ll</p>
+
+<p>This command tells ska to output the simulation to <em>saxpy.ska</em> using AMD's K10 architecture (Supported architectures are in the <em>architectures</em> subdirectory of the main project.)  Once you have generated an output file, you can view it with skaview:</p>
+
+<p>% skaview saxpy.ska</p>
+
+<h1>Slope View</h1>
+
+<p>For a complete, more intuitive view of potential stalls in the pipeline, skaview offers a <em>slope</em> view.  The images below show the main window, and the main window with the slope view window opened:</p>
+
+<p><img src="images/main.png" alt="Main Window"></p>
       </section>
-
     </div>
 
     <!-- FOOTER  -->
