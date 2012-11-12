@@ -148,6 +148,12 @@ and structural hazards.</p>
 
 <p>The slope view plots the pipeline progress as a single-valued function, with a point at the first execution cycle of each instruction.  Longer stalls will have nearly zero slope, while multiple issue sections (best) will have up to <em>-(max issue)</em>.</p>
 
+<h1>Graph View</h1>
+
+<p> Sometimes it is useful to view a basic block as a <em>directed acyclic graph (DAG)</em>.  Because LLVM IR is in <em>static single-assignment (SSA)</em> form it is straightforward to create a graph view of the LLVM instruction dependencies.  The image below shows a portion of such a graph.</p>
+
+<p><img src="http://tuxfan.github.com/ska/images/graph.png" alt="Graph Window"></p>
+
       </section>
     </div>
 
