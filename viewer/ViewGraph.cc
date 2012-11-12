@@ -59,6 +59,10 @@ viewgraph_t::viewgraph_t(QWidget * parent)
 
 void viewgraph_t::load(const QString & dataset, const QString & data)
 {
+	// set the window title
+	QString title = "Graph view (" + dataset + ")";
+	setWindowTitle(title);
+
 	Agraph_t * graph;
 	GVC_t * gvc;
 
