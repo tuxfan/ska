@@ -3,6 +3,7 @@
  * All rights reserved
  *----------------------------------------------------------------------------*/
 
+#include <thread>
 #include <iostream>
 
 #include <ViewMain.hh>
@@ -331,6 +332,11 @@ void viewmain_t::load(int m)
 	QString balance;
 	balance.setNum(modules_[m]["balance"].toDouble());
 
+#if 0
+	std::thread t(graph_load, std::ref(*graph_),
+		std::ref(modules_[m]["name"]), std::ref(modules_[m].graph));
+#endif
+
 	// load data
 	pipeline_->load(modules_[m].cycles, modules_[m].issues,
 		modules_[m].pipelines, modules_[m].instructions);
@@ -342,6 +348,12 @@ void viewmain_t::load(int m)
 	// load metrics data
 	metrics_->load(modules_[m]["name"], modules_[m].metrics);
 
+#if 0
+	t.join();
+
 	// load graph data
+	gthread_ = new std::thread(graph_load, std::ref(*graph_),
+		std::ref(modules_[m]["name"]), std::ref(modules_[m].graph));
+#endif
 	graph_->load(modules_[m]["name"], modules_[m].graph);
 } // viewmain_t::load

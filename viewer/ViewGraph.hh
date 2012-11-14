@@ -58,4 +58,7 @@ private:
 
 }; // class viewgraph_t
 
+void graph_load(viewgraph_t & graph, const QString & dataset,
+	const QString & data);
+
 #endif // ViewGraph_hh

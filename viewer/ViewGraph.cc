@@ -162,3 +162,8 @@ void viewgraph_t::adjustScrollBar(QScrollBar * scrollBar, double factor)
 	scrollBar->setValue(int(factor * scrollBar->value() +
 		((factor - 1) * scrollBar->pageStep()/2)));
 } // viewgraph_t::adjustScrollBar
+
+void graph_load(viewgraph_t & graph, const QString & dataset,
+	const QString & data) {
+	graph.load(dataset, data);
+} // graph_load
