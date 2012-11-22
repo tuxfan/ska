@@ -66,7 +66,7 @@ and structural hazards.</p>
 
 <p>The primary functionality of ska is as a pipeline simulator of LLVM IR.  The below image shows the an annotated screen shot from skaview:</p>
 
-<p><img src="http://tuxfan.github.com/webdata/ska/pipeline.png" alt="Pipeline Simulation Detail"></p>
+<p><img src="http://tuxfan.github.com/webdata/ska/images/pipeline.png" alt="Pipeline Simulation Detail"></p>
 
 <p>From left to right, this images shows the issue cycle of each instruction, the logic unit on which it executed (including multiple issue flags: D indicates dual-issue), the pipeline progress (dashes represent stalls) and the LLVM IR instruction that was executed.</p>
 
@@ -142,24 +142,21 @@ and structural hazards.</p>
 
 <p>For a complete, more intuitive view of potential stalls in the pipeline, skaview offers a <em>slope</em> view.  The images below show the main window, and the main window with the slope view window opened:</p>
 
-<p><img src="http://tuxfan.github.com/webdata/ska/main.png" alt="Main Window"></p>
+<p><img src="http://tuxfan.github.com/webdata/ska/images/main.png" alt="Main Window"><img src="http://tuxfan.github.com/webdata/ska/images/slope.png" alt="Slope Window"></p>
 
-<p><img src="http://tuxfan.github.com/webdata/ska/slope.png" alt="Main Window w/ Slope View"></p>
-
-<p>The slope view plots the pipeline progress as a single-valued function, with a point at the first execution cycle of each instruction.  Longer stalls will have nearly zero slope, while multiple issue sections (best) will have up to <em>-(max issue)</em>.</p>
+<p>The slope view plots the pipeline progress as a single-valued function, with a point at the first execution cycle of each instruction. Longer stalls will have nearly zero slope, while multiple issue sections (best) will have up to <em>-(max issue)</em>.</p>
 
 <h1>Graph View</h1>
 
-<p>Sometimes it is useful to view a basic block as a <em>directed acyclic graph (DAG)</em>.  Because LLVM IR is in <em>static single-assignment (SSA)</em> form it is straightforward to create a graph view of the LLVM instruction dependencies.  The image below shows a portion of such a graph.</p>
+<p>Sometimes it is useful to view a basic block as a <em>directed acyclic graph (DAG)</em>. Because LLVM IR is in <em>static single-assignment (SSA)</em> form it is straightforward to create a graph view of the LLVM instruction dependencies. The image below shows a portion of such a graph:</p>
 
-<p><img src="http://tuxfan.github.com/webdata/ska/graph.png" alt="Graph Window"></p>
+<p><img src="http://tuxfan.github.com/webdata/ska/images/graph.png" alt="Graph Window"></p>
 
 <h1>Metrics</h1>
 
-<p>The ska simulator collects statistics during a run.  These statistics are used to generate several metrics.  Both the statistics and metrics can be viewed from within skaview:</p>
+<p>The ska simulator collects statistics during a run. These statistics are used to generate several metrics. Both the statistics and metrics can be viewed from within skaview:</p>
 
-<p><img src="http://tuxfan.github.com/webdata/ska/metrics.png" alt="Metrics"></p>
-
+<p><img src="http://tuxfan.github.com/webdata/ska/images/metrics.png" alt="Metrics"></p>
       </section>
     </div>
 
