@@ -124,7 +124,7 @@
 
 <!-- VU: instructions -->
 <value key="lu::5::instructions">
-	<string>extractelement insertelement shufflevector extractvalue insertvalue call</string>
+	<string>add extractelement insertelement shufflevector extractvalue insertvalue call</string>
 </value>
 
 <!-- VU: types -->
