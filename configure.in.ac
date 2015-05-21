@@ -65,7 +65,7 @@ CONFIG_GENERIC_WITH(dragonegg, DRAGONEGG)
 #------------------------------------------------------------------------------#
 
 if test "$HAS_LLVM_CONFIG" = "yes" ; then
-	LLVM_DEPENDS=`llvm-config --libs`" -lpthread -ldl"
+	LLVM_DEPENDS=`llvm-config --libs`" -lpthread -ldl -ltinfo"
 fi
 
 CPPFLAGS="$CPPFLAGS -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS"

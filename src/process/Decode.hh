@@ -5,7 +5,7 @@
 	#include <cxxabi.h>
 #endif
 
-#include <llvm/Instruction.h>
+#include <llvm/IR/Instruction.h>
 
 #include <Parameters.hh>
 #include <Instruction.hh>

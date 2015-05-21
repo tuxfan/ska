@@ -12,6 +12,7 @@ config/ltmain.sh
 config/missing
 config/version
 config/lib_version
+config/compile
 configure
 configure.ac
 src/include

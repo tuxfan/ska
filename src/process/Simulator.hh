@@ -15,16 +15,17 @@
 #include <vector>
 #include <list>
 
-#include <llvm/Module.h>
-#include <llvm/Constants.h>
-#include <llvm/Function.h>
-#include <llvm/Instruction.h>
-#include <llvm/Instructions.h>
-#include <llvm/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/Instruction.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/LLVMContext.h>
 #include <llvm/ADT/APInt.h>
 #include <llvm/Support/raw_ostream.h>
-#include <llvm/Support/IRReader.h>
-#include <llvm/Support/InstIterator.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/IRReader/IRReader.h>
+#include <llvm/IR/InstIterator.h>
 
 #include <FileIO.hh>
 #include <Decode.hh>
@@ -219,7 +220,7 @@ simulator_t::simulator_t(const char * ir_file)
 
 	if(llvm_module_ == nullptr) {
 		ExitOnError("LLVM parse failed on " << ir_file << std::endl <<
-			llvm_err_.getMessage(), ska::LLVMError);
+			llvm_err_.getMessage().str(), ska::LLVMError);
 	} // if
 
 	/*-------------------------------------------------------------------------*
@@ -874,9 +875,6 @@ size_t simulator_t::bytes(llvm::Type * type) {
 			return bytes(type->getPointerElementType());
 
 		case llvm::Type::VectorTyID:
-			break;
-
-		case llvm::Type::NumTypeIDs:
 			break;
 
 		default:

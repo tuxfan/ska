@@ -11,12 +11,13 @@
 #define OpTypes_hh
 
 #include <map>
+#include <limits>
 
-#include <llvm/Instructions.h>
+#include <llvm/IR/Instructions.h>
 
 namespace ska {
 
-static const unsigned TypeAnyID = llvm::Type::NumTypeIDs + 1;
+static const unsigned TypeAnyID = std::numeric_limits<unsigned>::max();
 
 unsigned any_type() {
 	return TypeAnyID;

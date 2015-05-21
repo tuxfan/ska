@@ -12,7 +12,7 @@
 
 #include <map>
 
-#include <llvm/Instructions.h>
+#include <llvm/IR/Instructions.h>
 
 namespace ska {
 

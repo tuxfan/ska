@@ -35,7 +35,8 @@ const char * gv_dir_default = "back";
 #define GV_DIR const_cast<char *>(gv_dir)
 #define GV_DIR_DEFAULT const_cast<char *>(gv_dir_default)
 
-
+const int ag_create(1);
+const int ag_access(0);
 
 /*----------------------------------------------------------------------------*
  * Class for creating Graphviz trees.
@@ -66,17 +67,17 @@ public:
 			agclose(graph_);
 		} // if
 
-		graph_ = agopen(GV_GRAPH, AGDIGRAPH);
+		graph_ = agopen(GV_GRAPH, Agdirected, nullptr);
 
 		// set default node attributes
-		agnodeattr(graph_, GV_LABEL, GV_LABEL_DEFAULT);
-		agnodeattr(graph_, GV_COLOR, GV_COLOR_DEFAULT);
-		agnodeattr(graph_, GV_STYLE, GV_STYLE_DEFAULT);
-		agnodeattr(graph_, GV_FILL_COLOR, GV_FILL_COLOR_DEFAULT);
-		agnodeattr(graph_, GV_FONT_COLOR, GV_FONT_COLOR_DEFAULT);
+		agattr(graph_, AGNODE, GV_LABEL, GV_LABEL_DEFAULT);
+		agattr(graph_, AGNODE, GV_COLOR, GV_COLOR_DEFAULT);
+		agattr(graph_, AGNODE, GV_STYLE, GV_STYLE_DEFAULT);
+		agattr(graph_, AGNODE, GV_FILL_COLOR, GV_FILL_COLOR_DEFAULT);
+		agattr(graph_, AGNODE, GV_FONT_COLOR, GV_FONT_COLOR_DEFAULT);
 
 		// set default edge attributes
-		agedgeattr(graph_, GV_DIR, GV_DIR_DEFAULT);
+		agattr(graph_, AGEDGE, GV_DIR, GV_DIR_DEFAULT);
 	} // clear
 
 	/*-------------------------------------------------------------------------*
@@ -88,7 +89,7 @@ public:
 	Agnode_t * add_node(const char * name, const char * label = nullptr) {
 		char buffer[1024];
 		sprintf(buffer, "%s", name);
-		Agnode_t * node = agnode(graph_, buffer);
+		Agnode_t * node = agnode(graph_, buffer, ag_create);
 
 		if(label != nullptr) {
 			char attr[1024];
@@ -122,7 +123,7 @@ public:
 		const char * value) {
 		char buffer[1024];
 		sprintf(buffer, "%s", name);
-		Agnode_t * node = agnode(graph_, buffer);
+		Agnode_t * node = agnode(graph_, buffer, ag_access);
 
 		if(node == nullptr) {
 			Warn("Node " << name << " does not exist");
@@ -143,7 +144,7 @@ public:
 	void set_label(const char * name, const char * label) {
 		char buffer[1024];
 		sprintf(buffer, "%s", name);
-		Agnode_t * node = agnode(graph_, buffer);
+		Agnode_t * node = agnode(graph_, buffer, ag_access);
 
 		if(node == nullptr) {
 			Warn("Node " << name << " does not exist");
@@ -160,7 +161,7 @@ public:
 	char * get_node_attribute(const char * name, const char * attr) {
 		char buffer[1024];
 		sprintf(buffer, "%s", name);
-		Agnode_t * node = agnode(graph_, buffer);
+		Agnode_t * node = agnode(graph_, buffer, ag_access);
 
 		if(node == nullptr) {
 			Warn("Node " << name << " does not exist");
@@ -177,7 +178,7 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	Agedge_t * add_edge(Agnode_t * parent, Agnode_t * child) {
-		return agedge(graph_, parent, child);	
+		return agedge(graph_, parent, child, nullptr, ag_create);	
 	} // add_edge
 
 	void set_edge_attribute(Agedge_t * edge, const char * attr,
