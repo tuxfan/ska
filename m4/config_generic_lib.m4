@@ -100,6 +100,8 @@ AC_DEFUN([CONFIG_GENERIC_LIB], [
 			LDFLAGS="$LDFLAGS"
 			check_lib="c"
 		fi
+		
+		echo $CPPFLAGS
 
 		case "$4" in
 			C++)
