@@ -117,7 +117,7 @@ VIEWER_LIBS="$VIEWER_LIBS $QT_LIBS"
 #------------------------------------------------------------------------------#
 
 CONFIG_GENERIC_LIB(qwt, QWT, [QwtPlot((QWidget *) 0)], C++,
-	[$QT_CPPFLAGS/Qt])
+	[$QT_CPPFLAGS $QT_CPPFLAGS/Qt])
 
 VIEWER_CPPFLAGS="$VIEWER_CPPFLAGS $QWT_CPPFLAGS"
 VIEWER_LDFLAGS="$VIEWER_LDFLAGS $QWT_LDFLAGS"
