@@ -38,21 +38,28 @@ AC_CONFIG_FILES([Makefile SANDBOX_SUBDIR \
 SANDBOX_SUBST
 
 #------------------------------------------------------------------------------#
-# Program options
-#------------------------------------------------------------------------------#
-
-AC_PROG_CXX
-AC_PROG_LIBTOOL
-CONFIG_PROG_LLVM_CONFIG
-CONFIG_PROG_MOC
-CONFIG_PROG_RCC
-
-#------------------------------------------------------------------------------#
 # Enable options
 #------------------------------------------------------------------------------#
 
 CONFIG_GENERIC_ENABLE(debug, DEBUG)
 CONFIG_GENERIC_ENABLE(color, COLOR)
+CONFIG_GENERIC_ENABLE(fortran, FORTRAN)
+
+#------------------------------------------------------------------------------#
+# Program options
+#------------------------------------------------------------------------------#
+
+AC_PROG_CXX
+
+if test "$enable_fortran" = "yes" ; then
+	echo "ENABLING FORTRAN"
+	AC_PROG_FC
+fi
+
+AC_PROG_LIBTOOL
+CONFIG_PROG_LLVM_CONFIG
+CONFIG_PROG_MOC
+CONFIG_PROG_RCC
 
 #------------------------------------------------------------------------------#
 # With options

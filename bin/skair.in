@@ -32,7 +32,10 @@ exit
 }
 
 output=""
-cppflags=""
+flags=""
+cxx=@CXX@
+cc=@CC@
+fc=@FC@
 
 [ $# -lt 1 ] && usage
 
@@ -48,22 +51,22 @@ while getopts ":hI:D:W:m:O:g:o:" opt ; do
 		usage
 	;;
 	O)
-		cppflags="$cppflags -O$OPTARG"
+		flags="$flags -O$OPTARG"
 	;;
 	I)
-		cppflags="$cppflags -I$OPTARG"
+		flags="$flags -I$OPTARG"
 	;;
 	D)
-		cppflags="$cppflags -D$OPTARG"
+		flags="$flags -D$OPTARG"
 	;;
 	W)
-		cppflags="$cppflags -W$OPTARG"
+		flags="$flags -W$OPTARG"
 	;;
 	m)
-		cppflags="$cppflags -m$OPTARG"
+		flags="$flags -m$OPTARG"
 	;;
 	g)
-		cppflags="$cppflags -g"
+		flags="$flags -g"
 	;;
 	o)
 		output=$OPTARG
@@ -79,30 +82,63 @@ shift $(($OPTIND - 1))
 #------------------------------------------------------------------------------#
 
 if [ -n "$SKAIR_CPPFLAGS" ] ; then
-	cppflags=$SKAIR_CPPFLAGS
-elif [ -z "$cppflags" ] ; then
-	cppflags="-O2"
+	flags=$SKAIR_CPPFLAGS
+elif [ -z "$flags" ] ; then
+	flags="-O2"
 fi
 
-cppflags=`echo $cppflags | sed 's,^ ,,'`
+flags=`echo $flags | sed 's,^ ,,'`
 
 #------------------------------------------------------------------------------#
 # Parse language type from file suffix.
 #------------------------------------------------------------------------------#
 
 ftype=`echo $1 | sed 's,.*\.,,g'`
-fbase=`echo $1 | sed 's,\..*$,,g'`
+fbase=`basename $1 .$ftype`
 
 case $ftype in
+
 	f|F|f90|F90)
-		cmd=gfortran
+		if [ -z $fc ] ; then
+			echo "You must enable Fortran support to process this file!!!"
+			exit 1
+		fi
+		cmd=$fc
+		emitflags="-fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir"
 	;;
+
 	c|C)
-		cmd=gcc
+		cmd=$cc
+
+		case $cc in
+
+			*gcc*)
+				emitflags="-fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir"
+			;;
+
+			*clang*)
+				emitflags="-emit-llvm"
+			;;
+
+		esac
 	;;
+
 	cc|CC|cxx)
-		cmd=g++
+		cmd=$cxx
+
+		case $cxx in
+
+			*g++*)
+				emitflags="-fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir"
+			;;
+
+			*clang++*)
+				emitflags="-emit-llvm"
+			;;
+
+		esac
 	;;
+
 esac
 
 #------------------------------------------------------------------------------#
@@ -118,5 +154,5 @@ fi
 #------------------------------------------------------------------------------#
 
 echo "Generating LLVM IR with:"
-echo "$cmd $cppflags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1"
-$cmd $cppflags -fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir -o $output -S $1
+echo "$cmd $flags $emitflags -o $output -S $1"
+$cmd $flags $emitflags -o $output -S $1
