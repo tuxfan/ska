@@ -32,7 +32,9 @@ AC_CONFIG_FILES([Makefile SANDBOX_SUBDIR \
 	lib/Makefile \
 	bin/Makefile \
 	bin/skair \
-	viewer/Makefile
+	viewer/Makefile \
+	examples/Makefile \
+	examples/saxpy/Makefile
 ])
 
 SANDBOX_SUBST

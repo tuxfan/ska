@@ -7,5 +7,8 @@
 # Custom rules for ska project
 #------------------------------------------------------------------------------#
 
-.c.ll:
-	${top_builddir}/bin/skair $@
+%.ll: %.c
+	$(top_builddir)/bin/skair $<
+
+%.ll: %.cc
+	$(top_builddir)/bin/skair $<

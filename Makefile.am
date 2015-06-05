@@ -7,7 +7,7 @@
 # Top-level makefile for SKA project
 #------------------------------------------------------------------------------#
 
-SUBDIRS = lib bin viewer @SANDBOX@
+SUBDIRS = lib bin viewer examples @SANDBOX@
 
 #------------------------------------------------------------------------------#
 # Create links
