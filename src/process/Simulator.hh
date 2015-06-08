@@ -105,7 +105,7 @@ private:
 	// private data members
 	llvm::SMDiagnostic llvm_err_;
 	llvm::LLVMContext llvm_context_;
-	llvm::Module * llvm_module_;
+	std::unique_ptr<llvm::Module> llvm_module_;
 
 	core_t * core_;
 }; // class simulator_t
@@ -216,7 +216,8 @@ simulator_t::simulator_t(const char * ir_file)
 
 	log << " --- Reading IR File ---" << std::endl;
 	log << " " << ir_file << std::endl << std::endl;
-	llvm_module_ = ParseIRFile(ir_file, llvm_err_, llvm_context_);
+	//llvm_module_ = ParseIRFile(ir_file, llvm_err_, llvm_context_);
+	llvm_module_ = llvm::parseIRFile(ir_file, llvm_err_, llvm_context_);
 
 	if(llvm_module_ == nullptr) {
 		ExitOnError("LLVM parse failed on " << ir_file << std::endl <<
