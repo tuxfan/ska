@@ -32,6 +32,7 @@
 #include <Instruction.hh>
 #include <MachineState.hh>
 #include <Statistics.hh>
+#include <RegAlloc.hh>
 
 #include <Dependency.hh>
 
@@ -335,6 +336,14 @@ simulator_t::simulator_t(const char * ir_file)
 			"---------------------------------------#" << std::endl;
 		output << "BEGIN_MODULE" << std::endl;
 		output << "KEYWORD_NAME " << fname << std::endl;
+
+
+                /*------------------------------------------------------------------*
+                 * Do register allocation and modify the dmap, LLVM DAG accordingly 
+                 *------------------------------------------------------------------*/
+              
+                
+
 
 		/*----------------------------------------------------------------------* 
 		 * Simulate instruction execution.

@@ -73,7 +73,7 @@ private:
 #endif // MachineState_hh
 
 /*----------------------------------------------------------------------------*
- * Local Variables: 
+ * Local Variables:
  * mode:c++
  * c-basic-offset:3
  * indent-tabs-mode:t
