@@ -10,40 +10,7 @@
 #ifndef Simulator_hh
 #define Simulator_hh
 
-#include <string>
-#include <cstring>
-#include <vector>
-#include <list>
-
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/Function.h>
-#include <llvm/IR/Instruction.h>
-#include <llvm/IR/Instructions.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/ADT/APInt.h>
-#include <llvm/Support/raw_ostream.h>
-#include <llvm/Support/SourceMgr.h>
-#include <llvm/IRReader/IRReader.h>
-#include <llvm/IR/InstIterator.h>
-
-#include <FileIO.hh>
-#include <Decode.hh>
-#include <Instruction.hh>
-#include <MachineState.hh>
-#include <Statistics.hh>
-#include <RegAlloc.hh>
-
-#include <Dependency.hh>
-
-#if defined(HAVE_GRAPHVIZ)
-#include <Graphviz.hh>
-#endif
-
-#include <OpCodes.hh>
-#include <OpTypes.hh>
-#include <Core.hh>
-#include <Utils.hh>
+#include <RegAlloc.hh> //contains other llvm includes
 
 namespace ska {
 
@@ -96,6 +63,13 @@ private:
 
 	void update_opcount(llvm::Instruction * instruction);
 
+
+        /*-------------------------------------------------------------------------*
+         * Do register allocation
+         *-------------------------------------------------------------------------*/
+
+        void doRegAlloc (dependency_map_t dmap);
+
 	/*-------------------------------------------------------------------------*
 	 * Compute the number of bytes associated with a given llvm::Type.  This
 	 * is used to compute load and store sizes.
@@ -137,7 +111,7 @@ simulator_t::simulator_t(const char * ir_file)
 	arch.getval(architecture, "name");
 	output << "KEYWORD_ARCHITECTURE " << architecture <<
 		std::endl << std::endl;
-	
+
 	/*-------------------------------------------------------------------------*
 	 * Start log information.
 	 *-------------------------------------------------------------------------*/
@@ -217,7 +191,9 @@ simulator_t::simulator_t(const char * ir_file)
 
 	log << " --- Reading IR File ---" << std::endl;
 	log << " " << ir_file << std::endl << std::endl;
+
 	//llvm_module_ = ParseIRFile(ir_file, llvm_err_, llvm_context_);
+
 	llvm_module_ = llvm::parseIRFile(ir_file, llvm_err_, llvm_context_);
 
 	if(llvm_module_ == nullptr) {
@@ -246,7 +222,7 @@ simulator_t::simulator_t(const char * ir_file)
 		} // if
 
 #if defined(HAVE_GRAPHVIZ)
-		graphviz_t & graph = graphviz_t::instance();					
+		graphviz_t & graph = graphviz_t::instance();
 		graph.clear();
 #endif
 
@@ -341,8 +317,8 @@ simulator_t::simulator_t(const char * ir_file)
                 /*------------------------------------------------------------------*
                  * Do register allocation and modify the dmap, LLVM DAG accordingly 
                  *------------------------------------------------------------------*/
-              
-                
+
+                 doRegAlloc(dmap);
 
 
 		/*----------------------------------------------------------------------* 
@@ -894,12 +870,56 @@ size_t simulator_t::bytes(llvm::Type * type) {
 	return 0;
 } // simulator_t::bytes
 
+
+void simulator_t::doRegAlloc (dependency_map_t dmap) {
+
+       // check the register type used in the simulation
+       // and appropriately decide what to do
+       // also include register aliasing information
+       // simple solution -- aliased registers map to 
+       // the same color
+       int n = 2; //initially assume there are only 2 reg typs
+                  //we can read this number from the arch
+                  //file, ideally 
+        
+        
+        
+        
+        
+        //First, construct the flowgraph from the dmap
+        //llvm_module_->begin( )
+         
+         
+
+
+       //let there be two register types, 32-bit and 64-bit 
+       //can be extended to n register types, as seen on a 
+       //real architecture. Do coloring for the registers, 
+       //assign only appropriate colors
+
+       
+       
+
+
+
+      //Rewrite the program in case there is no solution to
+      //our problem, and do tail recursion on doRegAlloc
+
+
+
+
+        
+        
+
+
+} 
+
 } // namespace ska
 
 #endif // Simulator_hh
 
 /*----------------------------------------------------------------------------*
- * Local Variables: 
+ * Local Variables:
  * mode:c++
  * c-basic-offset:3
  * indent-tabs-mode:t
