@@ -38,6 +38,9 @@
 
 namespace ska {
 
+
+typedef std::map<llvm::Value *, dependency_t *> dependency_map_t;
+
 class flow_graph{
 
 private :
@@ -61,10 +64,11 @@ private :
 
 public :
 
-          flow_graph(){ ; } //creates the CFG
+          flow_graph( dependency_map_t dmap,
+                        int n){ ; } //creates the CFG
           void liveness_flow(){ ; } //populates liveness info
           void build_iGraph() { ; } //interference
-                                         //graph
+                                    //graph
 
 };  //flowgraph
 

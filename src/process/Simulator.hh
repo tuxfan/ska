@@ -31,7 +31,8 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	typedef std::map<llvm::Value *, instruction_t *> instruction_map_t;
-	typedef std::map<llvm::Value *, dependency_t *> dependency_map_t;
+	//typedef std::map<llvm::Value *, dependency_t *> dependency_map_t;
+        //above code moved to RegAlloc.h
 
 	typedef std::vector<instruction_t *> instruction_vector_t;
 	typedef std::list<instruction_t *> instruction_list_t;
@@ -884,20 +885,16 @@ void simulator_t::doRegAlloc (dependency_map_t dmap) {
         
         
         
-        
-        
         //First, construct the flowgraph from the dmap
-        //llvm_module_->begin( )
-         
-         
-
+   
+        flow_graph * fg = new flow_graph(dmap,n); 
+        fg->build_iGraph(); //build the interference graph
 
        //let there be two register types, 32-bit and 64-bit 
        //can be extended to n register types, as seen on a 
        //real architecture. Do coloring for the registers, 
        //assign only appropriate colors
 
-       
        
 
 
