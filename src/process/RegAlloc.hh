@@ -52,12 +52,12 @@ private :
           typedef struct node {
                 BB * BBInfo;
                 data * dataInfo;
-                std :: vector <struct Node *>
+                std :: vector <struct node *>
                        branches;
           } node;
 
           int ** iGraph;
-          Node * rootBB;
+          node * rootBB;
 
 public :
 
