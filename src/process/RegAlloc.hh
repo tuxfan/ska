@@ -45,16 +45,17 @@ class flow_graph{
 
 private :
 
-          typedef std::vector<llvm::Value *> BB;
 
           typedef struct data {
                 int * regList;
                 bool * liveInfo;
+                llvm::Value inst;
           } data;
 
+          typedef std::vector<data *> BB;
+
           typedef struct node {
-                BB * BBInfo;
-                data * dataInfo;
+                BB BBInfo;
                 std :: vector <struct node *>
                        branches;
           } node;
@@ -65,13 +66,25 @@ private :
 public :
 
           flow_graph( dependency_map_t dmap,
-                        int n){ ; } //creates the CFG
+                        int n, llvm::Module::iterator
+                        fita); //creates the CFG
           void liveness_flow(){ ; } //populates liveness info
           void build_iGraph() { ; } //interference
                                     //graph
 
 };  //flowgraph
 
+flow_graph::flow_graph(dependency_map_t dmap, int n,
+                        llvm::Module::iterator fita){
+
+        rootBB = new node; //root basic block
+        auto bita = (*fita).begin(); //basic block iterator
+        auto iita = (*bita).begin(); //instruction iterator
+        
+        while (iita != (*bita).end()){ //iterate through rootBB
+                iita++;
+        }
+}
 
 } //namespace ska
 

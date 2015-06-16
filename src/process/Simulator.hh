@@ -69,7 +69,7 @@ private:
          * Do register allocation
          *-------------------------------------------------------------------------*/
 
-        void doRegAlloc (dependency_map_t dmap);
+        void doRegAlloc (dependency_map_t dmap, llvm::Module::iterator it );
 
 	/*-------------------------------------------------------------------------*
 	 * Compute the number of bytes associated with a given llvm::Type.  This
@@ -196,8 +196,10 @@ simulator_t::simulator_t(const char * ir_file)
 	//llvm_module_ = ParseIRFile(ir_file, llvm_err_, llvm_context_);
 
 	llvm_module_ = llvm::parseIRFile(ir_file, llvm_err_, llvm_context_);
+        llvm_module_->dump(); //added by Kartik for debugging
 
-	if(llvm_module_ == nullptr) {
+	if(llvm_module_ == nullptr) { //added by Kartik for debuggingn
+
 		ExitOnError("LLVM parse failed on " << ir_file << std::endl <<
 			llvm_err_.getMessage().str(), ska::LLVMError);
 	} // if
@@ -211,7 +213,8 @@ simulator_t::simulator_t(const char * ir_file)
 	statistics_t & stats = statistics_t::instance();
 
 	log << " --- Processing Module ---" << std::endl;
-	for(llvm::Module::iterator fita = llvm_module_->begin();
+	for(llvm::Module::iterator fita = llvm_module_->begin();//function iterator ... 
+                                                                //all fns in IR
 		fita != llvm_module_->end(); ++fita) {
 
 		std::string fname = try_demangle_and_strip(fita->getName().str());
@@ -284,6 +287,7 @@ simulator_t::simulator_t(const char * ir_file)
 			} // if
 
 			dita->second->update_tree_properties();
+
 		} // for
 
 // FIXME: NEED TO SEE IF THIS IS NECESSARY
@@ -319,7 +323,7 @@ simulator_t::simulator_t(const char * ir_file)
                  * Do register allocation and modify the dmap, LLVM DAG accordingly 
                  *------------------------------------------------------------------*/
 
-                 doRegAlloc(dmap);
+                 doRegAlloc(dmap,fita);
 
 
 		/*----------------------------------------------------------------------* 
@@ -872,7 +876,7 @@ size_t simulator_t::bytes(llvm::Type * type) {
 } // simulator_t::bytes
 
 
-void simulator_t::doRegAlloc (dependency_map_t dmap) {
+void simulator_t::doRegAlloc (dependency_map_t dmap, llvm::Module::iterator fita ) {
 
        // check the register type used in the simulation
        // and appropriately decide what to do
@@ -885,17 +889,15 @@ void simulator_t::doRegAlloc (dependency_map_t dmap) {
         
         
         
-        //First, construct the flowgraph from the dmap
+       //First, construct the flowgraph from the dmap
    
-        flow_graph * fg = new flow_graph(dmap,n); 
-        fg->build_iGraph(); //build the interference graph
+       flow_graph * fg = new flow_graph(dmap,n,fita); 
+       fg->build_iGraph(); //build the interference graph
 
        //let there be two register types, 32-bit and 64-bit 
        //can be extended to n register types, as seen on a 
        //real architecture. Do coloring for the registers, 
        //assign only appropriate colors
-
-       
 
 
 
@@ -903,10 +905,6 @@ void simulator_t::doRegAlloc (dependency_map_t dmap) {
       //our problem, and do tail recursion on doRegAlloc
 
 
-
-
-        
-        
 
 
 } 
