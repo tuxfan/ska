@@ -26,3 +26,20 @@ project.
 #example.ll
 
 A function that adds two integer arguments and returns the result
+
+#example1.ll
+
+An example that contains a branch instruction
+
+#example2.ll
+
+An example that contains a call instruction
+
+#example3.ll
+
+An example that contains a for loop
+
+#example4.ll
+
+An example that contains a phi instruction #still figuring out how to generate
+                                           #this
