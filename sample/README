@@ -41,5 +41,4 @@ An example that contains a for loop
 
 #example4.ll
 
-An example that contains a phi instruction #still figuring out how to generate
-                                           #this
+An example that contains a phi instruction
