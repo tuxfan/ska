@@ -61,10 +61,15 @@ private :
           std::map<llvm::Value *, live_info> live_tab ; //liveness table
 
           typedef std::map<llvm::Value *,bool> intf; //represents adjacency
-          std::map<llvm::Value *, intf> intf_table; // matrix 
+          std::map<llvm::Value *, intf> intf_table; // matrix
           std::map<llvm::Value *,std::list<llvm::Value*>> intf_list;
                                                     //adj. list
           llvm::Value * root; //the root instruction
+
+          typedef std::map<llvm::Value *,bool> tree_list;
+
+          std::map<llvm::Value *, tree_list> BB_livin; //livein mapped
+                                                      //to basic block
 
 
 public :
@@ -86,6 +91,8 @@ public :
 
           int print_debug(std::map<llvm::Value *, bool> mm);
                                                   //liveness debug info
+  
+          int BBLiveness();
 
 };  //flowgraph
 
@@ -102,6 +109,11 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
         debug_liv.open("Liveness_Analysis");
         debug_liv << "Printing instructions in IR "<< std::endl;
 
+        while (aita != fita->arg_end()){
+               regCover[aita]=false; //add operands to regCover
+               aita++;
+        }
+
         while (iita != (*bita).end()){ //iterate through rootBB
                                        //populate value map
                regCover[iita]=false;   //no coverage on init
@@ -112,7 +124,7 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
                debug_liv << std::endl;
                iita++;
         }
-        iita--;
+
 
         debug_liv << std::endl
                   << "Now printing instructions covered by"
@@ -121,6 +133,8 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
 
         while (iita != (*bita).begin()){//need to add multiple BB
                                         //liveness analysis
+
+               iita--;
                int numOp = iita->getNumOperands();
                while(numOp>0){
                         auto xx = (iita->getOperand(numOp-1));
@@ -131,7 +145,6 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
                         }
                         numOp--;
                }
-               iita--;
         }
 
         debug_liv << std::endl
@@ -172,6 +185,14 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
         debug_liv.close(); //end of liveness debug
 
 } //flow_graph constructor
+
+int flow_graph::BBLiveness(){
+
+        //take input of live variables that are live in at subsequent basic blocks
+        //check until where they are live in this basic block and construct intf. graph
+        //accordingly
+
+}
 
 int flow_graph::print_debug(std::map<llvm::Value *, bool> mm){
 
@@ -224,6 +245,7 @@ int flow_graph::liveness_flow(llvm::Value * op,
                                               //populate the liveness
                                               //table
                                 //iita->dump();//debug
+
                                 if (iita==op) {
                                           live_tab[iita].live_in[op]=false;
                                           live_tab[iita].live_out[op]=true;
