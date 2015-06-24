@@ -70,6 +70,7 @@ private :
 
           std::map<llvm::Value *, tree_list> BB_livin; //livein mapped
                                                       //to basic block
+          
 
 
 public :
@@ -91,8 +92,19 @@ public :
 
           int print_debug(std::map<llvm::Value *, bool> mm);
                                                   //liveness debug info
-  
-          int BBLiveness();
+
+          std::map<llvm::Value * ,bool> //a map of instructions
+            BBLiveness
+                      (llvm::ilist_iterator<llvm::Instruction> iita, 
+                                  llvm::BasicBlock * bita   );
+
+
+          std::map<llvm::Value * ,bool> //a map of instructions
+           recur_live 
+                      (llvm::ilist_iterator<llvm::Instruction> iita, 
+                                  llvm::BasicBlock * bita   );
+
+          bool check_livein();
 
 };  //flowgraph
 
@@ -116,12 +128,14 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
 
         while (iita != (*bita).end()){ //iterate through rootBB
                                        //populate value map
+               iita->dump();
                regCover[iita]=false;   //no coverage on init
                std::string str;
                llvm::raw_string_ostream rso(str);
                rso<<*iita;
                debug_liv << rso.str();
                debug_liv << std::endl;
+
                iita++;
         }
 
@@ -131,22 +145,9 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
                   << " liveness analysis "
                   << std::endl;
 
-        while (iita != (*bita).begin()){//need to add multiple BB
-                                        //liveness analysis
 
-               iita--;
-               int numOp = iita->getNumOperands();
-               while(numOp>0){
-                        auto xx = (iita->getOperand(numOp-1));
-                        if (regCover.find(xx) != regCover.end()){
-                                  auto init=iita;
-                                  liveness_flow(xx,init,
-                                                   bita);
-                        }
-                        numOp--;
-               }
-        }
-
+        auto bb_livin = recur_live(iita,bita);
+                
         debug_liv << std::endl
                   << "Now printing liveness tables"
                   << std::endl;
@@ -186,13 +187,69 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
 
 } //flow_graph constructor
 
-int flow_graph::BBLiveness(){
+std::map<llvm::Value * ,bool> //a map of instructions
+ flow_graph::BBLiveness(llvm::ilist_iterator<llvm::Instruction> iita, 
+                                  llvm::BasicBlock * bita   ){
 
-        //take input of live variables that are live in at subsequent basic blocks
-        //check until where they are live in this basic block and construct intf. graph
+        //take input of live variables that are live in at subsequent basic 
+        //blocks
+        //check until where they are live in this basic block and construct 
+        //intf. graph
         //accordingly
 
+        while (iita != (*bita).begin()){//need to add multiple BB
+                                        //liveness analysis
+
+               iita--;
+               iita->dump();
+               int numOp = iita->getNumOperands();
+               while(numOp>0){
+                        auto xx = (iita->getOperand(numOp-1));
+                        xx->dump();
+                        if (regCover.find(xx) != regCover.end()){
+                                  auto init=iita;
+                                  liveness_flow(xx,init,
+                                                   bita);
+                        }
+                        numOp--;
+               }
+        }
+
+        return  live_tab[bita->begin()].live_in; //live_in info
+                                                 //for the BB
+
 }
+
+
+std::map<llvm::Value * ,bool> //a map of instructions
+ flow_graph::recur_live(llvm::ilist_iterator<llvm::Instruction> iita, 
+                                  llvm::BasicBlock * bita ){
+
+        auto bb_livin = BBLiveness(iita,bita);
+                               //get livenesss info for this BB
+                               //populates the liveness table
+                               //with information from the BB
+                               //we need to return liveness
+                               //i.e. live_in for this BB
+        iita=bita->end();
+        iita--; //the last instruction
+        bool live_in_change = check_livein(); //checks if the live
+                                              //in info changed
+        if (live_in_change){
+                  unsigned opcode = ((llvm::Instruction *)iita)->getOpcode();
+                  if (opcode == llvm::Instruction::Br){
+                             
+                  }
+        }else{
+                  return bb_livin;
+        }
+}
+
+bool flow_graph::check_livein(){
+
+          return false;
+
+};
 
 int flow_graph::print_debug(std::map<llvm::Value *, bool> mm){
 
@@ -240,21 +297,21 @@ int flow_graph::liveness_flow(llvm::Value * op,
                       live_tab[iita].live_in[op]=true; //instr where operand first
                       live_tab[iita].live_out[op]=false; //used is live in but not
                                                       //live out
-                      iita--;
                       while(iita != (*bita).begin()){
                                               //populate the liveness
                                               //table
                                 //iita->dump();//debug
 
                                 if (iita==op) {
+                                          iita--;
                                           live_tab[iita].live_in[op]=false;
                                           live_tab[iita].live_out[op]=true;
                                           iita = (*bita).begin(); //breaks out
                                 }
                                 else{
+                                          iita--;
                                           live_tab[iita].live_in[op]=true;
                                           live_tab[iita].live_out[op]=true;
-                                          iita--;
                                 }
                       }
                       regCover[op]=true;
