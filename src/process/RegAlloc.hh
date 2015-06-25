@@ -96,15 +96,22 @@ public :
           std::map<llvm::Value * ,bool> //a map of instructions
             BBLiveness
                       (llvm::ilist_iterator<llvm::Instruction> iita, 
-                                  llvm::BasicBlock * bita   );
+                                  llvm::BasicBlock * bita,
+                                  tree_list live_in   );
 
 
           std::map<llvm::Value * ,bool> //a map of instructions
            recur_live 
                       (llvm::ilist_iterator<llvm::Instruction> iita, 
-                                  llvm::BasicBlock * bita   );
+                                  llvm::BasicBlock * bita 
+                                   );
 
-          bool check_livein();
+          bool check_livein
+                    (std::map<llvm::Value *, bool> ,
+                        llvm::BasicBlock * bb);//check if there
+                                              //was any change in 
+                                              //live_in when 
+                                              //recursing over BBs
 
 };  //flowgraph
 
@@ -189,13 +196,24 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
 
 std::map<llvm::Value * ,bool> //a map of instructions
  flow_graph::BBLiveness(llvm::ilist_iterator<llvm::Instruction> iita, 
-                                  llvm::BasicBlock * bita   ){
+                                  llvm::BasicBlock * bita ,
+                                  tree_list live_in  ){
 
         //take input of live variables that are live in at subsequent basic 
         //blocks
         //check until where they are live in this basic block and construct 
         //intf. graph
         //accordingly
+
+        iita = bita->end();
+        iita--; 
+
+        tree_list::iterator it = live_in.begin();
+        while (it != live_in.end()){
+                auto init = iita;
+                liveness_flow(it->first,iita,bita);
+                it++;
+        }
 
         while (iita != (*bita).begin()){//need to add multiple BB
                                         //liveness analysis
@@ -222,32 +240,85 @@ std::map<llvm::Value * ,bool> //a map of instructions
 
 
 std::map<llvm::Value * ,bool> //a map of instructions
- flow_graph::recur_live(llvm::ilist_iterator<llvm::Instruction> iita, 
-                                  llvm::BasicBlock * bita ){
-
-        auto bb_livin = BBLiveness(iita,bita);
+flow_graph::recur_live(llvm::ilist_iterator<llvm::Instruction> iita, 
+                                llvm::BasicBlock * bita 
+                                ){
+                                    //need to add extra live0in information
+                                    //and do liveness for those ops also
+     
+        tree_list live_in; 
+        iita=bita->end();
+        iita--; //the last instruction
+        int numOp = iita->getNumOperands();
+        while (numOp >0){
+                auto bb_br = (iita->getOperand(numOp-1));
+                auto live_in_br = BB_livin[bb_br];
+                tree_list::iterator it_br = live_in_br.begin();
+                while(it_br != live_in_br.end()){
+                          live_in[it_br->first]=true;
+                }
+        }
+                        //get live in map from all branches 
+                        //of current basic block 
+        auto live_in_new = BBLiveness(iita,bita,live_in);
                                //get livenesss info for this BB
                                //populates the liveness table
                                //with information from the BB
                                //we need to return liveness
                                //i.e. live_in for this BB
+        bool live_in_change = check_livein(live_in_new,bita); 
+                                              //checks if the live
+                                              //in info changed
         iita=bita->end();
         iita--; //the last instruction
-        bool live_in_change = check_livein(); //checks if the live
-                                              //in info changed
         if (live_in_change){
+                  tree_list live_in_new;
                   unsigned opcode = ((llvm::Instruction *)iita)->getOpcode();
                   if (opcode == llvm::Instruction::Br){
-                             
+                          int numOp = iita->getNumOperands();
+                          while(numOp>0){
+                                    auto bb_br = (iita->getOperand(numOp-1));
+                                    bb_br->dump(); //debug information
+                                                   //for each operand do 
+                                                   //recur_live
+                                    auto it_br = ((llvm::BasicBlock *)bb_br)
+                                                                  ->begin();
+                                    auto live_in_br = 
+                                              recur_live(it_br,
+                                                  (llvm::BasicBlock *)bb_br);
+                                    numOp--;
+                          }
                   }
         }else{
-                  return bb_livin;
+                  return live_in_new;
         }
 }
 
-bool flow_graph::check_livein(){
+bool flow_graph::check_livein
+                    (std::map<llvm::Value *, bool> mm,
+                        llvm::BasicBlock * bb){
+          
+          bool forward_check = true;   
+          std::map<llvm::Value *,bool>::iterator it_0 = mm.begin();
+          while (it_0 != mm.end()){
+                    if (BB_livin[bb].find(it_0->first)==BB_livin[bb].end() )
+                              forward_check=false;
+                              break; 
+                    it_0++;
+          } 
 
-          return false;
+          bool backward_check = true;
+          std::map<llvm::Value *,bool>::iterator it_1 = BB_livin[bb].begin();
+          while (it_1 != BB_livin[bb].end()){
+
+                    if (mm.find(it_1->first) == mm.end()){
+
+                              backward_check = false;
+                              break;
+                    }
+                    it_1++;
+          } 
+          return forward_check && backward_check;
 
 };
 
@@ -301,7 +372,6 @@ int flow_graph::liveness_flow(llvm::Value * op,
                                               //populate the liveness
                                               //table
                                 //iita->dump();//debug
-
                                 if (iita==op) {
                                           iita--;
                                           live_tab[iita].live_in[op]=false;
