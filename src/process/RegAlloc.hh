@@ -101,10 +101,9 @@ public :
 
 
           std::map<llvm::Value * ,bool> //a map of instructions
-           recur_live 
-                      (llvm::ilist_iterator<llvm::Instruction> iita, 
-                                  llvm::BasicBlock * bita 
-                                   );
+           recur_live( 
+                        llvm::BasicBlock * bita 
+                            );
 
           bool check_livein
                     (std::map<llvm::Value *, bool> ,
@@ -153,7 +152,7 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
                   << std::endl;
 
 
-        auto bb_livin = recur_live(iita,bita);
+        auto bb_livin = recur_live(bita);
                 
         debug_liv << std::endl
                   << "Now printing liveness tables"
@@ -240,23 +239,29 @@ std::map<llvm::Value * ,bool> //a map of instructions
 
 
 std::map<llvm::Value * ,bool> //a map of instructions
-flow_graph::recur_live(llvm::ilist_iterator<llvm::Instruction> iita, 
-                                llvm::BasicBlock * bita 
-                                ){
+flow_graph::recur_live( 
+                        llvm::BasicBlock * bita 
+                           ){
                                     //need to add extra live0in information
                                     //and do liveness for those ops also
      
-        tree_list live_in; 
-        iita=bita->end();
+        tree_list live_in;  //an empty list saying what vars are
+                            //live_in from branching BBs of this BB
+        auto iita=bita->end();
         iita--; //the last instruction
-        int numOp = iita->getNumOperands();
-        while (numOp >0){
-                auto bb_br = (iita->getOperand(numOp-1));
-                auto live_in_br = BB_livin[bb_br];
-                tree_list::iterator it_br = live_in_br.begin();
-                while(it_br != live_in_br.end()){
-                          live_in[it_br->first]=true;
-                }
+        unsigned opcode = ((llvm::Instruction *)iita)->getOpcode();
+        if (opcode == llvm::Instruction::Br){
+                  int numOp = iita->getNumOperands();
+                  while (numOp >0){
+                          auto bb_br = (iita->getOperand(numOp-1));
+                          auto live_in_br = BB_livin[bb_br];
+                          tree_list::iterator it_br = live_in_br.begin();
+                          while(it_br != live_in_br.end()){
+                                   live_in[it_br->first]=true;
+                                   it_br++;
+                          }
+                          numOp--;
+                  }
         }
                         //get live in map from all branches 
                         //of current basic block 
@@ -269,10 +274,12 @@ flow_graph::recur_live(llvm::ilist_iterator<llvm::Instruction> iita,
         bool live_in_change = check_livein(live_in_new,bita); 
                                               //checks if the live
                                               //in info changed
+        BB_livin[bita]=live_in_new; //update the live in info
+
+        //live_in_change = false; //if want to omit the next section
         iita=bita->end();
         iita--; //the last instruction
-        if (live_in_change){
-                  tree_list live_in_new;
+        if (!live_in_change){
                   unsigned opcode = ((llvm::Instruction *)iita)->getOpcode();
                   if (opcode == llvm::Instruction::Br){
                           int numOp = iita->getNumOperands();
@@ -281,14 +288,12 @@ flow_graph::recur_live(llvm::ilist_iterator<llvm::Instruction> iita,
                                     bb_br->dump(); //debug information
                                                    //for each operand do 
                                                    //recur_live
-                                    auto it_br = ((llvm::BasicBlock *)bb_br)
-                                                                  ->begin();
-                                    auto live_in_br = 
-                                              recur_live(it_br,
-                                                  (llvm::BasicBlock *)bb_br);
+                                    recur_live(
+                                               (llvm::BasicBlock *)bb_br);
                                     numOp--;
                           }
                   }
+                  recur_live(bita); 
         }else{
                   return live_in_new;
         }
