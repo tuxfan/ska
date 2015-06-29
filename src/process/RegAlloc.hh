@@ -284,7 +284,7 @@ flow_graph::all_BB_liveness(
 bool flow_graph::check_livein
                     (std::map<llvm::Value *, bool> mm,
                         llvm::BasicBlock * bb){
-          
+ 
           bool forward_check = true;
           std::map<llvm::Value *,bool>::iterator it_0 = mm.begin();
           while (it_0 != mm.end()){
@@ -304,7 +304,7 @@ bool flow_graph::check_livein
                               break;
                     }
                     it_1++;
-          } 
+          }
           return forward_check && backward_check;
 
 };
