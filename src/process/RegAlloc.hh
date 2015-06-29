@@ -36,13 +36,7 @@
 #include <Core.hh>
 #include <Utils.hh>
 
-//#include <iostream>
-//#include <fstream> //for writing debug files
-
-
-
 namespace ska {
-
 
 typedef std::map<llvm::Value *, dependency_t *> dependency_map_t;
 
@@ -79,7 +73,7 @@ public :
                         fita); //creates the CFG
 
           int liveness_flow(llvm::Value * op,
-                                  llvm::ilist_iterator<llvm::Instruction> iita,
+                                  llvm::ilist_iterator<llvm::Instruction> iita, 
                                     llvm::BasicBlock * bita) ;
                                     //populates liveness info
           void build_iGraph() ; //interference
@@ -125,26 +119,6 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
 
         debug_liv.open("Liveness_Analysis");
         debug_liv << "Printing instructions in IR "<< std::endl;
-
-        /*while (aita != fita->arg_end()){
-               regCover[aita]=false; //add operands to regCover
-               aita++;
-        }
-
-        while (iita != (*bita).end()){ //iterate through rootBB
-                                       //populate value map
-               iita->dump();
-               regCover[iita]=false;   //no coverage on init
-               std::string str;
-               llvm::raw_string_ostream rso(str);
-               rso<<*iita;
-               debug_liv << rso.str();
-               debug_liv << std::endl;
-
-               iita++;
-        }*/
-
-
         debug_liv << std::endl
                   << "Now printing instructions covered by"
                   << " liveness analysis "
@@ -342,8 +316,10 @@ int flow_graph::liveness_flow(llvm::Value * op,
                       rso<<*iita;
                       debug_liv << rso.str();
                       debug_liv << std::endl;
-                      live_tab[iita].live_in[op]=true; //instr where operand first
-                      live_tab[iita].live_out[op]=false; //used is live in but not
+                      live_tab[iita].live_in[op]=true; //instr where 
+                                                        //operand first
+                      live_tab[iita].live_out[op]=false; //used is live in 
+                                                          //but not
                       regCover[op]=true;
           }
           else{
@@ -352,8 +328,10 @@ int flow_graph::liveness_flow(llvm::Value * op,
                       rso<<*iita;
                       debug_liv << rso.str();
                       debug_liv << std::endl;
-                      live_tab[iita].live_in[op]=true; //instr where operand first
-                      live_tab[iita].live_out[op]=false; //used is live in but not
+                      live_tab[iita].live_in[op]=true; //instr where 
+                                                       //operand first
+                      live_tab[iita].live_out[op]=false; //used is live in
+                                                        // but not
                                                       //live out
                       while(iita != (*bita).begin()){
                                               //populate the liveness
@@ -363,7 +341,7 @@ int flow_graph::liveness_flow(llvm::Value * op,
                                           iita--;
                                           live_tab[iita].live_in[op]=false;
                                           live_tab[iita].live_out[op]=true;
-                                          iita = (*bita).begin(); //breaks out
+                                          iita = (*bita).begin();//breaks out
                                 }
                                 else{
                                           iita--;
@@ -425,7 +403,7 @@ void flow_graph::build_iGraph(){
                                                 debug_intf << " X " <<
                                                           std::endl;
                                        }
-                                       else     debug_intf << " O " << //never
+                                       else     debug_intf << " O " <<//never
                                                           std::endl ;//called
 
                              }
