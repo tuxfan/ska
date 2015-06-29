@@ -21,12 +21,17 @@ private :
           typedef int reg_type; //register type
           typedef int color; //color
 
-          std::map<reg_type, color> color_map;
-                 //map each kind of reg to the 
-                 //corresponding color
+          std::map<color, reg_type> color_map;
+                  //many-to-one mapping of 
+                  //color to register type
+                  //eg : floating point, integer
           std::map<reg_type, numPhys> reg_map; 
                  //maps each regType to the number
                  //of phys regs available
+                 //eg : there can be 10 fp regs
+                 //and 10 int regs
+                 //so it says how many colors
+                 //per register
                           
 public :
 
@@ -35,7 +40,8 @@ public :
 };
 
 
-simplify_nodes::simplify_nodes( intf intf_table, dependency_map_t dmap ){
+simplify_nodes::simplify_nodes( std::map<llvm::Value *, intf> intf_table,
+                                                 dependency_map_t dmap ){
 
           //simplify the graph
           //by populating the stack 
