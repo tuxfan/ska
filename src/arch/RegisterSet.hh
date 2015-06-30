@@ -3,25 +3,25 @@
  * All rights reserved
  *----------------------------------------------------------------------------*/
 
-#ifndef Register_hh
-#define Register_hh
+#ifndef RegisterSet_hh
+#define RegisterSet_hh
 
 namespace ska {
 
-class register_t
+class register_set_t
 {
 public:
 
-	register_t() {}
-	~register_t() {}
+	register_set_t() {}
+	~register_set_t() {}
 
 private:
 
-}; // class register_t
+}; // class register_set_t
 
 } // namespace ska
 
-#endif // Register_hh
+#endif // RegisterSet_hh
 
 /*----------------------------------------------------------------------------*
  * Local Variables: 
