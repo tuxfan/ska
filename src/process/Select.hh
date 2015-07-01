@@ -50,7 +50,8 @@ public :
 
           typedef std::pair<llvm::Value *,bool> spill_info;
           
-          select(); //select constructor
+          select(std::stack<spill_info> ss,std::map<llvm::Value *,intf > intf_table,
+                             std::map<reg_type, numPhys> reg_map ); //select constructor
                     //selects colors for each instruction
                     //inserts instructions if there are
                     //actual spills and iterates regAlloc
@@ -58,7 +59,7 @@ public :
                     //allocation. If no actual spills,
                     //then we are done
   
-          std::map<llvm::Value *,bool> pot_spill;
+          std::stack<std::pair<llvm::Value *,bool>> pot_spill;
                     //stores only potential spills
 
 
@@ -78,7 +79,8 @@ private :
 };
 
 
-select::select(std::stack<spill_info> ss,intf intf_table ){
+select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table,
+                            std::map<reg_type, numPhys> reg_map   ){
          
 
           //pop instructions out of the ss stack 
@@ -89,32 +91,38 @@ select::select(std::stack<spill_info> ss,intf intf_table ){
           //it turns out that they are colorable later 
           //on, then we are done. Otherwise need to 
           //rewrite program and redo the reg allocation
+
           while( ss.size() != 0 ){
-                   auto ii = ss.pop(); //pop the instruction
+                   auto ii = ss.top(); //pop the instruction
+                   ss.pop();
                    if(ii.second==false){ //no spill, random color possible
                             color cc = c_map[0];//change to reg type of 
                                                 //instruction obtained
                                                 //from xml   
                             color min_c = 9999;
-                            intf::iterator intf_it = intf_table[ii].begin();
-                            while (intf_it != intf_table[ii].end()){
+                            intf::iterator intf_it = intf_table[ii.first].begin();
+                            while (intf_it != intf_table[ii.first].end()){
                                       color temp_c = reg_color[intf_it->first] ;
                                       if((temp_c < min_c) && (temp_c >= cc) &&
-                                                    (temp_c < cc+reg_map[ii]) ) 
+                                                    (temp_c < cc+reg_map[0]) ) //change to correct mapping
                                                 min_c=temp_c; 
                                       intf_it++;
                             }
-                            if ( min_c = 9999) c_map[inst_reg[ii]]; 
-                            reg_color[ii]=min_c;
+                            if ( min_c = 9999) c_map[inst_reg[ii.first]]; 
+                            reg_color[ii.first]=min_c;
                    }else{ //potential spill, color in the end
                           //do nothing here
+
+                          color cc = c_map[0];//change to reg type of 
+                                                //instruction obtained
+                                                //from xml
                           pot_spill.push(ii);
                           color min_c = 9999;
-                          intf::iterator intf_it = intf_table[ii].begin();
-                          while (intf_it != intf_table[ii].end()){
+                          intf::iterator intf_it = intf_table[ii.first].begin();
+                          while (intf_it != intf_table[ii.first].end()){
                                     color temp_c = reg_color[intf_it->first] ;
                                     if((temp_c < min_c) && (temp_c >= cc) &&
-                                                  (temp_c < cc+reg_map[ii]) ) 
+                                                  (temp_c < cc+reg_map[0]) ) //change to correct mapping
                                               min_c=temp_c; 
                                     intf_it++;
                           }
@@ -122,26 +130,30 @@ select::select(std::stack<spill_info> ss,intf intf_table ){
           }
 
           while( pot_spill.size() != 0){
-                    auto ii = pot_spill.pop();
+                    auto ii = pot_spill.top();
+                    pot_spill.pop();
                     color cc = c_map[0]; //change to reg type of
                                          //instruction obtained 
                                          //from xml
                     color max_c = -1;
-                    intf::iterator intf_it = intf_table[ii].begin();
-                    while (intf_it != intf_table[ii].end()){
+                    intf::iterator intf_it = intf_table[ii.first].begin();
+                    while (intf_it != intf_table[ii.first].end()){
                               color temp_c = reg_color[intf_it->first] ;
                               if((temp_c > max_c) && (temp_c >= cc) &&
-                                            (temp_c < cc+reg_map[ii]) )
+                                            (temp_c < cc+reg_map[0]) ) //change to correct mapping
                                         max_c=temp_c;
                               intf_it++;
                     }
-                    if (max_c == cc+reg_map[ii]){
+                    if (max_c == cc+reg_map[0]){ //change to correct mapping
 
-                              llvm::Instruction * ii_1 = intf_it->first;
+                              llvm::Instruction * ii_1 = ( llvm::Instruction *)intf_it->first;
                               
                               //TODO ... insert a store into the BB
-
                               //TODO ... insert a load into the BB
+                              //have to do it for all uses of the instruction
+                              //and at the definition
+
+
 
 
 
@@ -151,13 +163,17 @@ select::select(std::stack<spill_info> ss,intf intf_table ){
                       //there are two tiny live ranges, instead of one large
                       //live range
 
-                              
+                                 
 
           }
 
-          doRegAlloc(); //need to do register allocation again
+          
+
+          //doRegAlloc(); //need to do register allocation again
                         //we can invoke this from Simulator.hh
                         //and instead return a bool flag here
+
+        
                     
 }
 

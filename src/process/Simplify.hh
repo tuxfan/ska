@@ -64,7 +64,7 @@ private :
 
           typedef int reg_type; //register type
           typedef int color; //color
-          typedef int numPhys; //number of physical registers
+          //typedef int numPhys; //number of physical registers
 
           std::map<color, reg_type> color_map;
                   //many-to-one mapping of 
@@ -95,6 +95,8 @@ simplify_nodes::simplify_nodes( std::map<llvm::Value *, intf> intf_table,
           while(it_0 != intf_table.end()){
                     int degree = (it_0->second).size();
                     if(degree > reg_map[0]){ //change to correct reg type later
+                                             //will be pulled in from register_set
+                                             //header file
                             std::pair<llvm::Value *,bool> t_pair
                                 =( std::make_pair(it_0->first,false));
                             simple_nodes.push(t_pair);

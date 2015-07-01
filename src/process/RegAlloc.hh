@@ -36,7 +36,8 @@
 #include <Core.hh>
 #include <Utils.hh>
 
-#include <Simplify.hh>
+#include <Simplify.hh> //RegAlloc headers
+#include <Select.hh>
 
 namespace ska {
 
