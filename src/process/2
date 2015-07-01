@@ -50,7 +50,7 @@ public :
           typedef int reg_type; //register type
 
           typedef std::pair<llvm::Value *,bool> spill_info;
-
+          
           select(std::stack<spill_info> ss,std::map<llvm::Value *,intf > intf_table,
                              std::map<reg_type, numPhys> reg_map,
                              llvm::Module::iterator fita ); //select constructor
@@ -60,7 +60,7 @@ public :
                     //in the hopes of getting a legal
                     //allocation. If no actual spills,
                     //then we are done
-
+  
           std::stack<std::pair<llvm::Value *,bool>> pot_spill;
                     //stores only potential spills
           bool checkOperand( llvm::Value *, llvm::Value *);
@@ -222,12 +222,12 @@ bool select::checkOperand( llvm::Value * ii, llvm::Value * i_check){
 
 bool select::modifyOperand( llvm::Value * ii, llvm::Value * i_check,
                                 llvm :: Value * i_modify){
-         auto it = ((llvm::Instruction *)ii)->op_begin();
-         while (it != ( (llvm::Instruction *)ii)->op_end()){
+         auto it = ii->op_begin();
+         while (it != ii->op_end()){
 
-                    if((llvm::Instruction*)it == (llvm::Instruction *)i_check){
+                    if((Instruction*)it == (Instruction *)i_check){
 
-                          it = (llvm::Use *) i_modify;  //changed the operand
+                          it = (Instruction *) i_modify;  //changed the operand
                     }
                     it++;
          }
