@@ -1,3 +1,44 @@
+#ifndef Select_hh
+#define Select_hh 
+
+#include <string>
+#include <cstring>
+#include <vector>
+#include <list>
+
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/Instruction.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/ADT/APInt.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/IRReader/IRReader.h>
+#include <llvm/IR/InstIterator.h>
+#include <llvm/IR/CFG.h>
+
+#include <FileIO.hh>
+#include <Decode.hh>
+#include <Instruction.hh>
+#include <MachineState.hh>
+#include <Statistics.hh>
+
+#include <Dependency.hh>
+
+#if defined(HAVE_GRAPHVIZ)
+#include <Graphviz.hh>
+#endif
+
+#include <OpCodes.hh>
+#include <OpTypes.hh>
+#include <Core.hh>
+#include <Utils.hh>
+
+
+
+
 namespace ska{
 
 class select{
@@ -90,29 +131,36 @@ select::select(std::stack<spill_info> ss,intf intf_table ){
                     while (intf_it != intf_table[ii].end()){
                               color temp_c = reg_color[intf_it->first] ;
                               if((temp_c > max_c) && (temp_c >= cc) &&
-                                            (temp_c < cc+reg_map[ii]) ) 
+                                            (temp_c < cc+reg_map[ii]) )
                                         max_c=temp_c;
                               intf_it++;
                     }
                     if (max_c == cc+reg_map[ii]){
 
+                              llvm::Instruction * ii_1 = intf_it->first;
+                              
+                              //TODO ... insert a store into the BB
+
+                              //TODO ... insert a load into the BB
 
 
-                  
 
                     } //means there is an actual spill
                       //so need to push it to mem after definition
-                      //and get load it from mem before use, so that 
+                      //and get load it from mem before use, so that
                       //there are two tiny live ranges, instead of one large
                       //live range
+
                               
 
           }
 
           doRegAlloc(); //need to do register allocation again
-                    
-
+                        //we can invoke this from Simulator.hh
+                        //and instead return a bool flag here
                     
 }
 
-}
+} //namespace ska
+
+#endif

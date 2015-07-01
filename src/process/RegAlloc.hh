@@ -36,9 +36,11 @@
 #include <Core.hh>
 #include <Utils.hh>
 
+#include <Simplify.hh>
+
 namespace ska {
 
-typedef std::map<llvm::Value *, dependency_t *> dependency_map_t;
+//typedef std::map<llvm::Value *, dependency_t *> dependency_map_t;
 
 class flow_graph{
 
@@ -55,7 +57,7 @@ private :
 
           std::map<llvm::Value *, live_info> live_tab ; //liveness table
 
-          typedef std::map<llvm::Value *,bool> intf; //represents adjacency
+          //typedef std::map<llvm::Value *,bool> intf; //represents adjacency
           std::map<llvm::Value *, intf> intf_table; // matrix
           std::map<llvm::Value *,std::list<llvm::Value*>> intf_list;
                                                     //adj. list
