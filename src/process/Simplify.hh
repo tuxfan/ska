@@ -52,6 +52,7 @@ private :
 
 
           std::stack<std::pair<llvm::Value *, bool>> simple_nodes;
+          std::stack<std::pair<llvm::Value *, bool>> debug_nodes;
                           //nodes < K degree are false 
                           //nodes > K degree are true
                           //true means potential spill
@@ -77,12 +78,34 @@ private :
                  //and 10 int regs
                  //so it says how many colors
                  //per register
+           
                           
 public :
 
           simplify_nodes(std::map<llvm::Value *, intf> intf_table, dependency_map_t dmap);
 
+          void num_phys_regs();
+
 };
+
+void simplify_nodes::num_phys_regs(){ //change so that it gets this info from regset
+
+          reg_map[0]=100; //0 is of int type and has 100 registers
+          reg_map[1]=100; //1 is of float type and has another 100 registers 
+                          //you get the idea ...
+
+}
+
+int getInstructionType( llvm::Value * instr ){
+
+        auto type = ((llvm::Instruction *)instr)->getType();
+
+            if ( type->isIntegerTy()){ //simple 2 type case
+                      return 0;        //can add more types
+            }else{
+                      return 1;
+            }
+}
 
 
 simplify_nodes::simplify_nodes( std::map<llvm::Value *, intf> intf_table,
@@ -91,22 +114,64 @@ simplify_nodes::simplify_nodes( std::map<llvm::Value *, intf> intf_table,
           //by populating the stack 
           //with simple/spill nodes
 
+          num_phys_regs(); //gets data from reg set
+
           std::map<llvm::Value *,intf>::iterator it_0 = intf_table.begin();
+
           while(it_0 != intf_table.end()){
                     int degree = (it_0->second).size();
-                    if(degree > reg_map[0]){ //change to correct reg type later
+                    int type = getInstructionType(it_0->first );
+                    if(degree > reg_map[type]){ //change to correct reg type later
                                              //will be pulled in from register_set
                                              //header file
                             std::pair<llvm::Value *,bool> t_pair
-                                =( std::make_pair(it_0->first,false));
-                            simple_nodes.push(t_pair);
+                                =( std::make_pair(it_0->first,false)); //means
+                            simple_nodes.push(t_pair); //not a simple node
+                            debug_nodes.push(t_pair);
                     }else{
                             std::pair<llvm::Value *,bool> t_pair
-                               =( std::make_pair(it_0->first,true));
-                            simple_nodes.push(t_pair);
+                               =( std::make_pair(it_0->first,true)); //means
+                            simple_nodes.push(t_pair); //is a simple node
+                            debug_nodes.push(t_pair);
                     }
                     it_0++;
           }
+
+          std::ofstream simple_igraph;
+          simple_igraph.open("simplified igraph");
+          
+          while (!debug_nodes.empty()){
+
+                    auto node = debug_nodes.top();
+                    debug_nodes.pop();
+
+                            intf::iterator intf_it = intf_table[node.first].begin();  
+                            while(intf_it != intf_table[node.first].end()){
+                                      bool simp = node.second; //check whether   
+                                                            //simple node or not 
+                                      std::string str_0;
+                                      llvm::raw_string_ostream rso_0(str_0);
+                                      rso_0<<*(intf_it->first);
+                                      simple_igraph << rso_0.str();
+
+                                      simple_igraph << " , ";
+                                      
+                                      std::string str_1;
+                                      llvm::raw_string_ostream rso_1(str_1);
+                                      rso_1<<*(node.first);
+                                      simple_igraph << rso_1.str();
+    
+                                      if (simp){
+                                                simple_igraph << " T " ;//is simple
+                                                simple_igraph << std::endl ;
+                                      }else{
+                                                simple_igraph << " F " ;//is not simple
+                                                simple_igraph << std::endl ;
+                                      }
+ 
+                                      intf_it++; 
+                            }
+          } 
 }
 
 } //namespace ska

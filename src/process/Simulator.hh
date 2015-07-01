@@ -881,22 +881,23 @@ void simulator_t::doRegAlloc (dependency_map_t dmap, llvm::Module::iterator fita
        // check the register type used in the simulation
        // and appropriately decide what to do
        // also include register aliasing information
-       // simple solution -- aliased registers map to 
+       // simple solution -- aliased registers map to
        // the same color
        int n = 2; //initially assume there are only 2 reg typs
                   //we can read this number from the arch
-                  //file, ideally 
-        
-        
-        
-       //First, construct the flowgraph from the dmap
-   
-       flow_graph * fg = new flow_graph(dmap,n,fita); 
-       fg->build_iGraph(); //build the interference graph
+                  //file, ideally
 
-       //let there be two register types, 32-bit and 64-bit 
-       //can be extended to n register types, as seen on a 
-       //real architecture. Do coloring for the registers, 
+
+
+       //First, construct the flowgraph from the dmap
+
+       flow_graph * fg = new flow_graph(dmap,n,fita);
+       fg->build_iGraph(); //build the interference graph
+       fg->simplify_iGraph(); //simplifies the iGraph
+
+       //let there be two register types, 32-bit and 64-bit
+       //can be extended to n register types, as seen on a
+       //real architecture. Do coloring for the registers,
        //assign only appropriate colors
 
 
@@ -907,7 +908,7 @@ void simulator_t::doRegAlloc (dependency_map_t dmap, llvm::Module::iterator fita
 
 
 
-} 
+}
 
 } // namespace ska
 

@@ -69,6 +69,8 @@ private :
           std::map<llvm::Value *, tree_list> BB_livin; //livein mapped
                                                       //to basic block
 
+          dependency_map_t dmap;
+
 
 public :
           flow_graph(dependency_map_t dmap,
@@ -107,6 +109,14 @@ public :
                                               //was any change in 
                                               //live_in when 
                                               //recursing over BBs
+
+         void simplify_iGraph(){
+                  simplify_nodes * simp_igraph = new simplify_nodes( intf_table,
+                                                dmap);
+                  
+                  
+
+         };
 
 };  //flowgraph
 
