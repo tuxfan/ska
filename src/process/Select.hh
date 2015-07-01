@@ -1,5 +1,5 @@
 #ifndef Select_hh
-#define Select_hh 
+#define Select_hh
 
 #include <string>
 #include <cstring>
@@ -36,9 +36,6 @@
 #include <OpTypes.hh>
 #include <Core.hh>
 #include <Utils.hh>
-
-
-
 
 namespace ska{
 
@@ -87,31 +84,31 @@ private :
 select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table,
                             std::map<reg_type, numPhys> reg_map,
                             llvm::Module::iterator fita   ){
-         
 
-          //pop instructions out of the ss stack 
+
+          //pop instructions out of the ss stack
           //if they are simple nodes, just assign a
           //color and proceed. If they are potential
           //spills, then make a separate list i.e.
-          //assign colors to those in the end. If 
-          //it turns out that they are colorable later 
-          //on, then we are done. Otherwise need to 
+          //assign colors to those in the end. If
+          //it turns out that they are colorable later
+          //on, then we are done. Otherwise need to
           //rewrite program and redo the reg allocation
 
           while( ss.size() != 0 ){
                    auto ii = ss.top(); //pop the instruction
                    ss.pop();
                    if(ii.second==false){ //no spill, random color possible
-                            color cc = c_map[0];//change to reg type of 
+                            color cc = c_map[0];//change to reg type of
                                                 //instruction obtained
-                                                //from xml   
+                                                //from xml
                             color min_c = 9999;
                             intf::iterator intf_it = intf_table[ii.first].begin();
                             while (intf_it != intf_table[ii.first].end()){
                                       color temp_c = reg_color[intf_it->first] ;
                                       if((temp_c < min_c) && (temp_c >= cc) &&
                                                     (temp_c < cc+reg_map[0]) ) //change to correct mapping
-                                                min_c=temp_c; 
+                                                min_c=temp_c;
                                       intf_it++;
                             }
                             if ( min_c = 9999) c_map[inst_reg[ii.first]]; 
@@ -129,7 +126,7 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                                     color temp_c = reg_color[intf_it->first] ;
                                     if((temp_c < min_c) && (temp_c >= cc) &&
                                                   (temp_c < cc+reg_map[0]) ) //change to correct mapping
-                                              min_c=temp_c; 
+                                              min_c=temp_c;
                                     intf_it++;
                           }
                    }
@@ -139,7 +136,7 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                     auto ii = pot_spill.top();
                     pot_spill.pop();
                     color cc = c_map[0]; //change to reg type of
-                                         //instruction obtained 
+                                         //instruction obtained
                                          //from xml
                     color max_c = -1;
                     intf::iterator intf_it = intf_table[ii.first].begin();
@@ -153,14 +150,14 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                     if (max_c == cc+reg_map[0]){ //change to correct mapping
 
                               llvm::Instruction * ii_1 = ( llvm::Instruction *)intf_it->first;
-                              
+
                               auto bita = fita->begin();
                               while (bita != fita->end()){
 
                                         auto iita = bita->begin();
                                         while (iita != bita->end()){
                                                   if((llvm::Instruction *)iita == ii_1){
-                                       
+
                                                            auto iita_0= iita ;
                                                            auto iita_1= iita++;
                                                            iita = iita_0;
@@ -169,7 +166,7 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                                                            bita->getInstList().insert(iita_1, ai);
                                                            llvm::StoreInst *si = new llvm::StoreInst(iita,ai,iita_1);
                                                   }
-                                       
+
                                                   if(checkOperand(iita,ii_1)){
 
                                                            auto iita_0= iita ;
@@ -193,14 +190,14 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
 
           }
 
-          
+
 
           //doRegAlloc(); //need to do register allocation again
                         //we can invoke this from Simulator.hh
                         //and instead return a bool flag here
 
-        
-                    
+
+
 }
 
 
