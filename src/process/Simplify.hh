@@ -1,4 +1,4 @@
-#ifndef Simplify_hh
+#ifndef Simplify_he
 #define Simplify_hh
 
 #include <string>
@@ -56,7 +56,7 @@ private :
                           //nodes > K degree are true
                           //true means potential spill
                           //false means no spill
-          int K; 
+          int K;
 
                  //maximum degree allowed for a node
                  //i.e. max number of colors
@@ -91,20 +91,20 @@ simplify_nodes::simplify_nodes( std::map<llvm::Value *, intf> intf_table,
           //by populating the stack 
           //with simple/spill nodes
 
-        /*  intf::iterator it_0 = intf_table.begin();  
+          std::map<llvm::Value *,intf>::iterator it_0 = intf_table.begin();
           while(it_0 != intf_table.end()){
                     int degree = (it_0->second).size();
                     if(degree > reg_map[0]){ //change to correct reg type later
-                            pair<llvm::Value *,bool> t_pair;
-                            t_pair.push_back( std::make_pair(it_0->first,false)); 
-                            simple_nodes.push(t_pair); 
+                            std::pair<llvm::Value *,bool> t_pair
+                                =( std::make_pair(it_0->first,false));
+                            simple_nodes.push(t_pair);
                     }else{
-                            pair<llvm::Value *,bool> t_pair;
-                            t_pair.push_back( std::make_pair(it_0->first,true)); 
-                            simple_nodes.push(t_pair); 
+                            std::pair<llvm::Value *,bool> t_pair
+                               =( std::make_pair(it_0->first,true));
+                            simple_nodes.push(t_pair);
                     }
                     it_0++;
-          }*/
+          }
 }
 
 } //namespace ska
