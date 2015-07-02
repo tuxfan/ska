@@ -455,7 +455,7 @@ bool flow_graph::select_regs( ){
                                    intf_table, simp_igraph->get_reg_map(),
                                    root_fita );    
 
-          return true;
+          return s_regs->return_flag();
 
 }
 

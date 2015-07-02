@@ -63,6 +63,7 @@ public :
           bool checkOperand( llvm::Value *, llvm::Value *);
           bool modifyOperand( llvm::Value *, llvm::Value *, llvm::Value*);
           void populate_starting_colors();
+          bool return_flag();
 
 
 private :
@@ -77,18 +78,18 @@ private :
           std::map<reg_type,int> c_map; //the starting color for this reg type
           std::map<llvm::Value *, reg_type> inst_reg;
           std::map<llvm::Value *, llvm::Value *> alloca_map;
+          bool stop_flag;
 
 
 };
 
 void select::populate_starting_colors(){
 
-          c_map[0] = 1; //integer type has colors 1-100
-          c_map[1] = 101; //float type has colors 101-200 
+          c_map[0] = 1;   //integer type has colors 1-100
+          c_map[1] = 5; //float type has colors 101-200 
                           //ideally, this should be read in from 
                           //the reg_set class
                           //or from xml
-
 }
 
 
@@ -106,12 +107,17 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
           //on, then we are done. Otherwise need to
           //rewrite program and redo the reg allocation
 
+          stop_flag = true; //we are optimistic
+
           populate_starting_colors();
+
+          std::ofstream node_colors ;
+          node_colors.open("Simple Node colors");
 
           while( ss.size() != 0 ){
                    auto ii = ss.top(); //pop the instruction
                    ss.pop();
-                   if(ii.second==false){ //no spill, random color possible
+                   if(ii.second==true){ //no spill, random color possible
                             int type = ska::getInstructionType(ii.first);
                             color cc = c_map[type];
                             color min_c = 9999;
@@ -129,11 +135,23 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                             if ( min_c = 9999) reg_color[ii.first]=c_map[type];
                             else
                                       reg_color[ii.first]=min_c+1;
+
+                            std::string str;
+                            llvm::raw_string_ostream rso(str);
+                            rso<<*(ii.first);
+                            node_colors<< rso.str();
+                            node_colors << "  ";
+                            node_colors << reg_color[ii.first]; 
+                            node_colors << std::endl;
+
                    }else{ //potential spill, color in the end
                           //do nothing here
                           pot_spill.push(ii);
                    }
           }
+
+          node_colors.close();
+          node_colors.open("Coloring spill nodes");
 
           while( pot_spill.size() != 0){
                     auto ii = pot_spill.top();
@@ -152,6 +170,9 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                                             (temp_c < cc+reg_map[type]) ) //change to correct mapping
                                         max_c=temp_c;
                               intf_it++;
+                    }
+                    if (max_c == -1){
+                         max_c = c_map[type] ; //means none of interfering nodescolored yet
                     }
                     if (max_c == cc+reg_map[type]-1){ //means we cannot find a color to assign
                                                       //so make tiny live ranges and remove
@@ -192,18 +213,35 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                                         }
                                         bita++;
                               }
+                              std::string str;
+                              llvm::raw_string_ostream rso(str);
+                              rso<<*(ii.first);
+                              node_colors<< rso.str();
 
+                              node_colors << "  ";
+                              node_colors << "could not color";
+                              node_colors << std :: endl;
+                              stop_flag=false;
+ 
                     } //means there is an actual spill
                       //so need to push it to mem after definition
                       //and get load it from mem before use, so that
                       //there are two tiny live ranges, instead of one large
                       //live range
+                    else{
+                              reg_color[ii.first]=max_c+1;
 
+                              std::string str;
+                              llvm::raw_string_ostream rso(str);
+                              rso<<*(ii.first);
+                              node_colors<< rso.str();
 
+                              node_colors << "  ";
+                              node_colors << (max_c+1);
+                              node_colors << std :: endl;
+                    }
           }
-
-
-
+          node_colors.close();
 } //select constructor
 
 
@@ -232,6 +270,11 @@ bool select::modifyOperand( llvm::Value * ii, llvm::Value * i_check,
                     it++;
          }
          return false;
+}
+
+
+bool select::return_flag(){
+          return stop_flag;
 }
 
 } //namespace ska
