@@ -63,7 +63,7 @@ private :
                  //i.e. max number of colors
 
 
-          typedef int reg_type; //register type
+          //typedef int reg_type; //register type
           typedef int color; //color
           //typedef int numPhys; //number of physical registers
 
@@ -86,7 +86,22 @@ public :
 
           void num_phys_regs();
 
+          std::stack<std::pair<llvm::Value *, bool>> getStack();
+
+          std::map<reg_type, numPhys> get_reg_map();
+
 };
+
+std::stack<std::pair<llvm::Value *, bool>> simplify_nodes::getStack(){
+
+          return simple_nodes;
+}
+
+std::map<reg_type,numPhys> simplify_nodes::get_reg_map(){
+
+          return reg_map;
+
+}
 
 void simplify_nodes::num_phys_regs(){ //change so that it gets this info from regset
 
@@ -111,7 +126,7 @@ int getInstructionType( llvm::Value * instr ){
 simplify_nodes::simplify_nodes( std::map<llvm::Value *, intf> intf_table,
                                                  dependency_map_t dmap ){
           //simplify the graph
-          //by populating the stack 
+          //by populating the stack
           //with simple/spill nodes
 
           num_phys_regs(); //gets data from reg set

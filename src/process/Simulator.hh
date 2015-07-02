@@ -887,24 +887,18 @@ void simulator_t::doRegAlloc (dependency_map_t dmap, llvm::Module::iterator fita
                   //we can read this number from the arch
                   //file, ideally
 
-
-
        //First, construct the flowgraph from the dmap
 
-       flow_graph * fg = new flow_graph(dmap,n,fita);
-       fg->build_iGraph(); //build the interference graph
-       fg->simplify_iGraph(); //simplifies the iGraph
-
-       //let there be two register types, 32-bit and 64-bit
-       //can be extended to n register types, as seen on a
-       //real architecture. Do coloring for the registers,
-       //assign only appropriate colors
-
-
-
-      //Rewrite the program in case there is no solution to
-      //our problem, and do tail recursion on doRegAlloc
-
+       bool reg_alloc_flag=false;
+       
+       while (reg_alloc_flag==false){
+                flow_graph * fg = new flow_graph(dmap,n,fita);
+                fg->build_iGraph(); //build the interference graph
+                fg->simplify_iGraph(); //simplifies the iGraph
+                reg_alloc_flag = fg->select_regs();
+                                //colors igraph and says if 
+                                //rewrites are needed
+       }
 
 
 

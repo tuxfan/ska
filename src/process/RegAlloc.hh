@@ -71,6 +71,9 @@ private :
 
           dependency_map_t dmap;
 
+          simplify_nodes * simp_igraph;
+
+          llvm::Module::iterator root_fita ;
 
 public :
           flow_graph(dependency_map_t dmap,
@@ -111,12 +114,12 @@ public :
                                               //recursing over BBs
 
          void simplify_iGraph(){
-                  simplify_nodes * simp_igraph = new simplify_nodes( intf_table,
+                 simp_igraph = new simplify_nodes( intf_table,
                                                 dmap);
-                  
-                  
-
          };
+
+
+         bool select_regs(); 
 
 };  //flowgraph
 
@@ -128,6 +131,7 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
         auto bita = (*fita).begin(); //basic block iterator
         auto iita = (*bita).begin(); //instruction iterator
         root = iita; //store the root iita
+        root_fita = fita;
         int name_count=0;
 
         debug_liv.open("Liveness_Analysis");
@@ -444,6 +448,16 @@ void flow_graph::traverse_list( std::map<llvm::Value *,bool> imap){
                 it_0++;
          }
 } // traverse_list
+
+bool flow_graph::select_regs( ){
+
+          select * s_regs = new select( simp_igraph->getStack(),
+                                   intf_table, simp_igraph->get_reg_map(),
+                                   root_fita );    
+
+          return true;
+
+}
 
 } //namespace ska
 
