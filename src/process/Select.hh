@@ -97,7 +97,6 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                             std::map<reg_type, numPhys> reg_map,
                             llvm::Module::iterator fita ){
 
-
           //pop instructions out of the ss stack
           //if they are simple nodes, just assign a
           //color and proceed. If they are potential
@@ -122,21 +121,25 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                             color cc = c_map[type];
                             color min_c = 9999;
                             intf::iterator intf_it = intf_table[ii.first].begin();
+                            ii.first->dump();
                             while (intf_it != intf_table[ii.first].end()){
                                       color temp_c;
-                                      if (reg_color.find(intf_it->first) != reg_color.end())
+                                      (intf_it->first)->dump();
+                                      if (reg_color.find(intf_it->first) != reg_color.end()){
                                                 temp_c = reg_color[intf_it->first] ;
-                                      else temp_c = 9999;
+                                                printf(" : Colour is %d",temp_c);
+                                      }
+                                      else { temp_c = 9999; printf(" : Colour not assigned \n"); }
                                       if((temp_c < min_c) && (temp_c >= cc) &&
                                                     (temp_c < cc+reg_map[type]) ) //change to correct mapping
                                                 min_c=temp_c;
                                       intf_it++;
                             }
-                            if ( min_c = 9999) reg_color[ii.first]=c_map[type];
+                            if ( min_c == 9999) reg_color[ii.first]=c_map[type];
                             else
                                       reg_color[ii.first]=min_c+1;
 
-                            std::string str;
+                            std::string str; //prints in the opposite order
                             llvm::raw_string_ostream rso(str);
                             rso<<*(ii.first);
                             node_colors<< rso.str();
@@ -177,7 +180,6 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                     if (max_c == cc+reg_map[type]-1){ //means we cannot find a color to assign
                                                       //so make tiny live ranges and remove
                                                       //large live range for the instruction
-
                               llvm::Instruction * ii_1 = ( llvm::Instruction *)ii.first;
 
                               auto bita = fita->begin();
@@ -185,18 +187,22 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
 
                                         auto iita = bita->begin();
                                         while (iita != bita->end()){
+                                                  ii_1->dump();
+                                                  iita->dump();
                                                   if((llvm::Instruction *)iita == ii_1){
 
                                                            auto iita_0= iita ;
                                                            auto iita_1= ++iita;
                                                            iita = iita_0;
-                                                           llvm::AllocaInst* ai = new llvm::AllocaInst(iita->getType());
+                                                           llvm::AllocaInst* ai = new llvm::AllocaInst((iita->getType()));
                                                            alloca_map[iita]=ai;
                                                            bita->getInstList().insert(iita_1, ai);
                                                            llvm::StoreInst *si = new llvm::StoreInst(iita,ai,iita_1);
                                                   }
 
-                                                  if(checkOperand(iita,ii_1)){
+                                                   
+                                                  if(checkOperand(iita,ii_1)){ //checkOperand does not work properly
+                                                                               //need to investigate with simple test case
 
                                                            auto iita_0= iita ;
                                                            auto iita_1= ++iita;
@@ -204,10 +210,10 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                                                            //llvm::LoadInst *li = new llvm::LoadInst(alloca_map[iita], "LOAD",iita );
                                                            llvm::LoadInst *li = new llvm::LoadInst(alloca_map.begin()->first, "LOAD",iita );
                                                            llvm::StoreInst *si = new llvm::StoreInst(li,alloca_map.begin()->first,iita_1);
-
                                                                                                   //there is an offset which we have
                                                                                                   //ignored here
-                                                           modifyOperand(iita,ii_1,li);
+                                                           modifyOperand(iita,ii_1,li); //need to check this also
+                                                                                        //with simple test cases
                                                   }
                                                   iita++;
                                         }
@@ -222,7 +228,7 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                               node_colors << "could not color";
                               node_colors << std :: endl;
                               stop_flag=false;
- 
+
                     } //means there is an actual spill
                       //so need to push it to mem after definition
                       //and get load it from mem before use, so that
@@ -271,7 +277,6 @@ bool select::modifyOperand( llvm::Value * ii, llvm::Value * i_check,
          }
          return false;
 }
-
 
 bool select::return_flag(){
           return stop_flag;

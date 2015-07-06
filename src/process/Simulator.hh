@@ -890,16 +890,26 @@ void simulator_t::doRegAlloc (dependency_map_t dmap, llvm::Module::iterator fita
        //First, construct the flowgraph from the dmap
 
        bool reg_alloc_flag=false;
-       
-       while (reg_alloc_flag==false){
+       int counter=0; 
+       while (reg_alloc_flag==false && counter < 1){
                 flow_graph * fg = new flow_graph(dmap,n,fita);
                 fg->build_iGraph(); //build the interference graph
                 fg->simplify_iGraph(); //simplifies the iGraph
                 reg_alloc_flag = fg->select_regs();
                                 //colors igraph and says if 
                                 //rewrites are needed
+                counter++;
        }
-
+       //printing what the final IR looks like
+       auto bita = fita->begin();
+       while (bita != fita->end()){
+             auto iita = bita->begin();
+             while(iita != bita->end()){
+                      iita->dump();
+                      iita++;
+             }
+             bita++;
+       }
 
 
 }

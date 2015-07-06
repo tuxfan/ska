@@ -507,7 +507,6 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 	
 		default:
 			ExitOnError("Unhandled Instruction", ska::UnknownCase);
-
 	} // switch
 
 	return properties;

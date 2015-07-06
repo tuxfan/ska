@@ -120,6 +120,7 @@ public :
 
 
          bool select_regs(); 
+         bool empty_the_maps();
 
 };  //flowgraph
 
@@ -189,7 +190,7 @@ std::map<llvm::Value * ,bool> //a map of instructions
 
         //take input of live variables that are live in at subsequent basic 
         //blocks
-        //check until where they are live in this basic block and construct 
+        //check until where they are live in this basic block and construct
         //intf. graph
         //accordingly
 
@@ -283,7 +284,7 @@ bool flow_graph::check_livein
                               forward_check=false;
                               break; 
                     it_0++;
-          } 
+          }
 
           bool backward_check = true;
           std::map<llvm::Value *,bool>::iterator it_1 = BB_livin[bb].begin();
@@ -453,9 +454,15 @@ bool flow_graph::select_regs( ){
 
           select * s_regs = new select( simp_igraph->getStack(),
                                    intf_table, simp_igraph->get_reg_map(),
-                                   root_fita );    
+                                   root_fita );
 
           return s_regs->return_flag();
+
+}
+
+bool flow_graph::empty_the_maps(){ //not needed if we make new flowgraph for each regalloc iter 
+         intf_table.empty();  
+         live_tab.empty(); 
 
 }
 
