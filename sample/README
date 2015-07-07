@@ -42,3 +42,10 @@ An example that contains a for loop
 #example4.ll
 
 An example that contains a phi instruction
+
+#spilled code
+Spilled code is IR that needed to be rewritten as there were
+not enough registers to handle the instructions. 
+The spilled code will run in the simulator but will not give
+correct output if compiled using clang because the frame pointer
+offset for loading various variables has not been implemented.

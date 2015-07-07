@@ -29,7 +29,3 @@ lor.end:                                          ; preds = %lor.rhs, %entry
 }
 
 attributes #0 = { nounwind uwtable "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
-
-!llvm.ident = !{!0}
-
-!0 = !{!"clang version 3.6.1 (tags/RELEASE_361/final)"}
