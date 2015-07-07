@@ -105,8 +105,8 @@ std::map<reg_type,numPhys> simplify_nodes::get_reg_map(){
 
 void simplify_nodes::num_phys_regs(){ //change so that it gets this info from regset
 
-          reg_map[0]=4; //0 is of int type and has 100 registers
-          reg_map[1]=4; //1 is of float type and has another 100 registers 
+          reg_map[0]=2; //0 is of int type and has 100 registers
+          reg_map[1]=2; //1 is of float type and has another 100 registers 
                           //you get the idea ...
 
 }

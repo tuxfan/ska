@@ -891,6 +891,16 @@ void simulator_t::doRegAlloc (dependency_map_t dmap, llvm::Module::iterator fita
 
        bool reg_alloc_flag=false;
        int counter=0; 
+
+       auto bita = fita->begin();
+
+
+       llvm::AllocaInst* ai = new llvm::AllocaInst((bita->begin()->getType()));
+       bita->getInstList().insert(bita->begin(), ai);
+       //inserting the frame pointer
+
+
+
        while (reg_alloc_flag==false && counter < 1){
                 flow_graph * fg = new flow_graph(dmap,n,fita);
                 fg->build_iGraph(); //build the interference graph
@@ -901,7 +911,7 @@ void simulator_t::doRegAlloc (dependency_map_t dmap, llvm::Module::iterator fita
                 counter++;
        }
        //printing what the final IR looks like
-       auto bita = fita->begin();
+       bita=fita->begin();
        while (bita != fita->end()){
              auto iita = bita->begin();
              while(iita != bita->end()){

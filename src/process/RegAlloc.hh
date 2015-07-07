@@ -68,7 +68,6 @@ private :
 
           std::map<llvm::Value *, tree_list> BB_livin; //livein mapped
                                                       //to basic block
-
           dependency_map_t dmap;
 
           simplify_nodes * simp_igraph;
@@ -97,8 +96,8 @@ public :
 
           std::map<llvm::Value * ,bool> //a map of instructions
             BBLiveness
-                      (           llvm::BasicBlock * bita,
-                                  tree_list live_in   );
+                      (   llvm::BasicBlock * bita,
+                          tree_list live_in   );
 
 
           int //a map of instructions
@@ -461,8 +460,8 @@ bool flow_graph::select_regs( ){
 }
 
 bool flow_graph::empty_the_maps(){ //not needed if we make new flowgraph for each regalloc iter 
-         intf_table.empty();  
-         live_tab.empty(); 
+         intf_table.empty();
+         live_tab.empty();
 
 }
 

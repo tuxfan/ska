@@ -71,22 +71,23 @@ private :
           std::map<llvm::Value *, intf> new_intf_table;
           std::map<llvm::Value *, color> reg_color;
                                     //final register colors
+
           std::map<reg_type, std::map<color,bool>> phys_reg_list;
                                     //says which colors correspond
                                     //to a particular register type
                                     //in particular,
+
           std::map<reg_type,int> c_map; //the starting color for this reg type
           std::map<llvm::Value *, reg_type> inst_reg;
           std::map<llvm::Value *, llvm::Value *> alloca_map;
           bool stop_flag;
-
 
 };
 
 void select::populate_starting_colors(){
 
           c_map[0] = 1;   //integer type has colors 1-100
-          c_map[1] = 5; //float type has colors 101-200 
+          c_map[1] = 3; //float type has colors 101-200 
                           //ideally, this should be read in from 
                           //the reg_set class
                           //or from xml
@@ -181,16 +182,33 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                                                       //so make tiny live ranges and remove
                                                       //large live range for the instruction
                               llvm::Instruction * ii_1 = ( llvm::Instruction *)ii.first;
+                              //llvm::AllocaInst* ai = new llvm::AllocaInst(ii_1->type);//framepointer
+                                                                                    //or reference address
+        
+
 
                               auto bita = fita->begin();
+
+		              llvm::Function::ArgumentListType & args = 
+                                                    fita->getArgumentList();
+
+                              for (auto args_it = args.begin(); args_it != args.end(); args_it++){
+                                    alloca_map[args_it]= bita->begin();
+                                    args_it->dump();
+                              }
+
                               while (bita != fita->end()){
 
                                         auto iita = bita->begin();
-                                        while (iita != bita->end()){
+                                        int count =0;
+                                        while (iita != bita->end() ){
                                                   ii_1->dump();
                                                   iita->dump();
+	                                          unsigned opcode = iita->getOpcode();
+                                                  if (opcode == llvm::Instruction::Alloca){
+                                                            alloca_map[iita]= iita;
+                                                  }
                                                   if((llvm::Instruction *)iita == ii_1){
-
                                                            auto iita_0= iita ;
                                                            auto iita_1= ++iita;
                                                            iita = iita_0;
@@ -198,24 +216,29 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                                                            alloca_map[iita]=ai;
                                                            bita->getInstList().insert(iita_1, ai);
                                                            llvm::StoreInst *si = new llvm::StoreInst(iita,ai,iita_1);
+                                                           iita++;iita++;
                                                   }
 
-                                                   
-                                                  if(checkOperand(iita,ii_1)){ //checkOperand does not work properly
+                                                  else if(checkOperand(iita,ii_1)){ //checkOperand does not work properly
                                                                                //need to investigate with simple test case
 
-                                                           auto iita_0= iita ;
-                                                           auto iita_1= ++iita;
+                                                 
+                                                           auto iita_0 = iita ;
+                                                           auto iita_1 = ++iita;
                                                            iita = iita_0;
-                                                           //llvm::LoadInst *li = new llvm::LoadInst(alloca_map[iita], "LOAD",iita );
-                                                           llvm::LoadInst *li = new llvm::LoadInst(alloca_map.begin()->first, "LOAD",iita );
-                                                           llvm::StoreInst *si = new llvm::StoreInst(li,alloca_map.begin()->first,iita_1);
-                                                                                                  //there is an offset which we have
-                                                                                                  //ignored here
+
+                                                          if (alloca_map.find(ii_1 ) == alloca_map.end()) {iita++ ;continue;} //not a real reg
+
+                                                           llvm::LoadInst *li = new llvm::LoadInst((alloca_map.begin())->second,"LOAD",iita );
                                                            modifyOperand(iita,ii_1,li); //need to check this also
-                                                                                        //with simple test cases
+                                                           llvm::StoreInst *si = new llvm::StoreInst(li,(alloca_map.begin()->second),iita_1);
+                                                                                                  //there should be a frame pointer offset which we have
+                                                                                                  //ignored here
+                                                                                                  //with simple test cases
+                                                           iita++;
                                                   }
                                                   iita++;
+                                                  //count++;
                                         }
                                         bita++;
                               }
@@ -253,10 +276,14 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
 
 bool select::checkOperand( llvm::Value * ii, llvm::Value * i_check){
 
+         ii->dump();
+         i_check->dump();
          auto it = ((llvm::Instruction *)ii)->op_begin();
+         (*it)->dump();
          while (it != ((llvm::Instruction *)ii)->op_end()){
-
-                    if((llvm::Instruction *)it == (llvm::Instruction *)i_check){
+                    (*it)->dump();
+                    i_check->dump();
+                    if((*it) == (llvm::Instruction *)i_check){
 
                          return true;
                     }
@@ -269,9 +296,10 @@ bool select::modifyOperand( llvm::Value * ii, llvm::Value * i_check,
                                 llvm :: Value * i_modify){
          auto it = ((llvm::Instruction *)ii)->op_begin();
          while (it != ( (llvm::Instruction *)ii)->op_end()){
-
-                    if((llvm::Instruction*)it == (llvm::Instruction *)i_check){
-                          it = (llvm::Use *) i_modify;  //changed the operand
+                    (*it)->dump();
+                    i_check->dump();
+                    if((*it) == i_check){
+                          *it = i_modify;  //changed the operand
                     }
                     it++;
          }
