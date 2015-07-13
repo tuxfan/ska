@@ -69,7 +69,7 @@ private:
          * Do register allocation
          *-------------------------------------------------------------------------*/
 
-        void doRegAlloc (dependency_map_t dmap, llvm::Module::iterator it );
+        void doRegAlloc (llvm::Module::iterator it, llvm::Module::iterator end );
 
 	/*-------------------------------------------------------------------------*
 	 * Compute the number of bytes associated with a given llvm::Type.  This
@@ -196,13 +196,18 @@ simulator_t::simulator_t(const char * ir_file)
 	//llvm_module_ = ParseIRFile(ir_file, llvm_err_, llvm_context_);
 
 	llvm_module_ = llvm::parseIRFile(ir_file, llvm_err_, llvm_context_);
-        llvm_module_->dump(); //added by Kartik for debugging
+        //llvm_module_->dump(); //added by Kartik for debugging
 
 	if(llvm_module_ == nullptr) { //added by Kartik for debuggingn
 
 		ExitOnError("LLVM parse failed on " << ir_file << std::endl <<
 			llvm_err_.getMessage().str(), ska::LLVMError);
 	} // if
+
+        auto fita_1 = llvm_module_->begin();
+        auto end = llvm_module_->end();
+        //doRegAlloc(fita_1,end);
+        //exit(0);
 
 	/*-------------------------------------------------------------------------*
 	 * Visit functions.
@@ -213,7 +218,7 @@ simulator_t::simulator_t(const char * ir_file)
 	statistics_t & stats = statistics_t::instance();
 
 	log << " --- Processing Module ---" << std::endl;
-	for(llvm::Module::iterator fita = llvm_module_->begin();//function iterator ... 
+	for(llvm::Module::iterator fita = llvm_module_->begin();//function iterator ...
                                                                 //all fns in IR
 		fita != llvm_module_->end(); ++fita) {
 
@@ -249,6 +254,7 @@ simulator_t::simulator_t(const char * ir_file)
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
 			dmap[&*iita] = new instruction_t(decode(&*iita));
 		} // for
+
 
 		/*----------------------------------------------------------------------*
 		 * Add dependency information
@@ -323,7 +329,6 @@ simulator_t::simulator_t(const char * ir_file)
                  * Do register allocation and modify the dmap, LLVM DAG accordingly 
                  *------------------------------------------------------------------*/
 
-                 doRegAlloc(dmap,fita);
 
 
 		/*----------------------------------------------------------------------* 
@@ -444,6 +449,10 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 		std::vector<instruction_t *> cycle_issue;
 
 		while(iita != end && issue && issued < core_->max_issue()) {
+                        llvm::CallInst * ci;
+                        if (( ci=llvm::dyn_cast<llvm::CallInst>(&(*iita)))){iita++; continue;} //we ignore calls
+                                                                                              //at the moment
+                        //iita->dump(); //debug ... says which instruction is being processed
 
 			/*-------------------------------------------------------------------*
 			 * Lookup instruction
@@ -586,7 +595,7 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 				 *----------------------------------------------------------------*/
 
 				update_opcount(&*iita);
-			
+
 				/*----------------------------------------------------------------*
 				 * Add instruction to active list
 				 *----------------------------------------------------------------*/
@@ -876,38 +885,58 @@ size_t simulator_t::bytes(llvm::Type * type) {
 } // simulator_t::bytes
 
 
-void simulator_t::doRegAlloc (dependency_map_t dmap, llvm::Module::iterator fita ) {
+void simulator_t::doRegAlloc (llvm::Module::iterator fita,
+                              llvm::Module::iterator end) {
 
        // check the register type used in the simulation
        // and appropriately decide what to do
        // also include register aliasing information
-       // simple solution -- aliased registers map to 
+       // simple solution -- aliased registers map to
        // the same color
+
        int n = 2; //initially assume there are only 2 reg typs
                   //we can read this number from the arch
-                  //file, ideally 
-        
-        
-        
+                  //file, ideally
+
        //First, construct the flowgraph from the dmap
-   
-       flow_graph * fg = new flow_graph(dmap,n,fita); 
-       fg->build_iGraph(); //build the interference graph
 
-       //let there be two register types, 32-bit and 64-bit 
-       //can be extended to n register types, as seen on a 
-       //real architecture. Do coloring for the registers, 
-       //assign only appropriate colors
+       bool reg_alloc_flag=false;
+       int counter=0; 
+
+       auto bita = fita->begin();
 
 
-
-      //Rewrite the program in case there is no solution to
-      //our problem, and do tail recursion on doRegAlloc
+       llvm::AllocaInst* ai = new llvm::AllocaInst((bita->begin()->getType()));
+       bita->getInstList().insert(bita->begin(), ai);
+       //inserting the frame pointer
 
 
 
+       while (reg_alloc_flag==false && counter < 1){
+                flow_graph * fg = new flow_graph(n,fita,end);
+                printf ("Building intf graph\n");
+                fg->build_iGraph(); //build the interference graph
+                printf ("Completed intf graph build\n");
+                fg->simplify_iGraph(); //simplifies the iGraph
+                reg_alloc_flag = fg->select_regs();
+                                //colors igraph and says if 
+                                //rewrites are needed
+                counter++;
+       }
 
-} 
+       //printing what the final IR looks like
+       bita=fita->begin();
+       while (bita != fita->end()){
+             auto iita = bita->begin();
+             while(iita != bita->end()){
+                      //iita->dump();
+                      iita++;
+             }
+             bita++;
+       }
+
+
+}
 
 } // namespace ska
 
