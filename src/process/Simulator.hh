@@ -213,7 +213,7 @@ simulator_t::simulator_t(const char * ir_file)
 	statistics_t & stats = statistics_t::instance();
 
 	log << " --- Processing Module ---" << std::endl;
-	for(llvm::Module::iterator fita = llvm_module_->begin();//function iterator ... 
+	for(llvm::Module::iterator fita = llvm_module_->begin();//function iterator ...
                                                                 //all fns in IR
 		fita != llvm_module_->end(); ++fita) {
 
@@ -323,7 +323,7 @@ simulator_t::simulator_t(const char * ir_file)
                  * Do register allocation and modify the dmap, LLVM DAG accordingly 
                  *------------------------------------------------------------------*/
 
-                 doRegAlloc(dmap,fita);
+                 //doRegAlloc(dmap,fita);
 
 
 		/*----------------------------------------------------------------------* 
@@ -586,7 +586,7 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 				 *----------------------------------------------------------------*/
 
 				update_opcount(&*iita);
-			
+
 				/*----------------------------------------------------------------*
 				 * Add instruction to active list
 				 *----------------------------------------------------------------*/

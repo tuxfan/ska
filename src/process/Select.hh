@@ -122,10 +122,10 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                             color cc = c_map[type];
                             color min_c = 9999;
                             intf::iterator intf_it = intf_table[ii.first].begin();
-                            ii.first->dump();
+                            //ii.first->dump();
                             while (intf_it != intf_table[ii.first].end()){
                                       color temp_c;
-                                      (intf_it->first)->dump();
+                                      //(intf_it->first)->dump();
                                       if (reg_color.find(intf_it->first) != reg_color.end()){
                                                 temp_c = reg_color[intf_it->first] ;
                                                 printf(" : Colour is %d",temp_c);
@@ -194,7 +194,7 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
 
                               for (auto args_it = args.begin(); args_it != args.end(); args_it++){
                                     alloca_map[args_it]= bita->begin();
-                                    args_it->dump();
+                                    //args_it->dump();
                               }
 
                               while (bita != fita->end()){
@@ -202,8 +202,8 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                                         auto iita = bita->begin();
                                         int count =0;
                                         while (iita != bita->end() ){
-                                                  ii_1->dump();
-                                                  iita->dump();
+                                                  //ii_1->dump();
+                                                  //iita->dump();
 	                                          unsigned opcode = iita->getOpcode();
                                                   if (opcode == llvm::Instruction::Alloca){
                                                             alloca_map[iita]= iita;
@@ -276,13 +276,13 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
 
 bool select::checkOperand( llvm::Value * ii, llvm::Value * i_check){
 
-         ii->dump();
-         i_check->dump();
+         //ii->dump();
+         //i_check->dump();
          auto it = ((llvm::Instruction *)ii)->op_begin();
-         (*it)->dump();
+         //(*it)->dump();
          while (it != ((llvm::Instruction *)ii)->op_end()){
-                    (*it)->dump();
-                    i_check->dump();
+                    //(*it)->dump();
+                    //i_check->dump();
                     if((*it) == (llvm::Instruction *)i_check){
 
                          return true;
@@ -296,8 +296,8 @@ bool select::modifyOperand( llvm::Value * ii, llvm::Value * i_check,
                                 llvm :: Value * i_modify){
          auto it = ((llvm::Instruction *)ii)->op_begin();
          while (it != ( (llvm::Instruction *)ii)->op_end()){
-                    (*it)->dump();
-                    i_check->dump();
+                    //(*it)->dump();
+                    //i_check->dump();
                     if((*it) == i_check){
                           *it = i_modify;  //changed the operand
                     }

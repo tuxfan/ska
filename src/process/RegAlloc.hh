@@ -80,7 +80,7 @@ public :
                         fita); //creates the CFG
 
           int liveness_flow(llvm::Value * op,
-                                  llvm::ilist_iterator<llvm::Instruction> iita, 
+                                  llvm::ilist_iterator<llvm::Instruction> iita,
                                     llvm::BasicBlock * bita) ;
                                     //populates liveness info
           void build_iGraph() ; //interference
@@ -108,8 +108,8 @@ public :
           bool check_livein
                     (std::map<llvm::Value *, bool> ,
                         llvm::BasicBlock * bb);//check if there
-                                              //was any change in 
-                                              //live_in when 
+                                              //was any change in
+                                              //live_in when
                                               //recursing over BBs
 
          void simplify_iGraph(){
@@ -118,7 +118,7 @@ public :
          };
 
 
-         bool select_regs(); 
+         bool select_regs();
          bool empty_the_maps();
 
 };  //flowgraph
