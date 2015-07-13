@@ -9,7 +9,7 @@
 
 This directory contains several samples of LLVM IR.
 
-# saxby.ll
+# saxpy.ll
 
 Single-precision multiply-add (not using intrinsic).
 
