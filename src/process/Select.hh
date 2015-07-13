@@ -87,7 +87,7 @@ private :
 void select::populate_starting_colors(){
 
           c_map[0] = 1;   //integer type has colors 1-100
-          c_map[1] = 3; //float type has colors 101-200 
+          c_map[1] = 101; //float type has colors 101-200 
                           //ideally, this should be read in from 
                           //the reg_set class
                           //or from xml
@@ -128,9 +128,9 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                                       //(intf_it->first)->dump();
                                       if (reg_color.find(intf_it->first) != reg_color.end()){
                                                 temp_c = reg_color[intf_it->first] ;
-                                                printf(" : Colour is %d",temp_c);
+                                                //printf(" : Colour is %d",temp_c);
                                       }
-                                      else { temp_c = 9999; printf(" : Colour not assigned \n"); }
+                                      else { temp_c = 9999; }//printf(" : Colour not assigned \n"); }
                                       if((temp_c < min_c) && (temp_c >= cc) &&
                                                     (temp_c < cc+reg_map[type]) ) //change to correct mapping
                                                 min_c=temp_c;

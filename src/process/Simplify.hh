@@ -82,7 +82,7 @@ private :
                           
 public :
 
-          simplify_nodes(std::map<llvm::Value *, intf> intf_table, dependency_map_t dmap);
+          simplify_nodes(std::map<llvm::Value *, intf> intf_table);
 
           void num_phys_regs();
 
@@ -93,7 +93,6 @@ public :
 };
 
 std::stack<std::pair<llvm::Value *, bool>> simplify_nodes::getStack(){
-
           return simple_nodes;
 }
 
@@ -105,8 +104,8 @@ std::map<reg_type,numPhys> simplify_nodes::get_reg_map(){
 
 void simplify_nodes::num_phys_regs(){ //change so that it gets this info from regset
 
-          reg_map[0]=2; //0 is of int type and has 100 registers
-          reg_map[1]=2; //1 is of float type and has another 100 registers 
+          reg_map[0]=100; //0 is of int type and has 100 registers
+          reg_map[1]=100; //1 is of float type and has another 100 registers 
                           //you get the idea ...
 
 }
@@ -123,8 +122,8 @@ int getInstructionType( llvm::Value * instr ){
 }
 
 
-simplify_nodes::simplify_nodes( std::map<llvm::Value *, intf> intf_table,
-                                                 dependency_map_t dmap ){
+simplify_nodes::simplify_nodes( std::map<llvm::Value *, intf> intf_table
+                                                  ){
           //simplify the graph
           //by populating the stack
           //with simple/spill nodes

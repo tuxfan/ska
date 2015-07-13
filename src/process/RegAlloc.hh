@@ -18,6 +18,7 @@
 #include <llvm/IRReader/IRReader.h>
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/CFG.h>
+#include <llvm/IR/Constants.h>
 
 #include <FileIO.hh>
 #include <Decode.hh>
@@ -75,9 +76,9 @@ private :
           llvm::Module::iterator root_fita ;
 
 public :
-          flow_graph(dependency_map_t dmap,
+          flow_graph(
                         int n, llvm::Module::iterator
-                        fita); //creates the CFG
+                        fita, llvm::Module::iterator end); //creates the CFG
 
           int liveness_flow(llvm::Value * op,
                                   llvm::ilist_iterator<llvm::Instruction> iita,
@@ -113,8 +114,8 @@ public :
                                               //recursing over BBs
 
          void simplify_iGraph(){
-                 simp_igraph = new simplify_nodes( intf_table,
-                                                dmap);
+                 simp_igraph = new simplify_nodes( intf_table
+                                                );
          };
 
 
@@ -123,8 +124,9 @@ public :
 
 };  //flowgraph
 
-flow_graph::flow_graph(dependency_map_t dmap, int n,
-                        llvm::Module::iterator fita){
+flow_graph::flow_graph(int n,
+                        llvm::Module::iterator fita,
+                        llvm::Module::iterator end){
 
         //rootBB = new node; //root basic block
         auto aita = fita->arg_begin();//argument iterator
@@ -141,8 +143,12 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
                   << " liveness analysis "
                   << std::endl;
 
-
-        all_BB_liveness(fita); //get the 
+        auto fita_1= fita;
+        while ( fita_1 != end){
+                  all_BB_liveness(fita_1); //get the 
+                  printf ("Function liveness done\n");
+                  fita_1++;
+        }
 
         debug_liv << std::endl
                   << "Now printing liveness tables"
@@ -184,20 +190,20 @@ flow_graph::flow_graph(dependency_map_t dmap, int n,
 } //flow_graph constructor
 
 std::map<llvm::Value * ,bool> //a map of instructions
- flow_graph::BBLiveness(          llvm::BasicBlock * bita ,
-                                  tree_list live_in  ){
+ flow_graph::BBLiveness( llvm::BasicBlock * bita ,
+                         tree_list live_in  ){
 
-        //take input of live variables that are live in at subsequent basic 
+        //take input of live variables that are live in at subsequent basic
         //blocks
         //check until where they are live in this basic block and construct
         //intf. graph
         //accordingly
 
         auto iita = bita->end();
-        iita--; 
+        iita--;
 
-        iita->dump(); //debug
-        bita->dump(); //debug
+        //iita->dump(); //debug
+        //bita->dump(); //debug
 
         tree_list::iterator it = live_in.begin();
         while (it != live_in.end()){
@@ -210,13 +216,16 @@ std::map<llvm::Value * ,bool> //a map of instructions
                                         //liveness analysis
 
                iita--;
-               iita->dump();
+               //iita->dump();
                int numOp = iita->getNumOperands();
                while(numOp>0){
                         auto xx = (iita->getOperand(numOp-1));
-                        xx->dump();
+                        //xx->dump();
                         //if (regCover.find(xx) != regCover.end()){
+                                  llvm::ConstantInt *CI ; 
                                   auto init=iita;
+                                  if(!( CI =
+                                      llvm::dyn_cast<llvm::ConstantInt>(xx)))
                                   liveness_flow(xx,init,
                                                    bita);
                         //}
@@ -251,7 +260,7 @@ flow_graph::all_BB_liveness(
                         tree_list succ_map;
                         auto sit = succ_begin(bita);
                         while (sit != succ_end(bita)){
-                                (*sit)->dump(); //dump the BB
+                                //(*sit)->dump(); //dump the BB
                                 tree_list live_in_succ=
                                     BB_livin[*sit];
                                 tree_list::iterator it = live_in_succ.begin();
@@ -275,7 +284,7 @@ flow_graph::all_BB_liveness(
 bool flow_graph::check_livein
                     (std::map<llvm::Value *, bool> mm,
                         llvm::BasicBlock * bb){
- 
+
           bool forward_check = true;
           std::map<llvm::Value *,bool>::iterator it_0 = mm.begin();
           while (it_0 != mm.end()){
