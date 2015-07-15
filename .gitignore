@@ -15,6 +15,7 @@ config/lib_version
 config/compile
 configure
 configure.ac
+configure.in
 src/include
 *.swp
 .*.sw?
