@@ -1,4 +1,4 @@
-#ifndef Simplify_he
+#ifndef Simplify_hh
 #define Simplify_hh
 
 #include <string>

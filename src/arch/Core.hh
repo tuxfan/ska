@@ -11,6 +11,7 @@
 #define Core_hh
 
 #include <LU.hh>
+#include <RegisterSet.hh>
 #include <MachineState.hh>
 
 namespace ska {
@@ -35,6 +36,19 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	~core_t() {}
+
+	/*-------------------------------------------------------------------------*
+	 * Add register sets to the core.
+	 *-------------------------------------------------------------------------*/
+
+#if 0
+	void add_register_set(register_set_t * rs) {
+		register_sets.push_back(rs);
+	} // add_unit
+
+	size_t registers(register_set_t::register_type_t type) {
+	} // registers
+#endif
 
 	/*-------------------------------------------------------------------------*
 	 * Add LUs to the core.
@@ -88,6 +102,7 @@ public:
 private:
 
 	std::vector<lu_t *> units_;	
+	std::vector<register_set_t *> register_sets_;
 	size_t max_issue_;
 
 }; // class core_t

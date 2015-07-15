@@ -101,7 +101,7 @@ public :
                           tree_list live_in   );
 
 
-          int //a map of instructions
+          void //a map of instructions
            all_BB_liveness(
                         llvm::Function * bita
                             );
@@ -120,7 +120,7 @@ public :
 
 
          bool select_regs();
-         bool empty_the_maps();
+         void empty_the_maps();
 
 };  //flowgraph
 
@@ -238,7 +238,7 @@ std::map<llvm::Value * ,bool> //a map of instructions
 }
 
 
-int
+void
 flow_graph::all_BB_liveness(
                         llvm::Function * fita
                            ){
@@ -377,6 +377,8 @@ int flow_graph::liveness_flow(llvm::Value * op,
                       }
                       regCover[op]=true;
           }
+
+			return 0;
 } //liveness flow
 
 void flow_graph::build_iGraph(){
@@ -468,7 +470,7 @@ bool flow_graph::select_regs( ){
 
 }
 
-bool flow_graph::empty_the_maps(){ //not needed if we make new flowgraph for each regalloc iter 
+void flow_graph::empty_the_maps(){ //not needed if we make new flowgraph for each regalloc iter 
          intf_table.empty();
          live_tab.empty();
 

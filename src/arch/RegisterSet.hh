@@ -8,14 +8,33 @@
 
 namespace ska {
 
+/*----------------------------------------------------------------------------*
+ * Register Set class.
+ * All rights reserved
+ *----------------------------------------------------------------------------*/
+
 class register_set_t
 {
 public:
 
-	register_set_t() {}
+	enum class register_type_t {
+		Integer,
+		Float,
+		Vector
+	}; // enum class type
+
+	register_set_t(register_type_t type, size_t num_registers)
+		: type_(type), num_registers_(num_registers) {}
+
 	~register_set_t() {}
 
+	register_type_t type() const { return type_; }
+	size_t num_registers() const { return num_registers_; }
+
 private:
+
+	register_type_t type_;
+	size_t num_registers_;
 
 }; // class register_set_t
 

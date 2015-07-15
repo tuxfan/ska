@@ -134,6 +134,38 @@ simulator_t::simulator_t(const char * ir_file)
 	log << " --- Creating Core ---" << std::endl;
 	core_ = new core_t(max_issue);
 
+	size_t register_sets;
+	arch.getval(register_sets, "register_sets");
+
+	for(size_t i(0); i<register_sets; ++i) {
+		char key[256];
+		std::string type;
+		size_t registers;
+
+		sprintf(key, "rs::%d::type", int(i));
+		arch.getval(type, key);
+
+		sprintf(key, "rs::%d::registers", int(i));
+		arch.getval(registers, key);
+
+		register_set_t * rs =
+			(type == "Integer") ?
+				new register_set_t(register_set_t::register_type_t::Integer,
+					registers) :
+			(type == "Float") ?
+				new register_set_t(register_set_t::register_type_t::Float,
+					registers) :
+			(type == "Vector") ?
+				new register_set_t(register_set_t::register_type_t::Vector,
+					registers) :
+			// default
+				nullptr;
+
+		if(rs == nullptr) {
+			ExitOnError("Unknown register type", ska::UnknownCase);
+		} // if
+	} // for
+
 	size_t lus;
 	arch.getval(lus, "lus");
 
@@ -182,7 +214,6 @@ simulator_t::simulator_t(const char * ir_file)
 		delete[] types;
 
 		// add unit to the core
-		//core.add_unit(lu);
 		core_->add_unit(lu);
 	} // for
 
