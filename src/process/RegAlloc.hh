@@ -288,9 +288,9 @@ bool flow_graph::check_livein
           bool forward_check = true;
           std::map<llvm::Value *,bool>::iterator it_0 = mm.begin();
           while (it_0 != mm.end()){
-                    if (BB_livin[bb].find(it_0->first)==BB_livin[bb].end() )
+                    if ( BB_livin[bb].find(it_0->first)==BB_livin[bb].end() )
                               forward_check=false;
-                              break; 
+                              break;
                     it_0++;
           }
 
@@ -333,27 +333,28 @@ int flow_graph::liveness_flow(llvm::Value * op,
                      llvm::ilist_iterator<llvm::Instruction> iita,
                                   llvm::BasicBlock * bita){
 
-          //iita->dump(); // debug
+          //iita->dump(); //debug
           //op->dump(); //debug
+
           if(regCover[op]==true) return 0;
           else if (iita == (*bita).begin()) {
-                      std::string str;
-                      llvm::raw_string_ostream rso(str);
-                      rso<<*iita;
-                      debug_liv << rso.str();
-                      debug_liv << std::endl;
-                      live_tab[iita].live_in[op]=true; //instr where 
+                      //std::string str;
+                      //llvm::raw_string_ostream rso(str);
+                      //rso<<*iita;
+                      //debug_liv << rso.str();
+                      //debug_liv << std::endl;
+                      live_tab[iita].live_in[op]=true; //instr where
                                                         //operand first
-                      live_tab[iita].live_out[op]=false; //used is live in 
+                      live_tab[iita].live_out[op]=false; //used is live in
                                                           //but not
                       regCover[op]=true;
           }
           else{
-                      std::string str;
+                      /*std::string str;
                       llvm::raw_string_ostream rso(str);
                       rso<<*iita;
                       debug_liv << rso.str();
-                      debug_liv << std::endl;
+                      debug_liv << std::endl;*/
                       live_tab[iita].live_in[op]=true; //instr where 
                                                        //operand first
                       live_tab[iita].live_out[op]=false; //used is live in
@@ -394,7 +395,7 @@ void flow_graph::build_iGraph(){
 
        //debug printing loop below
 
-       std::ofstream debug_intf;
+  /*std::ofstream debug_intf;
        debug_intf.open("Interference Graph");
 
        debug_intf << "Printing interference table below " <<
@@ -412,6 +413,8 @@ void flow_graph::build_iGraph(){
 
                                        auto val_1 = reg_it_0->first;
                                        auto val_2 = reg_it_1->first;
+t
+t
                                        bool tt =
                                             intf_table[val_1][val_2];
 
@@ -442,14 +445,15 @@ void flow_graph::build_iGraph(){
               reg_it_0++;
        }
 
-       debug_intf.close();
+       debug_intf.close();*/
 }
 
 void flow_graph::traverse_list( std::map<llvm::Value *,bool> imap){
          std::map<llvm::Value *,bool>::iterator it_0 = imap.begin();
          while (it_0 != imap.end()){
                 std::map<llvm::Value *,bool>::iterator it_1 =
-                                                imap.begin();
+                                                it_0;
+                it_1++;
                 while(it_1 != imap.end()){
                        auto val_0 = it_0->first ;
                        auto val_1 = it_1->first ;

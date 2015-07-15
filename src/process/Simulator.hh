@@ -237,7 +237,7 @@ simulator_t::simulator_t(const char * ir_file)
 
         auto fita_1 = llvm_module_->begin();
         auto end = llvm_module_->end();
-        //doRegAlloc(fita_1,end);
+        doRegAlloc(fita_1,end);
         //exit(0);
 
 	/*-------------------------------------------------------------------------*
@@ -949,6 +949,7 @@ void simulator_t::doRegAlloc (llvm::Module::iterator fita,
                 fg->build_iGraph(); //build the interference graph
                 printf ("Completed intf graph build\n");
                 fg->simplify_iGraph(); //simplifies the iGraph
+                printf("Simplified the igraph\n");
                 reg_alloc_flag = fg->select_regs();
                                 //colors igraph and says if 
                                 //rewrites are needed
@@ -965,8 +966,6 @@ void simulator_t::doRegAlloc (llvm::Module::iterator fita,
              }
              bita++;
        }
-
-
 }
 
 } // namespace ska

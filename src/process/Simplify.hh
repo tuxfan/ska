@@ -151,10 +151,10 @@ simplify_nodes::simplify_nodes( std::map<llvm::Value *, intf> intf_table
                     it_0++;
           }
 
-          std::ofstream simple_igraph;
-          simple_igraph.open("simplified igraph");
+          //std::ofstream simple_igraph;
+          //simple_igraph.open("simplified igraph");
           
-          while (!debug_nodes.empty()){
+          /*while (!debug_nodes.empty()){
 
                     auto node = debug_nodes.top();
                     debug_nodes.pop();
@@ -185,7 +185,7 @@ simplify_nodes::simplify_nodes( std::map<llvm::Value *, intf> intf_table
  
                                       intf_it++; 
                             }
-          } 
+          } */
 }
 
 } //namespace ska

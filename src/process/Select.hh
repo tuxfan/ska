@@ -140,13 +140,13 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                             else
                                       reg_color[ii.first]=min_c+1;
 
-                            std::string str; //prints in the opposite order
+                            /*std::string str; //prints in the opposite order
                             llvm::raw_string_ostream rso(str);
                             rso<<*(ii.first);
                             node_colors<< rso.str();
                             node_colors << "  ";
                             node_colors << reg_color[ii.first]; 
-                            node_colors << std::endl;
+                            node_colors << std::endl;*/
 
                    }else{ //potential spill, color in the end
                           //do nothing here
@@ -245,11 +245,11 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                               std::string str;
                               llvm::raw_string_ostream rso(str);
                               rso<<*(ii.first);
-                              node_colors<< rso.str();
+                              /*node_colors<< rso.str();
 
                               node_colors << "  ";
                               node_colors << "could not color";
-                              node_colors << std :: endl;
+                              node_colors << std :: endl;*/
                               stop_flag=false;
 
                     } //means there is an actual spill
@@ -263,11 +263,11 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                               std::string str;
                               llvm::raw_string_ostream rso(str);
                               rso<<*(ii.first);
-                              node_colors<< rso.str();
+                              /*node_colors<< rso.str();
 
                               node_colors << "  ";
                               node_colors << (max_c+1);
-                              node_colors << std :: endl;
+                              node_colors << std :: endl;*/
                     }
           }
           node_colors.close();
