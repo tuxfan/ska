@@ -1,0 +1,3 @@
+Function / Call Stack	Clockticks	Instructions Retired	CPI Rate	Retiring	Bad Speculation	Back-End Bound	Front-End Bound	Module	Function (Full)	Source File	Start Address
+boxmg::bmg2d::kernel::impls::residual	283,984,627	457,960,287	0.620	0.211	0.000	0.789	0.000	kernel-test	boxmg::bmg2d::kernel::impls::residual(boxmg::bmg2d::core::StencilOp const&, boxmg::bmg2d::core::Array<unsigned int, double> const&, boxmg::bmg2d::core::Array<unsigned int, double> const&, boxmg::bmg2d::core::Array<unsigned int, double>&)		0x6029fc
+

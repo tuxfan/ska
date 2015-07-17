@@ -1,0 +1,3 @@
+Function / Call Stack	Clockticks	Instructions Retired	CPI Rate	Retiring	Bad Speculation	Back-End Bound	Front-End Bound	Module	Function (Full)	Source File	Start Address
+centered_3d	259,622,095,647	334,057,786,295	0.777	0.316	0.000	0.719	0.004	ef-test	centered_3d	ef_operator.c	0x420703
+
