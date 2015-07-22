@@ -1,0 +1,469 @@
+<?xml version = "1.0" encoding = "iso-8859-1"?>
+<!--###########################################################################
+ # Copyright (c) 2012 Los Alamos National Security, LLC
+ # All rights reserved.
+ ############################################################################-->
+
+<!DOCTYPE root [
+	<!ELEMENT root (value*)>
+	<!ATTLIST root label CDATA #REQUIRED>
+	<!ELEMENT value (boolean|real|string|integer|size|
+		boolean_vector|real_vector|string_vector|integer_vector|size_vector)+>
+		<!ATTLIST value	key CDATA #REQUIRED>
+		<!ELEMENT boolean (#PCDATA)>
+		<!ELEMENT real (#PCDATA)>
+		<!ELEMENT string (#PCDATA)>
+		<!ELEMENT integer (#PCDATA)>
+		<!ELEMENT size (#PCDATA)>
+		<!ELEMENT boolean_vector (#PCDATA)>
+		<!ELEMENT real_vector (#PCDATA)>
+		<!ELEMENT string_vector (#PCDATA)>
+		<!ELEMENT integer_vector (#PCDATA)>
+		<!ELEMENT size_vector (#PCDATA)>
+]>
+
+<root label="1.0">
+
+<value key="name">
+	<string>Intel Pentium M</string>
+</value>
+
+<!--###########################################################################
+ ##############################################################################
+ # Core features
+ ##############################################################################
+ ############################################################################-->
+
+<value key="core::max_issue">
+	<integer>1</integer>
+</value>
+
+<!--###########################################################################
+ ##############################################################################
+ # Logic Units
+ ##############################################################################
+ ############################################################################-->
+
+<value key="lus">
+	<integer>6</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + LSU: load/store unit
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- LSU: instructions -->
+<value key="lu::0::instructions">
+	<string>alloca load store getelementptr</string>
+</value>
+
+<!-- LSU: types -->
+<value key="lu::0::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + ALU: integer arithmetic logic unit
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ALU: instructions -->
+<value key="lu::1::instructions">
+	<string>add sub mul udiv sdiv urem srem ashr</string>
+</value>
+
+<!-- ALU: types -->
+<value key="lu::1::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + ILU: integer logic unit
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ILU: instructions -->
+<value key="lu::2::instructions">
+	<string>shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp</string>
+</value>
+
+<!-- ILU: types -->
+<value key="lu::2::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + BRU: branch unit
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- BRU: instructions -->
+<value key="lu::3::instructions">
+	<string>ret br switch indirectbr invoke resume unreachable phi call select vaarg</string>
+</value>
+
+<!-- BRU: types -->
+<value key="lu::3::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + FPU: floating-point unit
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- FPU: instructions -->
+<value key="lu::4::instructions">
+	<string>fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp</string>
+</value>
+
+<!-- FPU: types -->
+<value key="lu::4::types">
+	<string>float double vector</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + VU: vector unit
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- VU: instructions -->
+<value key="lu::5::instructions">
+	<string>extractelement insertelement shufflevector exractvalue insertvalue</string>
+</value>
+
+<!-- VU: types -->
+<value key="lu::5::types">
+	<string>vector</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + NOP: no-op unit
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- NOP: instructions -->
+<value key="lu::6::instructions">
+	<string>fence atomiccmpxchg atomicrmw</string>
+</value>
+
+<value key="lu::6::types">
+	<string>any</string>
+</value>
+
+<!--###########################################################################
+ ##############################################################################
+ # Instructions
+ ##############################################################################
+ ############################################################################-->
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Terminator Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ret -->
+<value key="latency::ret">
+	<integer>1</integer>
+</value>
+
+<!-- br -->
+<value key="latency::br">
+	<integer>1</integer>
+</value>
+
+<!-- switch -->
+<value key="latency::switch">
+	<integer>1</integer>
+</value>
+
+<!-- indirectbr -->
+<value key="latency::indirectbr">
+	<integer>1</integer>
+</value>
+
+<!-- invoke -->
+<value key="latency::invoke">
+	<integer>1</integer>
+</value>
+
+<!-- resume -->
+<value key="latency::resume">
+	<integer>1</integer>
+</value>
+
+<!-- unreachable -->
+<value key="latency::unreachable">
+	<integer>1</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Standard Binary Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- add -->
+<value key="latency::add">
+	<integer>2</integer>
+</value>
+
+<!-- fadd -->
+<value key="latency::fadd::float">
+	<integer>3</integer>
+</value>
+
+<value key="latency::fadd::double">
+	<integer>3</integer>
+</value>
+
+<!-- sub -->
+<value key="latency::sub">
+	<integer>2</integer>
+</value>
+
+<!-- fsub -->
+<value key="latency::fsub::float">
+	<integer>3</integer>
+</value>
+
+<value key="latency::fsub::double">
+	<integer>3</integer>
+</value>
+
+<value key="latency::fsub::vector">
+	<integer>3</integer>
+</value>
+
+<!-- mul -->
+<value key="latency::mul">
+	<integer>5</integer>
+</value>
+
+<!-- fmul -->
+<value key="latency::fmul::float">
+	<integer>4</integer>
+</value>
+
+<value key="latency::fmul::double">
+	<integer>5</integer>
+</value>
+
+<!-- div -->
+<value key="latency::udiv">
+	<integer>39</integer>
+</value>
+
+<value key="latency::sdiv">
+	<integer>39</integer>
+</value>
+
+<value key="latency::fdiv::float">
+	<integer>34</integer>
+</value>
+
+<value key="latency::fdiv::double">
+	<integer>62</integer>
+</value>
+
+<!-- rem -->
+<value key="latency::urem">
+	<integer>39</integer>
+</value>
+
+<value key="latency::srem">
+	<integer>39</integer>
+</value>
+
+<value key="latency::frem::float">
+	<integer>34</integer>
+</value>
+
+<value key="latency::frem::double">
+	<integer>62</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Logical Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- shift -->
+<value key="latency::shl">
+	<integer>1</integer>
+</value>
+
+<value key="latency::lshr">
+	<integer>1</integer>
+</value>
+
+<value key="latency::ashr">
+	<integer>1</integer>
+</value>
+
+<!-- standard unary -->
+<value key="latency::and">
+	<integer>1</integer>
+</value>
+
+<value key="latency::or">
+	<integer>1</integer>
+</value>
+
+<value key="latency::xor">
+	<integer>1</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Memory Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- alloca -->
+<value key="latency::alloca">
+	<integer>1</integer>
+</value>
+
+<!-- load -->
+<value key="latency::load">
+	<integer>1</integer>
+</value>
+
+<!-- store -->
+<value key="latency::store">
+	<integer>1</integer>
+</value>
+
+<!-- getelementptr -->
+<value key="latency::getelementptr">
+	<integer>1</integer>
+</value>
+
+<!-- fence -->
+<value key="latency::fence">
+	<integer>1</integer>
+</value>
+
+<!-- atomiccmpxchg -->
+<value key="latency::atomiccmpxchg">
+	<integer>1</integer>
+</value>
+
+<!-- atomicrmw -->
+<value key="latency::atomicrmw">
+	<integer>1</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Cast Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<value key="latency::trunc">
+	<integer>1</integer>
+</value>
+
+<value key="latency::zext">
+	<integer>1</integer>
+</value>
+
+<value key="latency::sext">
+	<integer>1</integer>
+</value>
+
+<value key="latency::fptoui">
+	<integer>1</integer>
+</value>
+
+<value key="latency::fptosi">
+	<integer>1</integer>
+</value>
+
+<value key="latency::uitofp">
+	<integer>1</integer>
+</value>
+
+</value>
+
+<value key="latency::fptrunc">
+	<integer>1</integer>
+</value>
+
+<value key="latency::fpext">
+	<integer>1</integer>
+</value>
+
+<value key="latency::ptrtoint">
+	<integer>1</integer>
+</value>
+
+<value key="latency::inttoptr">
+	<integer>1</integer>
+</value>
+
+<value key="latency::bitcast">
+	<integer>1</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Other Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<value key="latency::icmp">
+	<integer>1</integer>
+</value>
+
+<value key="latency::fcmp">
+	<integer>1</integer>
+</value>
+
+<!-- phi -->
+<value key="latency::phi">
+	<integer>1</integer>
+</value>
+
+<value key="latency::call">
+	<integer>1</integer>
+</value>
+
+<value key="latency::select">
+	<integer>1</integer>
+</value>
+
+<value key="latency::userop1">
+	<integer>1</integer>
+</value>
+
+<value key="latency::userop2">
+	<integer>1</integer>
+</value>
+
+<value key="latency::vaarg">
+	<integer>1</integer>
+</value>
+
+<value key="latency::extractelement">
+	<integer>1</integer>
+</value>
+
+<value key="latency::insertelement">
+	<integer>1</integer>
+</value>
+
+<value key="latency::shufflevector">
+	<integer>1</integer>
+</value>
+
+<value key="latency::extractvalue">
+	<integer>1</integer>
+</value>
+
+<value key="latency::insertvalue">
+	<integer>1</integer>
+</value>
+
+<value key="latency::landingpad">
+	<integer>1</integer>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Call Operations
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<value key="latency::sqrt::float">
+	<integer>56</integer>
+</value>
+
+<value key="latency::sqrt::float">
+	<integer>114</integer>
+</value>
+
+</root>
