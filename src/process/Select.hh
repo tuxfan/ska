@@ -156,6 +156,7 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
 
           node_colors.close();
           node_colors.open("Coloring spill nodes");
+          node_colors << "Could not color, so added load store, possibly alloca";
 
           while( pot_spill.size() != 0){
                     auto ii = pot_spill.top();
@@ -201,7 +202,7 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
 
                                         auto iita = bita->begin();
                                         int count =0;
-                                        while (iita != bita->end() ){
+                                        while ( iita != bita->end() ){
                                                   //ii_1->dump();
                                                   //iita->dump();
 	                                          unsigned opcode = iita->getOpcode();
@@ -242,14 +243,13 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                                         }
                                         bita++;
                               }
+
                               std::string str;
                               llvm::raw_string_ostream rso(str);
-                              rso<<*(ii.first);
-                              /*node_colors<< rso.str();
+                              rso << *(ii.first);
+                              node_colors<< rso.str();
 
-                              node_colors << "  ";
-                              node_colors << "could not color";
-                              node_colors << std :: endl;*/
+                              node_colors << std :: endl;
                               stop_flag=false;
 
                     } //means there is an actual spill
@@ -271,6 +271,7 @@ select::select(std::stack<spill_info> ss,std::map<llvm::Value *,intf> intf_table
                     }
           }
           node_colors.close();
+
 } //select constructor
 
 

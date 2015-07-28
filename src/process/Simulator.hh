@@ -127,7 +127,7 @@ simulator_t::simulator_t(const char * ir_file)
 	/*-------------------------------------------------------------------------*
 	 * Initialize core.
 	 *-------------------------------------------------------------------------*/
-	
+
 	size_t max_issue;
 	arch.getval(max_issue, "core::max_issue");
 
@@ -165,6 +165,8 @@ simulator_t::simulator_t(const char * ir_file)
 			ExitOnError("Unknown register type", ska::UnknownCase);
 		} // if
 	} // for
+
+        //need to pull this into regalloc
 
 	size_t lus;
 	arch.getval(lus, "lus");
@@ -458,6 +460,7 @@ simulator_t::~simulator_t()
 
 void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 	const dependency_map_t & dmap, instruction_vector_t & retired) {
+
 	machine_state_t & machine = machine_state_t::instance();
 	statistics_t & stats = statistics_t::instance();
 	std::ostream & log = file_io_t::instance().log_stream();
@@ -788,12 +791,16 @@ void simulator_t::update_opcount(llvm::Instruction * instruction) {
 			break;
 			} // scope
 		case llvm::Instruction::GetElementPtr:
+
 			break;
 		case llvm::Instruction::Fence:
+
 			break;
 		case llvm::Instruction::AtomicCmpXchg:
+
 			break;
 		case llvm::Instruction::AtomicRMW:
+
 			break;
 		case llvm::Instruction::Trunc:
 			break;
@@ -906,6 +913,7 @@ size_t simulator_t::bytes(llvm::Type * type) {
 			return bytes(type->getPointerElementType());
 
 		case llvm::Type::VectorTyID:
+                        return bytes(type->getVectorElementType());
 			break;
 
 		default:
@@ -925,26 +933,22 @@ void simulator_t::doRegAlloc (llvm::Module::iterator fita,
        // simple solution -- aliased registers map to
        // the same color
 
-       int n = 2; //initially assume there are only 2 reg typs
-                  //we can read this number from the arch
-                  //file, ideally
-
        //First, construct the flowgraph from the dmap
 
        bool reg_alloc_flag=false;
-       int counter=0; 
+       int counter=0;
 
        auto bita = fita->begin();
 
 
-       llvm::AllocaInst* ai = new llvm::AllocaInst((bita->begin()->getType()));
+       llvm::AllocaInst* ai = new llvm::AllocaInst(llvm::IntegerType::get(llvm_context_,8));
        bita->getInstList().insert(bita->begin(), ai);
        //inserting the frame pointer
 
 
 
-       while (reg_alloc_flag==false && counter < 1){
-                flow_graph * fg = new flow_graph(n,fita,end);
+       while (reg_alloc_flag==false && counter < 1){ //hack so that reg alloc completes
+                flow_graph * fg = new flow_graph(2,fita,end);
                 printf ("Building intf graph\n");
                 fg->build_iGraph(); //build the interference graph
                 printf ("Completed intf graph build\n");
@@ -962,6 +966,7 @@ void simulator_t::doRegAlloc (llvm::Module::iterator fita,
              auto iita = bita->begin();
              while(iita != bita->end()){
                       //iita->dump();
+                      //add the register allocation data
                       iita++;
              }
              bita++;
