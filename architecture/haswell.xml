@@ -514,11 +514,11 @@
 
 <!-- integer -->
 <value key="latency::int">
-	<size>1</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::int">
-	<real>3</real>
+	<real>1</real>
 </value>
 
 <!-- float -->
@@ -563,11 +563,11 @@
  =================================== -->
 
 <value key="latency::udiv">
-	<size>39</size>
+	<size>64</size>
 </value>
 
 <value key="reciprocal::udiv">
-	<real>39</real>
+	<real>48</real>
 </value>
 
 <!-- ==================================
@@ -575,11 +575,11 @@
  =================================== -->
 
 <value key="latency::sdiv">
-	<size>39</size>
+	<size>71</size>
 </value>
 
 <value key="reciprocal::sdiv">
-	<real>39</real>
+	<real>50</real>
 </value>
 
 <!-- ==================================
@@ -588,41 +588,42 @@
 
 <!-- float -->
 <value key="latency::fdiv::float">
-	<size>24</size>
+	<size>17</size>
 </value>
 
 <value key="reciprocal::fdiv::float">
-	<real>10</real>
+	<real>13</real>
 </value>
 
 <!-- double -->
 <value key="latency::fdiv::double">
-	<size>27</size>
+	<size>17</size>
 </value>
 
 <value key="reciprocal::fdiv::double">
-	<real>11</real>
+	<real>13</real>
 </value>
 
-<!-- vector -->
-<value key="latency::fdiv::vector">
-	<size>27</size>
+<!-- vector xmm-->
+<value key="latency::fdiv::vector::xmm">
+	<size>11.5</size>
 </value>
 
-<value key="reciprocal::fdiv::vector">
-	<real>22</real>
+<value key="reciprocal::fdiv::vector::xmm">
+	<real>7</real>
 </value>
+
 
 <!-- ==================================
  = urem
  =================================== -->
 
 <value key="latency::urem">
-	<size>39</size>
+	<size>19</size>
 </value>
 
 <value key="reciprocal::urem">
-	<real>1</real>
+	<real>13</real>
 </value>
 
 <!-- ==================================
@@ -630,11 +631,11 @@
  =================================== -->
 
 <value key="latency::srem">
-	<size>39</size>
+	<size>19</size>
 </value>
 
 <value key="reciprocal::srem">
-	<real>1</real>
+	<real>13</real>
 </value>
 
 <!-- ==================================
@@ -643,29 +644,29 @@
 
 <!-- float -->
 <value key="latency::frem::float">
-	<size>34</size>
+	<size>19</size>
 </value>
 
 <value key="reciprocal::frem::float">
-	<real>34</real>
+	<real>13</real>
 </value>
 
 <!-- double -->
 <value key="latency::frem::double">
-	<size>62</size>
+	<size>19</size>
 </value>
 
 <value key="reciprocal::frem::double">
-	<real>34</real>
+	<real>13</real>
 </value>
 
 <!-- vector -->
 <value key="latency::frem::vector">
-	<size>62</size>
+	<size>19</size>
 </value>
 
 <value key="reciprocal::frem::vector">
-	<real>34</real>
+	<real>13</real>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -681,7 +682,7 @@
 </value>
 
 <value key="reciprocal::shl">
-	<real>1</real>
+	<real>0.5</real>
 </value>
 
 <!-- ==================================
@@ -693,7 +694,7 @@
 </value>
 
 <value key="reciprocal::lshr">
-	<real>1</real>
+	<real>0.5</real>
 </value>
 
 <!-- ==================================
@@ -705,7 +706,7 @@
 </value>
 
 <value key="reciprocal::ashr">
-	<real>1</real>
+	<real>0.5</real>
 </value>
 
 <!-- ==================================
@@ -718,7 +719,7 @@
 </value>
 
 <value key="reciprocal::and">
-	<real>1</real>
+	<real>0.25</real>
 </value>
 
 <!-- ==================================
@@ -730,7 +731,7 @@
 </value>
 
 <value key="reciprocal::or">
-	<real>1</real>
+	<real>0.25</real>
 </value>
 
 <!-- ==================================
@@ -742,7 +743,7 @@
 </value>
 
 <value key="reciprocal::xor">
-	<real>1</real>
+	<real>0.25</real>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -767,8 +768,8 @@
  =================================== -->
 
 <!-- load -->
-<value key="latency::load">
-	<size>1</size>
+<value key="latency::load"> 
+	<size>3</size>
 </value>
 
 <value key="reciprocal::load">
@@ -781,7 +782,7 @@
 
 <!-- store -->
 <value key="latency::store">
-	<size>1</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::store">
@@ -794,7 +795,7 @@
 
 <!-- getelementptr -->
 <value key="latency::getelementptr">
-	<size>1</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::getelementptr">
@@ -824,7 +825,7 @@
 </value>
 
 <value key="reciprocal::atomiccmpxchg">
-	<real>1</real>
+	<real>8</real>
 </value>
 
 <!-- ==================================
@@ -837,7 +838,7 @@
 </value>
 
 <value key="reciprocal::atomicrmw">
-	<real>1</real>
+	<real>8</real>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

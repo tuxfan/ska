@@ -22,3 +22,42 @@ mul --> IMUL, for integers
         FMUL, for floating point and double     
         PMUL, for vector integer
         MULSS, for vector floats
+
+udiv --> DIV r64
+sdiv --> IDIV r64
+
+fdiv -->   FDIV  for float and double 
+           DIVSS for vector xmm
+
+urem --> FPREM
+srem --> FPREM
+frem --> FPREM // this is not accurate as x64 does not have
+               //rem instructions for urem, srem and vector
+               //FPREM is x87
+
+shl --> SHR SHL SAR
+lshl --> SHR SHL SAR
+ashr -- >SHR SHL SAR
+
+and or xor --> AND OR XOR
+
+alloca --> //does not seem to be any instruction
+
+load, store --> MOV r,m MOV m,r
+
+getelementptr --> MOV m,r
+
+fence --> //does not seem to be any instruction 
+
+atomiccmprxchg --> CMPXCHG
+
+atomicrmw --> CMPXCHG
+//atomically modify the memory
+
+trunc --> 
+
+
+
+
+
+
