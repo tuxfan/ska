@@ -390,47 +390,47 @@
  =================================== -->
 <!-- integer -->
 <value key="latency::fadd::int">
-	<size>0.25</size>
+	<size>1</size>
 </value>
 
-<value key="reciprocal::fadd::float">
-	<real>1</real>
+<value key="reciprocal::fadd::int">
+	<real>0.25</real>
 </value>
 
 <!-- float -->
 <value key="latency::fadd::float">
-	<size>1</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::fadd::float">
-	<real>3</real>
+	<real>1</real>
 </value>
 
 <!-- double -->
 <value key="latency::fadd::double">
-	<size>1</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::fadd::double">
-	<real>3</real>
+	<real>1</real>
 </value>
 
 <!-- vector -->
 <value key="latency::fadd::vector::integer">
-	<size>0.5</size>
+	<size>1</size>
 </value>
 
 <value key="reciprocal::fadd::vector::integer">
-	<real>1</real>
+	<real>0.5</real>
 </value>
 
 <!-- vector floating point -->
 <value key="latency::fadd::vector::float">
-	<size>1</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::fadd::vector::float">
-	<real>3</real>
+	<real>1</real>
 </value>
 
 
@@ -450,41 +450,49 @@
 <!-- ==================================
  = fsub
  =================================== -->
-
-<!-- float -->
-<value key="latency::fsub::float">
+<!-- int -->
+<value key="latency::int">
 	<size>1</size>
 </value>
 
+<value key="reciprocal::int">
+	<real>0.25</real>
+</value>
+
+<!-- float -->
+<value key="latency::fsub::float">
+	<size>3</size>
+</value>
+
 <value key="reciprocal::fsub::float">
-	<real>3</real>
+	<real>1</real>
 </value>
 
 <!-- double -->
 <value key="latency::fsub::double">
-	<size>1</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::fsub::double">
-	<real>3</real>
-</value>
-
-<!-- vector -->
-<value key="latency::fsub::vector::int">
-	<size>0.5</size>
-</value>
-
-<value key="reciprocal::fsub::vector::int">
 	<real>1</real>
 </value>
 
 <!-- vector -->
-<value key="latency::fsub::vector::float">
+<value key="latency::fsub::vector::int">
 	<size>1</size>
 </value>
 
+<value key="reciprocal::fsub::vector::int">
+	<real>0.5</real>
+</value>
+
+<!-- vector -->
+<value key="latency::fsub::vector::float">
+	<size>3</size>
+</value>
+
 <value key="reciprocal::fsub::vector::float">
-	<real>3</real>
+	<real>1</real>
 </value>
 
 
@@ -493,7 +501,7 @@
  =================================== -->
 
 <value key="latency::mul">
-	<size>5</size>
+	<size>1</size>
 </value>
 
 <value key="reciprocal::mul">
@@ -504,9 +512,18 @@
  = fmul
  =================================== -->
 
+<!-- integer -->
+<value key="latency::int">
+	<size>1</size>
+</value>
+
+<value key="reciprocal::int">
+	<real>3</real>
+</value>
+
 <!-- float -->
 <value key="latency::fmul::float">
-	<size>6</size>
+	<size>5</size>
 </value>
 
 <value key="reciprocal::fmul::float">
@@ -515,7 +532,7 @@
 
 <!-- double -->
 <value key="latency::fmul::double">
-	<size>6</size>
+	<size>5</size>
 </value>
 
 <value key="reciprocal::fmul::double">
@@ -523,13 +540,23 @@
 </value>
 
 <!-- vector -->
-<value key="latency::fmul::vector">
-	<size>6</size>
+<value key="latency::fmul::vector::int">
+	<size>5</size>
 </value>
 
-<value key="reciprocal::fmul::vector">
+<value key="reciprocal::fmul::vector::int">
 	<real>1</real>
 </value>
+
+<!-- vector -->
+<value key="latency::fmul::vector::float">
+	<size>5</size>
+</value>
+
+<value key="reciprocal::fmul::vector::float">
+	<real>0.5</real>
+</value>
+
 
 <!-- ==================================
  = udiv

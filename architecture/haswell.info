@@ -18,4 +18,7 @@ sub --> SUB, for integeres
         PSUB, for vector integers
         SUBSS, for vector floats 
 
-mul --> 
+mul --> IMUL, for integers
+        FMUL, for floating point and double     
+        PMUL, for vector integer
+        MULSS, for vector floats
