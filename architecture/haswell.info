@@ -52,12 +52,74 @@ fence --> //does not seem to be any instruction
 atomiccmprxchg --> CMPXCHG
 
 atomicrmw --> CMPXCHG
+
 //atomically modify the memory
 
 trunc --> 
 
+zext -->
 
+sext -->
 
+fptoui -->
 
+fptosi -->
 
+uitofp -->
 
+sitofp -->
+
+fptrunc -->
+
+fpext -->
+
+ptrtoint -->
+
+inttoptr -->
+
+bitcast --> 
+
+icmp -->
+
+fcmp -->
+
+phi -->
+
+call -->
+
+select -->
+
+userop1 -->
+
+userop2 -->
+
+vaarg -->
+
+extractelement --> 
+
+insertelement -->
+
+shufflevector -->
+
+extractvalue -->
+
+insertvalue -->
+
+landingpad -->
+
+malloc -->
+
+free -->
+
+fabs -->
+
+sqrt -->
+
+rsqrt  --> 
+
+hadd --> //which llvm instruction is this ? 
+
+log -->FYL2X //does not contain any vector instruction in x86
+             //this is x87 floating point instruction
+
+pow --> FYL2X + F2XM1
