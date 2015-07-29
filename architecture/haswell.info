@@ -1,0 +1,21 @@
+Mapping of LLVM IR to Haswell :-
+
+latency::ret --> RET
+br --> JMP
+sw --> JMP
+indirectbr --> JMP
+invoke --> CALL
+resume --> RET
+unreachable --> no mapping, what is this ?
+
+add --> ADD  , for integers
+        FADD , for floating point and double
+        PADD , for vector integer
+        ADDSS, for vector floating point 
+
+sub --> SUB, for integeres
+        FSUB, for floating point and double
+        PSUB, for vector integers
+        SUBSS, for vector floats 
+
+mul --> 
