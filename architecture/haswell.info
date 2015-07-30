@@ -1,4 +1,4 @@
-Mapping of LLVM IR to Haswell :-
+// Mapping of LLVM IR to Haswell :-
 
 latency::ret --> RET
 br --> JMP
@@ -55,71 +55,71 @@ atomicrmw --> CMPXCHG
 
 //atomically modify the memory
 
-trunc --> 
+trunc --> //does not seem to have any x86 instruction 
 
-zext -->
+zext --> //no x86 instruction
 
-sext -->
+sext --> //no x86 instruction
 
-fptoui -->
+fptoui --> //no x86 instruction
 
-fptosi -->
+fptosi -->//no x86 instruction
 
-uitofp -->
+uitofp -->//no x86 instruction
 
-sitofp -->
+sitofp --> //no x86 instruction
 
-fptrunc -->
+fptrunc --> //no x86 instruction
 
-fpext -->
+fpext --> //no x86 instruction
 
-ptrtoint -->
+ptrtoint --> //no x86 instruction
 
-inttoptr -->
+inttoptr --> //no x86 instruction
 
-bitcast --> 
+bitcast --> //no x86 instruction
 
-icmp -->
+icmp --> // CMP
 
-fcmp -->
+fcmp --> // CMP ... using integer values
 
-phi -->
+phi --> //no x86 instruction 
 
-call -->
+call --> //CALL 
 
-select -->
+select --> CALL -- not accurate because x86 call has branching 
 
-userop1 -->
+userop1 --> //not in the llvm ir manual
 
-userop2 -->
+userop2 --> //not in the llvm ir manual
 
-vaarg -->
+vaarg --> //not in the llvm ir manual
 
-extractelement --> 
+extractelement --> MOVD xmm, r 
 
-insertelement -->
+insertelement --> MOVD r, xmm
 
-shufflevector -->
+shufflevector --> //no instruction in haswell instruction set
 
-extractvalue -->
+extractvalue --> MOVD xmm, r
 
-insertvalue -->
+insertvalue --> MOVD r, xmm
 
-landingpad -->
+landingpad --> //no x86 instruction
 
-malloc -->
+malloc --> //not an x86 instruction
 
-free -->
+free --> //not an x86 instruction
 
-fabs -->
+fabs -->  FABS
 
-sqrt -->
+sqrt --> FSQRT and SQRTSS/PS
 
-rsqrt  --> 
+rsqrt  -->  FSQRT and SQRTSS/PS
 
-hadd --> //which llvm instruction is this ? 
+hadd --> //which llvm instruction is this ?  -- PHADD, ADD
 
-log -->FYL2X //does not contain any vector instruction in x86
+log --> FYL2X //does not contain any vector instruction in x86
              //this is x87 floating point instruction
 
 pow --> FYL2X + F2XM1
