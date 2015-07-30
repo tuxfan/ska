@@ -209,6 +209,7 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 						ska::UnknownCase);
 					break;
 			} // switch
+
 			break;
 
 		case llvm::Instruction::UDiv:
@@ -233,7 +234,7 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 			arch.getval(properties.reciprocal, "reciprocal::fdiv::double");
 					break;
 				case llvm::Type::VectorTyID:
-					arch.getval(properties.latency, "latency::fdiv::vector");
+					arch.getval(properties.latency, "latency::fdiv::vector::xmm");
 			arch.getval(properties.reciprocal, "reciprocal::fdiv::vector");
 					break;
 				default:
