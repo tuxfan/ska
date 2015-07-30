@@ -181,59 +181,45 @@
 	<string>any</string>
 </value>
 
-<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + NOP: no-op unit
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
-
-<!-- NOP: instructions -->
+<!-- ALU: instructions -->
 <value key="lu::6::instructions">
-	<string>fence atomiccmpxchg atomicrmw</string>
+	<string>add sub mul udiv sdiv urem srem ashr</string>
 </value>
 
+<!-- ALU: types -->
 <value key="lu::6::types">
-	<string>any</string>
+	<string>integer</string>
 </value>
 
-
-<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + NOP: no-op unit
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
-
-<!-- NOP: instructions -->
+<!-- ALU: instructions -->
 <value key="lu::7::instructions">
-	<string>fence atomiccmpxchg atomicrmw</string>
+	<string>add sub mul udiv sdiv urem srem ashr</string>
 </value>
 
+<!-- ALU: types -->
 <value key="lu::7::types">
-	<string>any</string>
+	<string>integer</string>
 </value>
 
-<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + NOP: no-op unit
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
-
-<!-- NOP: instructions -->
+<!-- ALU: instructions -->
 <value key="lu::8::instructions">
-	<string>fence atomiccmpxchg atomicrmw</string>
+	<string>add sub mul udiv sdiv urem srem ashr</string>
 </value>
 
+<!-- ALU: types -->
 <value key="lu::8::types">
-	<string>any</string>
+	<string>integer</string>
 </value>
 
-<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + NOP: no-op unit
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
-
-<!-- NOP: instructions -->
+<!-- ALU: instructions -->
 <value key="lu::9::instructions">
-	<string>fence atomiccmpxchg atomicrmw</string>
+	<string>add sub mul udiv sdiv urem srem ashr</string>
 </value>
 
+<!-- ALU: types -->
 <value key="lu::9::types">
-	<string>any</string>
+	<string>integer</string>
 </value>
-
 
 
 <!--###########################################################################
@@ -376,26 +362,27 @@
  = add
  =================================== -->
 
-<!-- any -->
-<value key="latency::add">
-	<size>1</size>
+<!-- integer -->
+<value key="latency::add::int">
+<size>1</size>
 </value>
 
-<value key="reciprocal::add">
-	<real>1</real>
+<value key="reciprocal::add::int">
+<real>0.25</real>
+</value>
+
+<!-- vector -->
+<value key="latency::add::vector::integer">
+<size>1</size>
+</value>
+
+<value key="reciprocal::add::vector::integer">
+<real>0.5</real>
 </value>
 
 <!-- ==================================
  = fadd
  =================================== -->
-<!-- integer -->
-<value key="latency::fadd::int">
-	<size>1</size>
-</value>
-
-<value key="reciprocal::fadd::int">
-	<real>0.25</real>
-</value>
 
 <!-- float -->
 <value key="latency::fadd::float">
@@ -415,14 +402,6 @@
 	<real>1</real>
 </value>
 
-<!-- vector -->
-<value key="latency::fadd::vector::integer">
-	<size>1</size>
-</value>
-
-<value key="reciprocal::fadd::vector::integer">
-	<real>0.5</real>
-</value>
 
 <!-- vector floating point -->
 <value key="latency::fadd::vector::float">
@@ -439,25 +418,27 @@
  = sub
  =================================== -->
 
-<value key="latency::sub">
-	<size>1</size>
-</value>
+ <!-- int -->
+ <value key="latency::sub::int">
+ <size>1</size>
+ </value>
 
-<value key="reciprocal::sub">
-	<real>1</real>
-</value>
+ <value key="reciprocal::sub::int">
+ <real>0.25</real>
+ </value>
+
+ <!-- vector -->
+ <value key="latency::sub::vector::int">
+ <size>1</size>
+ </value>
+
+ <value key="reciprocal::sub::vector::int">
+ <real>0.5</real>
+ </value>
 
 <!-- ==================================
  = fsub
  =================================== -->
-<!-- int -->
-<value key="latency::int">
-	<size>1</size>
-</value>
-
-<value key="reciprocal::int">
-	<real>0.25</real>
-</value>
 
 <!-- float -->
 <value key="latency::fsub::float">
@@ -477,14 +458,6 @@
 	<real>1</real>
 </value>
 
-<!-- vector -->
-<value key="latency::fsub::vector::int">
-	<size>1</size>
-</value>
-
-<value key="reciprocal::fsub::vector::int">
-	<real>0.5</real>
-</value>
 
 <!-- vector -->
 <value key="latency::fsub::vector::float">
@@ -500,26 +473,27 @@
  = mul
  =================================== -->
 
-<value key="latency::mul">
-	<size>1</size>
-</value>
+ <!-- integer -->
+ <value key="latency::mul::int">
+ <size>3</size>
+ </value>
 
-<value key="reciprocal::mul">
-	<real>1</real>
-</value>
+ <value key="reciprocal::mul::int">
+ <real>1</real>
+ </value>
+
+ <!-- vector -->
+ <value key="latency::mul::vector::int">
+ <size>5</size>
+ </value>
+
+ <value key="reciprocal::mul::vector::int">
+ <real>1</real>
+ </value>
 
 <!-- ==================================
  = fmul
  =================================== -->
-
-<!-- integer -->
-<value key="latency::int">
-	<size>3</size>
-</value>
-
-<value key="reciprocal::int">
-	<real>1</real>
-</value>
 
 <!-- float -->
 <value key="latency::fmul::float">
@@ -539,14 +513,6 @@
 	<real>1</real>
 </value>
 
-<!-- vector -->
-<value key="latency::fmul::vector::int">
-	<size>5</size>
-</value>
-
-<value key="reciprocal::fmul::vector::int">
-	<real>1</real>
-</value>
 
 <!-- vector -->
 <value key="latency::fmul::vector::float">
