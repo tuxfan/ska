@@ -48,8 +48,14 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Ret:
-			arch.getval(properties.latency, "latency::ret");
-			arch.getval(properties.reciprocal, "reciprocal::ret");
+                            case llvm::Type::IntTyID:
+                        switch(optype):
+			          arch.getval(properties.latency, "latency::ret::int");
+			          arch.getval(properties.reciprocal, "reciprocal::ret");
+                                  break;
+                            default : 
+			          arch.getval(properties.latency, "latency::ret");
+			          arch.getval(properties.reciprocal, "reciprocal::ret");
 			break;
 
 		case llvm::Instruction::Br:
@@ -87,9 +93,20 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Add:
-			arch.getval(properties.latency, "latency::add");
-			arch.getval(properties.reciprocal, "reciprocal::add");
-			break;
+                        switch(optype){ 
+                                case llvm::Type::VectorTyID :
+		                 	arch.getval(properties.latency, "latency::add::vector::integer");
+		                	arch.getval(properties.reciprocal, "reciprocal::add::vector:integer");
+		                	break;
+                                case llvm::Type::IntegerTyID :
+		                 	arch.getval(properties.latency, "latency::add::integer");
+		                	arch.getval(properties.reciprocal, "reciprocal::add::integer");
+                                        break;
+                                default :
+                                        ExitOnError("Add Unhandled Type",
+						ska::UnknownCase);
+					break;
+                      }
 
 		case llvm::Instruction::FAdd:
 			// get the instruction latency
@@ -103,8 +120,8 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 					arch.getval(properties.reciprocal, "reciprocal::fadd::double");
 					break;
 				case llvm::Type::VectorTyID:
-					arch.getval(properties.latency, "latency::fadd::vector");
-					arch.getval(properties.reciprocal, "reciprocal::fadd::vector");
+					arch.getval(properties.latency, "latency::fadd::vector::float");
+					arch.getval(properties.reciprocal, "reciprocal::fadd::vector::float");
 					break;
 				default:
 					ExitOnError("FAdd Unhandled Type",
@@ -115,9 +132,20 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 			break;
 
 		case llvm::Instruction::Sub:
-			arch.getval(properties.latency, "latency::sub");
-			arch.getval(properties.reciprocal, "reciprocal::sub");
-			break;
+                        switch(optype) {
+                                case llvm::Type::IntegerTyId :
+			                arch.getval(properties.latency, "latency::sub::integer");
+			                arch.getval(properties.reciprocal, "reciprocal::sub::integer");
+		                  	break;
+                                case llvm::Type::VectorTyId :
+			                arch.getval(properties.latency, "latency::sub::vector::integer");
+			                arch.getval(properties.reciprocal, "reciprocal::sub::vector::integer");
+		                  	break;
+                                default :
+                                        ExitOnError("Sub Unhandled Type",
+						ska::UnknownCase);
+					break;
+                        }
 
 		case llvm::Instruction::FSub:
 			// get the instruction latency
@@ -131,8 +159,8 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 					arch.getval(properties.reciprocal, "reciprocal::fsub::double");
 					break;
 				case llvm::Type::VectorTyID:
-					arch.getval(properties.latency, "latency::fsub::vector");
-					arch.getval(properties.reciprocal, "reciprocal::fsub::vector");
+					arch.getval(properties.latency, "latency::fsub::vector::float");
+					arch.getval(properties.reciprocal, "reciprocal::fsub::vector::float");
 					break;
 				default:
 					ExitOnError("FSub Unhandled Type " <<
@@ -144,9 +172,22 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 			break;
 
 		case llvm::Instruction::Mul:
-			arch.getval(properties.latency, "latency::mul");
-			arch.getval(properties.reciprocal, "reciprocal::mul");
-			break;
+                        switch(optype){
+                                  case llvm::Type::IntegerTyId :
+			                arch.getval(properties.latency, "latency::mul::integer");
+			                arch.getval(properties.reciprocal, "reciprocal::mul::integer");
+			                break;
+
+                                  case llvm::Type::VectorTyId :
+                                        arch.getval(properties.latency, "latency::mul::vector::integer");
+			                arch.getval(properties.reciprocal, "reciprocal::mul::vector::integer");
+			                break;
+
+                                  default :
+                                        ExitOnError("Mul Unhandled Type",
+						ska::UnknownCase);
+					break;
+                        }
 
 		case llvm::Instruction::FMul:
 			// get the instruction latency
@@ -160,15 +201,14 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 			arch.getval(properties.reciprocal, "reciprocal::fmul::double");
 					break;
 				case llvm::Type::VectorTyID:
-					arch.getval(properties.latency, "latency::fmul::vector");
-			arch.getval(properties.reciprocal, "reciprocal::fmul::vector");
+					arch.getval(properties.latency, "latency::fmul::vector::float");
+			arch.getval(properties.reciprocal, "reciprocal::fmul::vector::float");
 					break;
 				default:
 					ExitOnError("FMul Unhandled Type",
 						ska::UnknownCase);
 					break;
 			} // switch
-
 			break;
 
 		case llvm::Instruction::UDiv:
