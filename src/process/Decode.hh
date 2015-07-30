@@ -48,15 +48,16 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Ret:
-                            case llvm::Type::IntTyID:
-                        switch(optype):
+                        switch(optype){
+                            case llvm::Type::IntegerTyID:
 			          arch.getval(properties.latency, "latency::ret::int");
 			          arch.getval(properties.reciprocal, "reciprocal::ret");
                                   break;
-                            default : 
+                            default :
 			          arch.getval(properties.latency, "latency::ret");
 			          arch.getval(properties.reciprocal, "reciprocal::ret");
-			break;
+                        }
+		        break;
 
 		case llvm::Instruction::Br:
 			arch.getval(properties.latency, "latency::br");
@@ -133,11 +134,11 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 
 		case llvm::Instruction::Sub:
                         switch(optype) {
-                                case llvm::Type::IntegerTyId :
+                                case llvm::Type::IntegerTyID :
 			                arch.getval(properties.latency, "latency::sub::integer");
 			                arch.getval(properties.reciprocal, "reciprocal::sub::integer");
 		                  	break;
-                                case llvm::Type::VectorTyId :
+                                case llvm::Type::VectorTyID :
 			                arch.getval(properties.latency, "latency::sub::vector::integer");
 			                arch.getval(properties.reciprocal, "reciprocal::sub::vector::integer");
 		                  	break;
@@ -173,12 +174,12 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 
 		case llvm::Instruction::Mul:
                         switch(optype){
-                                  case llvm::Type::IntegerTyId :
+                                  case llvm::Type::IntegerTyID :
 			                arch.getval(properties.latency, "latency::mul::integer");
 			                arch.getval(properties.reciprocal, "reciprocal::mul::integer");
 			                break;
 
-                                  case llvm::Type::VectorTyId :
+                                  case llvm::Type::VectorTyID :
                                         arch.getval(properties.latency, "latency::mul::vector::integer");
 			                arch.getval(properties.reciprocal, "reciprocal::mul::vector::integer");
 			                break;
