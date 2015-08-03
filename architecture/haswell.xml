@@ -251,6 +251,31 @@
  = br
  =================================== -->
 
+<value key="latency::br">
+	<size>2</size>
+</value>
+
+<value key="reciprocal::br">
+	<real>1</real>
+</value>
+
+
+<!-- ==================================
+ = br
+ =================================== -->
+
+<value key="latency::br::memory">
+	<size>2</size>
+</value>
+
+<value key="reciprocal::br::memory">
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = br
+ =================================== -->
+
 <value key="latency::br::memory">
 	<size>2</size>
 </value>
