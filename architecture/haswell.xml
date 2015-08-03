@@ -53,7 +53,7 @@
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <value key="rs::0::type">
-	<string>General Purpose</string> <!-- 64 bit general puropose reg -->
+	<string>Integer</string> <!-- 64 bit general puropose reg -->
 </value>
 
 <value key="rs::0::registers">
@@ -92,16 +92,16 @@
  ############################################################################-->
 
 <value key="lus">
-	<size>10</size>
+	<size>7</size>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + LSU: load/store unit
+ + Port 0
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- LSU: instructions -->
 <value key="lu::0::instructions">
-	<string>alloca load store getelementptr</string>
+	<string> add sub mul udiv sdiv urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp ret br switch indirectbr invoke resume unreachable phi call select vaarg landingpad fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp  extractelement insertelement shufflevector extractvalue insertvalue  fence atomiccmpxchg atomicrmw  fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp </string>
 </value>
 
 <!-- LSU: types -->
@@ -110,27 +110,27 @@
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + ALU: integer arithmetic logic unit
+ +  Port 1 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- ALU: instructions -->
 <value key="lu::1::instructions">
-	<string>add sub mul udiv sdiv urem srem ashr</string>
+	<string>add sub mul urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp ret fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp  extractelement insertelement extractvalue insertvalue  fence atomiccmpxchg atomicrmw fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp </string>
 </value>
 
 <!-- ALU: types -->
 <value key="lu::1::types">
-	<string>integer</string>
+	<string>integer float</string>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + ILU: integer logic unit
+ + Port 2 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- ILU: instructions -->
 
 <value key="lu::2::instructions">
-	<string>shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp</string>
+	<string> alloca load store getelementptr</string>
 </value>
 
 <!-- ILU: types -->
@@ -140,12 +140,12 @@
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + BRU: branch unit
+ + Port 3 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- BRU: instructions -->
 <value key="lu::3::instructions">
-	<string>ret br switch indirectbr invoke resume unreachable phi call select vaarg landingpad</string>
+	<string>alloca load store getelementptr </string>
 </value>
 
 <!-- BRU: types -->
@@ -154,12 +154,12 @@
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + FPU: floating-point unit
+ + Port 4 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- FPU: instructions -->
 <value key="lu::4::instructions">
-	<string>fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp</string>
+	<string> store </string>
 </value>
 
 <!-- FPU: types -->
@@ -168,22 +168,27 @@
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + VU: vector unit
+ + Port 5 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- VU: instructions -->
 <value key="lu::5::instructions">
-	<string>extractelement insertelement shufflevector extractvalue insertvalue</string>
+	<string>add sub mul urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp ret fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp  extractelement insertelement extractvalue insertvalue  fence atomiccmpxchg atomicrmw </string>
 </value>
 
 <!-- VU: types -->
 <value key="lu::5::types">
-	<string>any</string>
+	<string>integer vector</string>
 </value>
+
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Port 6 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- ALU: instructions -->
 <value key="lu::6::instructions">
-	<string>add sub mul udiv sdiv urem srem ashr</string>
+	<string>add sub mul udiv sdiv urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp ret br switch indirectbr invoke resume unreachable phi call select vaarg landingpad</string>
 </value>
 
 <!-- ALU: types -->
@@ -191,34 +196,19 @@
 	<string>integer</string>
 </value>
 
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Port 7 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
 <!-- ALU: instructions -->
 <value key="lu::7::instructions">
-	<string>add sub mul udiv sdiv urem srem ashr</string>
+	<string>store</string>
 </value>
 
 <!-- ALU: types -->
 <value key="lu::7::types">
-	<string>integer</string>
-</value>
-
-<!-- ALU: instructions -->
-<value key="lu::8::instructions">
-	<string>add sub mul udiv sdiv urem srem ashr</string>
-</value>
-
-<!-- ALU: types -->
-<value key="lu::8::types">
-	<string>integer</string>
-</value>
-
-<!-- ALU: instructions -->
-<value key="lu::9::instructions">
-	<string>add sub mul udiv sdiv urem srem ashr</string>
-</value>
-
-<!-- ALU: types -->
-<value key="lu::9::types">
-	<string>integer</string>
+	<string>any</string>
 </value>
 
 
@@ -363,11 +353,11 @@
  =================================== -->
 
 <!-- integer -->
-<value key="latency::add::int">
+<value key="latency::add::integer">
 <size>1</size>
 </value>
 
-<value key="reciprocal::add::int">
+<value key="reciprocal::add::integer">
 <real>0.25</real>
 </value>
 

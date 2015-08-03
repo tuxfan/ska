@@ -214,6 +214,19 @@
 </value>
 
 <!-- ==================================
+ = ret integer
+ =================================== -->
+
+<value key="latency::ret::int"> 
+	<size>1</size>
+</value>
+
+<value key="reciprocal::ret::int">
+	<real>1</real>
+</value>
+
+
+<!-- ==================================
  = br
  =================================== -->
 
@@ -301,6 +314,16 @@
 <value key="reciprocal::add">
 	<real>1</real>
 </value>
+
+<!-- integer -->
+<value key="latency::add::integer">
+<size>2</size>
+</value>
+
+<value key="reciprocal::add::integer">
+<real>1</real>
+</value>
+
 
 <!-- ==================================
  = fadd
