@@ -51,7 +51,7 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
                         switch(optype){
                             case llvm::Type::IntegerTyID:
 			          arch.getval(properties.latency, "latency::ret::int");
-			          arch.getval(properties.reciprocal, "reciprocal::ret");
+			          arch.getval(properties.reciprocal, "reciprocal::ret::int");
                                   break;
                             default :
 			          arch.getval(properties.latency, "latency::ret");
@@ -94,6 +94,7 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Add:
+                        printf (" The optype is %d \n", optype);
                         switch(optype){ 
                                 case llvm::Type::VectorTyID :
 		                 	arch.getval(properties.latency, "latency::add::vector::integer");
@@ -104,10 +105,11 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 		                	arch.getval(properties.reciprocal, "reciprocal::add::integer");
                                         break;
                                 default :
-                                        ExitOnError("Add Unhandled Type",
-						ska::UnknownCase);
-					break;
-                      }
+		                        ExitOnError("Add Unhandled Type",
+					ska::UnknownCase);
+          	 			break;
+                       }
+                       break;
 
 		case llvm::Instruction::FAdd:
 			// get the instruction latency
@@ -147,6 +149,7 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 						ska::UnknownCase);
 					break;
                         }
+                        break;
 
 		case llvm::Instruction::FSub:
 			// get the instruction latency
@@ -189,6 +192,8 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 						ska::UnknownCase);
 					break;
                         }
+
+                        break;
 
 		case llvm::Instruction::FMul:
 			// get the instruction latency
@@ -495,6 +500,7 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 			} // if
 
 			break;
+
 			} // scope
 	
 		case llvm::Instruction::Select:
@@ -551,6 +557,8 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 			ExitOnError("Unhandled Instruction", ska::UnknownCase);
 	} // switch
 
+
+        printf ("returning properties\n");
 	return properties;
 } // decode
 

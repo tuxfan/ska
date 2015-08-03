@@ -239,7 +239,7 @@ simulator_t::simulator_t(const char * ir_file)
 
         auto fita_1 = llvm_module_->begin();
         auto end = llvm_module_->end();
-        doRegAlloc(fita_1,end);
+        //doRegAlloc(fita_1,end);
         //exit(0);
 
 	/*-------------------------------------------------------------------------*
@@ -285,6 +285,7 @@ simulator_t::simulator_t(const char * ir_file)
 
 		// instructions
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
+                        iita->dump();
 			dmap[&*iita] = new instruction_t(decode(&*iita));
 		} // for
 
@@ -478,6 +479,8 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 	instruction_list_t active;
 	auto iita = begin;
 	while(iita != end || active.size() > 0) {
+                iita -> dump();
+                printf ("Active size is %d \n",(int)active.size());
 		size_t issued(0);
 		bool issue(true);
 		std::vector<instruction_t *> cycle_issue;
