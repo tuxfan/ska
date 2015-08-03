@@ -239,7 +239,7 @@ simulator_t::simulator_t(const char * ir_file)
 
         auto fita_1 = llvm_module_->begin();
         auto end = llvm_module_->end();
-        //doRegAlloc(fita_1,end);
+        doRegAlloc(fita_1,end);
         //exit(0);
 
 	/*-------------------------------------------------------------------------*
@@ -479,7 +479,7 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 	instruction_list_t active;
 	auto iita = begin;
 	while(iita != end || active.size() > 0) {
-                iita -> dump();
+                //iita -> dump();
                 printf ("Active size is %d \n",(int)active.size());
 		size_t issued(0);
 		bool issue(true);
