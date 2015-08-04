@@ -60,7 +60,7 @@ class select {
   // stores only potential spills
   bool checkOperand(llvm::Value *, llvm::Value *);
   bool modifyOperand(llvm::Value *, llvm::Value *, llvm::Value *);
-  void populate_starting_colors();
+  void populate_starting_colors(std::map<int,int> reg_map);
   bool return_flag();
 
  private:
@@ -79,9 +79,14 @@ class select {
   bool stop_flag;
 };
 
-void select::populate_starting_colors() {
+void select::populate_starting_colors(std::map<int,int> reg_map) {
   c_map[0] = 1;  // integer type has colors 1-100
-  c_map[1] = 101;  // float type has colors 101-200
+  c_map[1] = c_map[0]+reg_map[0];  // float type has colors 101-200
+  c_map[2] = c_map[1]+reg_map[1];
+  c_map[3] = c_map[2]+reg_map[2];
+
+  
+
   // ideally, this should be read in from
   // the reg_set class
   // or from xml
@@ -102,7 +107,7 @@ select::select(std::stack<spill_info> ss,
 
   stop_flag = true;  // we are optimistic
 
-  populate_starting_colors();
+  populate_starting_colors(reg_map);
 
   std::ofstream node_colors;
   node_colors.open("Simple Node colors");
@@ -160,6 +165,7 @@ select::select(std::stack<spill_info> ss,
     color cc = c_map[type];
     color max_c = -1;
     intf::iterator intf_it = intf_table[ii.first].begin();
+
     while (intf_it != intf_table[ii.first].end()) {
       color temp_c;
       if (reg_color.find(intf_it->first) != reg_color.end())
@@ -171,9 +177,11 @@ select::select(std::stack<spill_info> ss,
         max_c = temp_c;
       intf_it++;
     }
+
     if (max_c == -1) {
       max_c = c_map[type];  // means none of interfering nodescolored yet
     }
+
     if (max_c ==
         cc + reg_map[type] - 1) {  // means we cannot find a color to assign
       // so make tiny live ranges and remove
@@ -182,6 +190,8 @@ select::select(std::stack<spill_info> ss,
       // llvm::AllocaInst* ai = new llvm::AllocaInst(ii_1->type);//framepointer
       // or reference address
 
+
+      printf ("Could not color a spilled node !\n");
       auto bita = fita->begin();
 
       llvm::Function::ArgumentListType &args = fita->getArgumentList();
@@ -198,9 +208,11 @@ select::select(std::stack<spill_info> ss,
           // ii_1->dump();
           // iita->dump();
           unsigned opcode = iita->getOpcode();
+
           if (opcode == llvm::Instruction::Alloca) {
             alloca_map[iita] = iita;
           }
+
           if ((llvm::Instruction *)iita == ii_1) {
             auto iita_0 = iita;
             auto iita_1 = ++iita;

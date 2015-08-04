@@ -304,7 +304,7 @@
 	<size>1.5</size>
 </value>
 
-<value key="reciprocal::br::memory">
+<value key="reciprocal::br::short_near">
 	<real>1</real>
 </value>
 
@@ -434,20 +434,20 @@
  =================================== -->
 
  <!-- int -->
- <value key="latency::sub::int">
+ <value key="latency::sub::integer">
  <size>1</size>
  </value>
 
- <value key="reciprocal::sub::int">
+ <value key="reciprocal::sub::integer">
  <real>0.25</real>
  </value>
 
  <!-- vector -->
- <value key="latency::sub::vector::int">
+ <value key="latency::sub::vector::integer">
  <size>1</size>
  </value>
 
- <value key="reciprocal::sub::vector::int">
+ <value key="reciprocal::sub::vector::integer">
  <real>0.5</real>
  </value>
 

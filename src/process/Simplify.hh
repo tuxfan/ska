@@ -5,6 +5,8 @@
 #include <cstring>
 #include <vector>
 #include <list>
+#include <algorithm>
+#include <stack>
 
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Constants.h>
@@ -35,10 +37,11 @@
 #include <OpTypes.hh>
 #include <Core.hh>
 #include <Utils.hh>
-#include <algorithm>
-#include <stack>
+#include <RegisterSet.hh>
+
 
 #include <TypeDefs.hh>
+
 
 namespace ska {
 
@@ -75,14 +78,23 @@ class simplify_nodes {
   // per register
 
  public:
-  simplify_nodes(std::map<llvm::Value *, intf> intf_table);
+  simplify_nodes(std::map<llvm::Value *, intf> intf_table,
+                    register_set_t ** rs, size_t register_sets);
 
-  void num_phys_regs();
+  void num_phys_regs(register_set_t **rs, size_t register_sets);
 
   std::stack<std::pair<llvm::Value *, bool>> getStack();
 
   std::map<reg_type, numPhys> get_reg_map();
+
+  void populate_reg_map();
+
 };
+
+void simplify_nodes::populate_reg_map(){
+
+   
+}
 
 std::stack<std::pair<llvm::Value *, bool>> simplify_nodes::getStack() {
   return simple_nodes;
@@ -90,12 +102,31 @@ std::stack<std::pair<llvm::Value *, bool>> simplify_nodes::getStack() {
 
 std::map<reg_type, numPhys> simplify_nodes::get_reg_map() { return reg_map; }
 
-void simplify_nodes::num_phys_regs() {  // change so that it gets this info from
+void simplify_nodes::num_phys_regs( register_set_t **rs,
+                                        size_t register_size){
+                                        // change so that it gets this info from
                                         // regset
 
-  reg_map[0] = 100;  // 0 is of int type and has 100 registers
-  reg_map[1] = 100;  // 1 is of float type and has another 100 registers
+  for (int i=0; i<register_size; i++){
+      register_set_t::register_type_t idx = rs[i]->type(); 
+      reg_map[(int)idx] = (int)(rs[i]->num_registers());
+  }
+
+  reg_map[register_size] = 100;  //registers that do not belong 
+                                //to the currently defined set
+                                //are assigned from a large pool of 
+                                //regs, this is a stopgap soln ...
+
+  for (int i=0; i <register_size; i++){
+
+      printf ("The register type %d has %d registers\n", i, reg_map[i]);
+  }
+
+  //reg_map[0] = 100;  // 0 is of int type and has 100 registers
+  //reg_map[1] = 100;  // 1 is of float type and has another 100 registers
+  //reg_map[2] = 200;
   // you get the idea ...
+
 }
 
 int getInstructionType(llvm::Value *instr) {
@@ -103,19 +134,25 @@ int getInstructionType(llvm::Value *instr) {
 
   if (type->isIntegerTy()) {  // simple 2 type case
     return 0;  // can add more types
-  } else {
+  } else if (type->isFloatTy()){
     return 1;
+  } else if (type->isVectorTy()){
+    return 2;
+  } else {
+    return 3;
   }
 }
 
-simplify_nodes::simplify_nodes(std::map<llvm::Value *, intf> intf_table) {
+simplify_nodes::simplify_nodes(std::map<llvm::Value *, intf> intf_table,
+                                    register_set_t ** rs, size_t register_sets) {
+
   // simplify the graph
   // by populating the stack
   // with simple/spill nodes
 
-  num_phys_regs();  // gets data from reg set
+  num_phys_regs(rs, register_sets) ;  // gets data from reg set
 
-  std::map<llvm::Value *, intf>::iterator it_0 = intf_table.begin();
+  std::map<llvm::Value *, intf>::iterator it_0 = intf_table.begin() ;
 
   while (it_0 != intf_table.end()) {
     int degree = (it_0->second).size();
@@ -171,6 +208,7 @@ simplify_nodes::simplify_nodes(std::map<llvm::Value *, intf> intf_table) {
                               intf_it++;
                     }
   } */
+
 }
 
 }  // namespace ska

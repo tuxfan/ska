@@ -84,6 +84,9 @@ private:
 	std::unique_ptr<llvm::Module> llvm_module_;
 
 	core_t * core_;
+
+        register_set_t ** rs;
+        size_t register_sets;
 }; // class simulator_t
 
 /*----------------------------------------------------------------------------*
@@ -134,8 +137,9 @@ simulator_t::simulator_t(const char * ir_file)
 	log << " --- Creating Core ---" << std::endl;
 	core_ = new core_t(max_issue);
 
-	size_t register_sets;
 	arch.getval(register_sets, "register_sets");
+
+        rs = (register_set_t **)malloc(register_sets*sizeof(register_set_t * ));
 
 	for(size_t i(0); i<register_sets; ++i) {
 		char key[256];
@@ -148,7 +152,7 @@ simulator_t::simulator_t(const char * ir_file)
 		sprintf(key, "rs::%d::registers", int(i));
 		arch.getval(registers, key);
 
-		register_set_t * rs =
+		     rs[i] =
 			(type == "Integer") ?
 				new register_set_t(register_set_t::register_type_t::Integer,
 					registers) :
@@ -286,7 +290,6 @@ simulator_t::simulator_t(const char * ir_file)
 
 		// instructions
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
-                        iita->dump();
 			dmap[&*iita] = new instruction_t(decode(&*iita));
 		} // for
 
@@ -481,10 +484,15 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 	auto iita = begin;
 	while(iita != end || active.size() > 0) {
                 //iita -> dump();
-                printf ("Active size is %d \n",(int)active.size());
+                
+                //printf ("Active size is %d \n",(int)active.size());
 		size_t issued(0);
 		bool issue(true);
 		std::vector<instruction_t *> cycle_issue;
+
+//	        for(auto a = active.begin(); a != active.end(); ++a) {
+//                   printf("String is %s",(*a)->ir().c_str());
+//                }
 
 		while(iita != end && issue && issued < core_->max_issue()) {
                         llvm::CallInst * ci;
@@ -944,15 +952,12 @@ void simulator_t::doRegAlloc (llvm::Module::iterator fita,
 
        auto bita = fita->begin();
 
-
        llvm::AllocaInst* ai = new llvm::AllocaInst(llvm::IntegerType::get(llvm_context_,8));
        bita->getInstList().insert(bita->begin(), ai);
        //inserting the frame pointer
 
-
-
        while (reg_alloc_flag==false && counter < 1){ //hack so that reg alloc completes
-                flow_graph * fg = new flow_graph(2,fita,end);
+                flow_graph * fg = new flow_graph(register_sets,fita,end,rs);
                 printf ("Building intf graph\n");
                 fg->build_iGraph(); //build the interference graph
                 printf ("Completed intf graph build\n");
