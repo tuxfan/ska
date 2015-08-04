@@ -94,7 +94,6 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 		 *----------------------------------------------------------------------*/
 
 		case llvm::Instruction::Add:
-                        printf (" The optype is %d \n", optype);
                         switch(optype){ 
                                 case llvm::Type::VectorTyID :
 		                 	arch.getval(properties.latency, "latency::add::vector::integer");
@@ -558,7 +557,6 @@ instruction_properties_t decode(llvm::Instruction * instruction) {
 	} // switch
 
 
-        printf ("returning properties\n");
 	return properties;
 } // decode
 

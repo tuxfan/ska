@@ -285,7 +285,6 @@ simulator_t::simulator_t(const char * ir_file)
 
 		// instructions
 		for(auto iita = inst_begin(fita); iita != inst_end(fita); ++iita) {
-                        iita->dump();
 			dmap[&*iita] = new instruction_t(decode(&*iita));
 		} // for
 
@@ -480,10 +479,15 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 	auto iita = begin;
 	while(iita != end || active.size() > 0) {
                 //iita -> dump();
-                printf ("Active size is %d \n",(int)active.size());
+                
+                //printf ("Active size is %d \n",(int)active.size());
 		size_t issued(0);
 		bool issue(true);
 		std::vector<instruction_t *> cycle_issue;
+
+//	        for(auto a = active.begin(); a != active.end(); ++a) {
+//                   printf("String is %s",(*a)->ir().c_str());
+//                }
 
 		while(iita != end && issue && issued < core_->max_issue()) {
                         llvm::CallInst * ci;
