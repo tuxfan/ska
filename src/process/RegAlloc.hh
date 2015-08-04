@@ -73,9 +73,12 @@ class flow_graph {
 
   llvm::Module::iterator root_fita;
 
+  register_set_t **rs;
+  size_t register_sets;
+
  public:
-  flow_graph(int n, llvm::Module::iterator fita,
-             llvm::Module::iterator end);  // creates the CFG
+  flow_graph(size_t register_sets, llvm::Module::iterator fita,
+             llvm::Module::iterator end, register_set_t ** rs);  // creates the CFG
 
   int liveness_flow(llvm::Value *op,
                     llvm::ilist_iterator<llvm::Instruction> iita,
@@ -103,15 +106,20 @@ class flow_graph {
   // live_in when
   // recursing over BBs
 
-  void simplify_iGraph() { simp_igraph = new simplify_nodes(intf_table); };
+  void simplify_iGraph() { simp_igraph = new simplify_nodes(intf_table,rs,
+                                                 register_sets); };
 
   bool select_regs();
   void empty_the_maps();
 
 };  // flowgraph
 
-flow_graph::flow_graph(int n, llvm::Module::iterator fita,
-                       llvm::Module::iterator end) {
+flow_graph::flow_graph(size_t register_sets, llvm::Module::iterator fita,
+                       llvm::Module::iterator end, register_set_t ** rs){
+
+  this->register_sets = register_sets;
+  this->rs = rs;
+
   // rootBB = new node; //root basic block
   auto aita = fita->arg_begin();  // argument iterator
   auto bita = (*fita).begin();  // basic block iterator
