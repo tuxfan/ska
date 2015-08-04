@@ -18,9 +18,9 @@ class register_set_t
 public:
 
 	enum class register_type_t {
-		Integer,
-		Float,
-		Vector
+		Integer, //0
+		Float,   //1
+		Vector   //2
 	}; // enum class type
 
 	register_set_t(register_type_t type, size_t num_registers)
