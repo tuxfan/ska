@@ -17,11 +17,7 @@ AC_DEFUN([CONFIG_GENERIC_ENABLE], [
 		[Enable $1])],
 		[
 			if test -n "$$2" ; then
-				if test "$$2" = "yes" ; then
-					enable=1
-				else
-					enable=0
-				fi
+				enable=1
 			elif test "$enableval" = "yes" ; then
 				enable=1
 			else
@@ -30,11 +26,7 @@ AC_DEFUN([CONFIG_GENERIC_ENABLE], [
 		],
 		[
 			if test -n "$$2" ; then
-				if test "$$2" = "yes" ; then
-					enable=1
-				else
-					enable=0
-				fi
+				enable=1
 			else
 				enable=0
 			fi

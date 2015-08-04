@@ -19,6 +19,8 @@
 	std::cerr << "Usage: " << (s) << " -v [-l log file]" <<						\
 	" [-o output file]" <<	" architecture ir" <<									\
 	std::endl << std::endl << "Options:" << std::endl <<							\
+	"  -d      Turn on debug output (default: stderr)" << std::endl <<		\
+	"          (turns off normal logging output)" << std::endl <<				\
 	"  -v      Turn on verbose output (default: stderr)" << std::endl <<		\
 	"  -l file Specify a file for log output (implies -v)" << std::endl <<	\
 	"  -o file Specify a file for pipeline output" << std::endl;				\
@@ -43,7 +45,7 @@ int main(int argc, char ** argv) {
 	extern char * optarg;
 	extern int optind;
 
-	while((ch = getopt(argc, argv, "vo:l:")) != -1) {
+	while((ch = getopt(argc, argv, "dvo:l:")) != -1) {
 		switch(ch) {
 			case 'o':
 				ska::file_io_t::instance().set_out_stream(optarg);
@@ -53,6 +55,9 @@ int main(int argc, char ** argv) {
 				break;
 			case 'v':
 				ska::file_io_t::instance().set_verbose();
+				break;
+			case 'd':
+				ska::file_io_t::instance().set_debug();
 				break;
 			default:
 				USAGE(program.c_str());

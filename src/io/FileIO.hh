@@ -20,6 +20,11 @@ public:
 		log_stream_->rdbuf(std::cerr.rdbuf());
 	} // set_verbose
 
+	void set_debug() {
+		set_out_stream("/dev/null");
+		log_stream_->rdbuf(std::cerr.rdbuf());
+	} // set_debug
+
 	void set_log_stream(const char * name) {
 		if(log_file_ != nullptr) {
 			log_file_->close();

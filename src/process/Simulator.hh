@@ -251,8 +251,9 @@ simulator_t::simulator_t(const char * ir_file)
 	statistics_t & stats = statistics_t::instance();
 
 	log << " --- Processing Module ---" << std::endl;
-	for(llvm::Module::iterator fita = llvm_module_->begin();//function iterator ...
-                                                                //all fns in IR
+	//function iterator ...
+   //all fns in IR
+	for(llvm::Module::iterator fita = llvm_module_->begin();
 		fita != llvm_module_->end(); ++fita) {
 
 		std::string fname = try_demangle_and_strip(fita->getName().str());
