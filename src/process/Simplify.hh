@@ -112,7 +112,7 @@ void simplify_nodes::num_phys_regs( register_set_t **rs,
       reg_map[(int)idx] = (int)(rs[i]->num_registers());
   }
 
-  reg_map[register_size] = 100;  //registers that do not belong 
+  reg_map[register_size] = 16;  //registers that do not belong 
                                 //to the currently defined set
                                 //are assigned from a large pool of 
                                 //regs, this is a stopgap soln ...

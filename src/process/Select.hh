@@ -77,15 +77,14 @@ class select {
   std::map<llvm::Value *, reg_type> inst_reg;
   std::map<llvm::Value *, llvm::Value *> alloca_map;
   bool stop_flag;
+
 };
 
 void select::populate_starting_colors(std::map<int,int> reg_map) {
-  c_map[0] = 1;  // integer type has colors 1-100
+  c_map[0] = 1;                    // integer type has colors 1-100
   c_map[1] = c_map[0]+reg_map[0];  // float type has colors 101-200
   c_map[2] = c_map[1]+reg_map[1];
   c_map[3] = c_map[2]+reg_map[2];
-
-  
 
   // ideally, this should be read in from
   // the reg_set class
@@ -110,7 +109,7 @@ select::select(std::stack<spill_info> ss,
   populate_starting_colors(reg_map);
 
   std::ofstream node_colors;
-  node_colors.open("Simple Node colors");
+  node_colors.open("simple_node_colors");
 
   while (ss.size() != 0) {
     auto ii = ss.top();  // pop the instruction
@@ -118,9 +117,10 @@ select::select(std::stack<spill_info> ss,
     if (ii.second == true) {  // no spill, random color possible
       int type = ska::getInstructionType(ii.first);
       color cc = c_map[type];
-      color min_c = 9999;
+      color max_c = -1;
       intf::iterator intf_it = intf_table[ii.first].begin();
       // ii.first->dump();
+
       while (intf_it != intf_table[ii.first].end()) {
         color temp_c;
         //(intf_it->first)->dump();
@@ -128,17 +128,17 @@ select::select(std::stack<spill_info> ss,
           temp_c = reg_color[intf_it->first];
           // printf(" : Colour is %d",temp_c);
         } else {
-          temp_c = 9999;
+          temp_c = -1;
         }  // printf(" : Colour not assigned \n"); }
-        if ((temp_c < min_c) && (temp_c >= cc) &&
+        if ((temp_c >  max_c) && (temp_c >= cc) &&
             (temp_c < cc + reg_map[type]))  // change to correct mapping
-          min_c = temp_c;
+          max_c = temp_c;
         intf_it++;
       }
-      if (min_c == 9999)
+      if (max_c == -1)
         reg_color[ii.first] = c_map[type];
       else
-        reg_color[ii.first] = min_c + 1;
+        reg_color[ii.first] = max_c + 1;
 
       /*std::string str; //prints in the opposite order
       llvm::raw_string_ostream rso(str);
@@ -159,6 +159,8 @@ select::select(std::stack<spill_info> ss,
   node_colors << "Could not color, so added load store, possibly alloca";
 
   while (pot_spill.size() != 0) {
+    //printf ("Looking to color a spilled node ! \n");
+
     auto ii = pot_spill.top();
     pot_spill.pop();
     int type = ska::getInstructionType(ii.first);
@@ -178,20 +180,21 @@ select::select(std::stack<spill_info> ss,
       intf_it++;
     }
 
-    if (max_c == -1) {
-      max_c = c_map[type];  // means none of interfering nodescolored yet
-    }
+    //printf("Max color of the surrounding nodes is %d \n", max_c);
 
+    if (max_c == -1) {
+      reg_color[ii.first] = cc;
+    } else
     if (max_c ==
-        cc + reg_map[type] - 1) {  // means we cannot find a color to assign
+        cc + reg_map[type] - 1) {// means we cannot find a color to assign
       // so make tiny live ranges and remove
       // large live range for the instruction
       llvm::Instruction *ii_1 = (llvm::Instruction *)ii.first;
       // llvm::AllocaInst* ai = new llvm::AllocaInst(ii_1->type);//framepointer
       // or reference address
 
-
-      printf ("Could not color a spilled node !\n");
+      //printf ("Could not color a spilled node !\n");
+      //ii_1->dump();
       auto bita = fita->begin();
 
       llvm::Function::ArgumentListType &args = fita->getArgumentList();
@@ -205,8 +208,8 @@ select::select(std::stack<spill_info> ss,
         auto iita = bita->begin();
         int count = 0;
         while (iita != bita->end()) {
-          // ii_1->dump();
-          // iita->dump();
+           //ii_1->dump();
+           //iita->dump();
           unsigned opcode = iita->getOpcode();
 
           if (opcode == llvm::Instruction::Alloca) {
@@ -214,6 +217,7 @@ select::select(std::stack<spill_info> ss,
           }
 
           if ((llvm::Instruction *)iita == ii_1) {
+            //printf ("Created new alloca !\n");
             auto iita_0 = iita;
             auto iita_1 = ++iita;
             iita = iita_0;
@@ -229,6 +233,7 @@ select::select(std::stack<spill_info> ss,
                                 ii_1)) {  // checkOperand does not work properly
             // need to investigate with simple test case
 
+            //printf ("adding load and store \n");
             auto iita_0 = iita;
             auto iita_1 = ++iita;
             iita = iita_0;
@@ -254,6 +259,7 @@ select::select(std::stack<spill_info> ss,
         bita++;
       }
 
+
       std::string str;
       llvm::raw_string_ostream rso(str);
       rso << *(ii.first);
@@ -262,11 +268,14 @@ select::select(std::stack<spill_info> ss,
       node_colors << std::endl;
       stop_flag = false;
 
-    }  // means there is an actual spill
+    }
+
+    // means there is an actual spill
     // so need to push it to mem after definition
     // and get load it from mem before use, so that
     // there are two tiny live ranges, instead of one large
     // live range
+
     else {
       reg_color[ii.first] = max_c + 1;
 

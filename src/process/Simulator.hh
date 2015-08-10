@@ -244,7 +244,6 @@ simulator_t::simulator_t(const char * ir_file)
         auto fita_1 = llvm_module_->begin();
         auto end = llvm_module_->end();
         doRegAlloc(fita_1,end);
-        //exit(0);
 
 	/*-------------------------------------------------------------------------*
 	 * Visit functions.
@@ -256,7 +255,7 @@ simulator_t::simulator_t(const char * ir_file)
 
 	log << " --- Processing Module ---" << std::endl;
 	//function iterator ...
-   //all fns in IR
+        //all fns in IR
 	for(llvm::Module::iterator fita = llvm_module_->begin();
 		fita != llvm_module_->end(); ++fita) {
 
@@ -963,10 +962,16 @@ void simulator_t::doRegAlloc (llvm::Module::iterator fita,
                 printf ("Completed intf graph build\n");
                 fg->simplify_iGraph(); //simplifies the iGraph
                 printf("Simplified the igraph\n");
-                reg_alloc_flag = fg->select_regs();
+
+                auto fita_2 = fita;
+                while (fita_2 != end){
+                  reg_alloc_flag = fg->select_regs(fita_2);
                                 //colors igraph and says if 
                                 //rewrites are needed
-                counter++;
+                  printf("Iterated fn for regalloc\n");
+                  fita_2++;
+                }
+                counter++; //limit number of program rewrites to 1
        }
 
        //printing what the final IR looks like

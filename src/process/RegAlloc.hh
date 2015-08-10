@@ -109,7 +109,7 @@ class flow_graph {
   void simplify_iGraph() { simp_igraph = new simplify_nodes(intf_table,rs,
                                                  register_sets); };
 
-  bool select_regs();
+  bool select_regs(llvm::Module::iterator fita);
   void empty_the_maps();
 
 };  // flowgraph
@@ -428,9 +428,9 @@ void flow_graph::traverse_list(std::map<llvm::Value *, bool> imap) {
   }
 }  // traverse_list
 
-bool flow_graph::select_regs() {
+bool flow_graph::select_regs(llvm::Module::iterator fita) {
   select *s_regs = new select(simp_igraph->getStack(), intf_table,
-                              simp_igraph->get_reg_map(), root_fita);
+                              simp_igraph->get_reg_map(), fita);
 
   return s_regs->return_flag();
 }
