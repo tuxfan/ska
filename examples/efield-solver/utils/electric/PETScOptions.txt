@@ -1,0 +1,29 @@
+# ... options database for petsc
+# ... ksp
+
+-pc_type hypre
+-pc_hypre_type boomeramg
+
+#-pc_type mg
+# -pc_mg_smoothdown 3
+#-pc_mg_levels 3
+#-pc_mg_galerkin
+# -pc_mg_log
+#-ksp_diagonal_scale
+#-ksp_diagonal_scale_fix
+
+#-ksp_type richardson
+#-pc_type ilu
+#-on_error_attach_debugger
+#-start_in_debugger
+#-debugger_nodes 2
+#-ksp_view
+-ksp_converged_reason
+#-ksp_monitor_true_residual
+-ksp_atol 1e-10
+-ksp_rtol 1e-50
+-ksp_divtol 1e+40
+#-mat_view draw
+#-draw_pause -1
+#-mat_view
+# ... serial
