@@ -81,6 +81,7 @@ class select {
 };
 
 void select::populate_starting_colors(std::map<int,int> reg_map) {
+
   c_map[0] = 1;                    // integer type has colors 1-100
   c_map[1] = c_map[0]+reg_map[0];  // float type has colors 101-200
   c_map[2] = c_map[1]+reg_map[1];
@@ -289,6 +290,7 @@ select::select(std::stack<spill_info> ss,
       node_colors << std :: endl;*/
     }
   }
+
   node_colors.close();
 
 }  // select constructor

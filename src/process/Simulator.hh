@@ -957,18 +957,18 @@ void simulator_t::doRegAlloc (llvm::Module::iterator fita,
 
        while (reg_alloc_flag==false && counter < 1){ //hack so that reg alloc completes
                 flow_graph * fg = new flow_graph(register_sets,fita,end,rs);
-                printf ("Building intf graph\n");
+                //printf ("Building intf graph\n");
                 fg->build_iGraph(); //build the interference graph
-                printf ("Completed intf graph build\n");
+                //printf ("Completed intf graph build\n");
                 fg->simplify_iGraph(); //simplifies the iGraph
-                printf("Simplified the igraph\n");
+                //printf("Simplified the igraph\n");
 
                 auto fita_2 = fita;
                 while (fita_2 != end){
                   reg_alloc_flag = fg->select_regs(fita_2);
-                                //colors igraph and says if 
+                                //colors igraph and says if
                                 //rewrites are needed
-                  printf("Iterated fn for regalloc\n");
+                  //printf("Iterated fn for regalloc\n");
                   fita_2++;
                 }
                 counter++; //limit number of program rewrites to 1
