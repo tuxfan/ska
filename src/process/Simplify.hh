@@ -155,11 +155,14 @@ simplify_nodes::simplify_nodes(std::map<llvm::Value *, intf> intf_table,
   std::map<llvm::Value *, intf>::iterator it_0 = intf_table.begin() ;
 
   while (it_0 != intf_table.end()) {
+
     int degree = (it_0->second).size();
     int type = getInstructionType(it_0->first);
     if (degree > reg_map[type]) {  // change to correct reg type later
+
       // will be pulled in from register_set
       // header file
+
       std::pair<llvm::Value *, bool> t_pair =
           (std::make_pair(it_0->first, false));  // means
       simple_nodes.push(t_pair);  // not a simple node
@@ -171,6 +174,7 @@ simplify_nodes::simplify_nodes(std::map<llvm::Value *, intf> intf_table,
       debug_nodes.push(t_pair);
     }
     it_0++;
+
   }
 
   // std::ofstream simple_igraph;

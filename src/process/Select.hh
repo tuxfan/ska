@@ -82,10 +82,16 @@ class select {
 
 void select::populate_starting_colors(std::map<int,int> reg_map) {
 
-  c_map[0] = 1;                    // integer type has colors 1-100
-  c_map[1] = c_map[0]+reg_map[0];  // float type has colors 101-200
-  c_map[2] = c_map[1]+reg_map[1];
-  c_map[3] = c_map[2]+reg_map[2];
+
+  int register_size = reg_map.size();
+  c_map[0]=1; //starting color is 1
+  for (int i=0; i<register_size;i++){
+      c_map[i+1]= c_map[i] + reg_map[i];
+  }
+
+  //c_map[1] = c_map[0]+reg_map[0];  // float type has colors 101-200
+  //c_map[2] = c_map[1]+reg_map[1];
+  //c_map[3] = c_map[2]+reg_map[2];
 
   // ideally, this should be read in from
   // the reg_set class

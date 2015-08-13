@@ -137,7 +137,7 @@ flow_graph::flow_graph(size_t register_sets, llvm::Module::iterator fita,
   auto fita_1 = fita;
   while (fita_1 != end) {
     all_BB_liveness(fita_1);  // get the
-    printf("Function liveness done\n");
+    //printf("Function liveness done\n");
     fita_1++;
   }
 
