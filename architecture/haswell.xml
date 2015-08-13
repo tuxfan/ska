@@ -57,7 +57,7 @@
 </value>
 
 <value key="rs::0::registers">
-	<size>16</size>
+	<size>23</size>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -92,7 +92,7 @@
  ############################################################################-->
 
 <value key="lus">
-	<size>7</size>
+	<size>15</size>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -210,6 +210,168 @@
 <value key="lu::7::types">
 	<string>any</string>
 </value>
+
+
+
+<!-- LSU: instructions -->
+<value key="lu::8::instructions">
+	<string> add sub mul udiv sdiv urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp ret br switch indirectbr invoke resume unreachable phi call select vaarg landingpad fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp  extractelement insertelement shufflevector extractvalue insertvalue  fence atomiccmpxchg atomicrmw  fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp </string>
+</value>
+
+<!-- LSU: types -->
+<value key="lu::8::types">
+	<string>any</string>
+</value>
+
+<!-- LSU: instructions -->
+<value key="lu::9::instructions">
+	<string> add sub mul udiv sdiv urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp ret br switch indirectbr invoke resume unreachable phi call select vaarg landingpad fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp  extractelement insertelement shufflevector extractvalue insertvalue  fence atomiccmpxchg atomicrmw  fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp </string>
+</value>
+
+<!-- LSU: types -->
+<value key="lu::9::types">
+	<string>any</string>
+</value>
+
+<!-- LSU: instructions -->
+<value key="lu::10::instructions">
+	<string> add sub mul udiv sdiv urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp ret br switch indirectbr invoke resume unreachable phi call select vaarg landingpad fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp  extractelement insertelement shufflevector extractvalue insertvalue  fence atomiccmpxchg atomicrmw  fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp </string>
+</value>
+
+<!-- LSU: types -->
+<value key="lu::10::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Port 11 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ILU: instructions -->
+
+<value key="lu::11::instructions">
+	<string> alloca load store getelementptr</string>
+</value>
+
+<!-- ILU: types -->
+
+<value key="lu::11::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Port 12 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ILU: instructions -->
+
+<value key="lu::12::instructions">
+	<string> alloca load store getelementptr</string>
+</value>
+
+<!-- ILU: types -->
+
+<value key="lu::12::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Port 13 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ILU: instructions -->
+
+<value key="lu::13::instructions">
+	<string> alloca load store getelementptr</string>
+</value>
+
+<!-- ILU: types -->
+
+<value key="lu::13::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Port 14 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ILU: instructions -->
+
+<value key="lu::14::instructions">
+	<string> alloca load store getelementptr</string>
+</value>
+
+<!-- ILU: types -->
+
+<value key="lu::14::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Port 15 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ILU: instructions -->
+
+<value key="lu::15::instructions">
+	<string> alloca load store getelementptr</string>
+</value>
+
+<!-- ILU: types -->
+
+<value key="lu::15::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Port 16
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ILU: instructions -->
+
+<value key="lu::16::instructions">
+	<string> alloca load store getelementptr</string>
+</value>
+
+<!-- ILU: types -->
+
+<value key="lu::16::types">
+	<string>any</string>
+</value>
+
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Port 17
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ILU: instructions -->
+
+<value key="lu::17::instructions">
+	<string> alloca load store getelementptr</string>
+</value>
+
+<!-- ILU: types -->
+
+<value key="lu::17::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + Port 18
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- ILU: instructions -->
+
+<value key="lu::18::instructions">
+	<string> alloca load store getelementptr</string>
+</value>
+
+<!-- ILU: types -->
+
+<value key="lu::18::types">
+	<string>any</string>
+</value>
+
 
 
 <!--###########################################################################
