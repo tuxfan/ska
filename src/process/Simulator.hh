@@ -11,6 +11,7 @@
 #define Simulator_hh
 
 #include <RegAlloc.hh> //contains other llvm includes
+#include <FunctionList.hh>
 
 namespace ska {
 
@@ -261,6 +262,12 @@ simulator_t::simulator_t(const char * ir_file)
 
 		std::string fname = try_demangle_and_strip(fita->getName().str());
 		log << " Function " << fname << std::endl;
+
+		// skip functions that are not listed by the user
+		if(!function_list_t::instance().contains(fname)) {
+			log << " Function " << fname << " not matched in list" << std::endl;
+			continue;
+		} // if
 
 		// skip degnerate functions and declarations
 		if(inst_begin(fita) == inst_end(fita)) {

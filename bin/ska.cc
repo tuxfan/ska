@@ -14,6 +14,7 @@
 #include <MachineState.hh>
 #include <Parameters.hh>
 #include <Simulator.hh>
+#include <FunctionList.hh>
 
 #define USAGE(s)																				\
 	std::cerr << "Usage: " << (s) << " -v [-l log file]" <<						\
@@ -45,8 +46,11 @@ int main(int argc, char ** argv) {
 	extern char * optarg;
 	extern int optind;
 
-	while((ch = getopt(argc, argv, "dvo:l:")) != -1) {
+	while((ch = getopt(argc, argv, "dvf:o:l:")) != -1) {
 		switch(ch) {
+			case 'f':
+				ska::function_list_t::instance().read(optarg);
+				break;
 			case 'o':
 				ska::file_io_t::instance().set_out_stream(optarg);
 				break;
