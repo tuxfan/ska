@@ -45,15 +45,15 @@ After configuration, simply type:
 # Running ska and skaview
 
 The *ska* executable takes two filenames as arguements: an architecture
-specification in .xml format, and an LLVM IR file of the source code
+specification in *.xml* format, and an LLVM IR file of the source code
 to be analyzed.  Optionally, you can specify an output file with the
-'-o' flag, e.g.:
+*-o* flag, e.g.:
 
 ```
-% ska -o saxby.ska pentium-m.xml saxby.ll
+% ska -o saxby.ska haswell.xml saxby.ll
 ```
 
-In this case, 'saxby.ska' is the output file, 'pentium-m.xml' is the
+In this case, *saxby.ska* is the output file, *haswell.xml* is the
 architecture file, and 'saxby.ll' is the LLVM IR file.
 
 If you generate an output file, you can use the optional viewer program
