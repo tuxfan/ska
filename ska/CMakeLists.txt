@@ -32,23 +32,25 @@ target_link_libraries(skabin ${CINCH_LINK_LIBRARIES}
 # Create skair script
 #------------------------------------------------------------------------------#
 
-configure_file(${CMAKE_SOURCE_DIR}/ska/skair.in
-  ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/skair)
-file(COPY ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/skair
-  DESTINATION ${CMAKE_BINARY_DIR}/bin
-  FILE_PERMISSIONS
-    OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    GROUP_READ GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE
-)
+endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  configure_file(${CMAKE_SOURCE_DIR}/ska/skair.in
+    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/skair)
+  file(COPY ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/skair
+    DESTINATION ${CMAKE_BINARY_DIR}/bin
+    FILE_PERMISSIONS
+      OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE
+  )
 
-install(FILES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/skair
-  DESTINATION bin
-  PERMISSIONS
-    OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    GROUP_READ GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE
-)
+  install(FILES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/skair
+    DESTINATION bin
+    PERMISSIONS
+      OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE
+  )
+endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
 #~---------------------------------------------------------------------------~-#
 # Formatting options for emacs and vim.

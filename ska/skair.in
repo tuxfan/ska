@@ -109,34 +109,12 @@ case $ftype in
 
 	c|C)
 		cmd=$cc
-
-		case $cc in
-
-			*gcc*)
-				emitflags="-fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir"
-			;;
-
-			*clang*)
-				emitflags="-emit-llvm"
-			;;
-
-		esac
+		emitflags="-emit-llvm"
 	;;
 
 	cc|CC|cxx)
 		cmd=$cxx
-
-		case $cxx in
-
-			*g++*)
-				emitflags="-fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir"
-			;;
-
-			*clang++*)
-				emitflags="-emit-llvm"
-			;;
-
-		esac
+		emitflags="-emit-llvm"
 	;;
 
 esac
