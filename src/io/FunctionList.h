@@ -18,7 +18,7 @@ public:
 
 	bool contains(const char * function) {
 		std::string func(function);
-		contains(func);
+		return contains(func);
 	} // contains
 
 	bool contains(const std::string & function) {

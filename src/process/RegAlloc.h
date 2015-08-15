@@ -6,6 +6,9 @@
 #include <vector>
 #include <list>
 
+#define __STDC_LIMIT_MACROS
+#define __STDC_CONSTANT_MACROS
+
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Function.h>
