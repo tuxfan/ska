@@ -9,7 +9,7 @@
 #include <QtGui/QScrollBar>
 #include <graphviz/gvc.h>
 
-#include <ViewGraph.hh>
+#include "ViewGraph.h"
 
 viewgraph_t::viewgraph_t(QWidget * parent)
 	: QMainWindow(parent), scale_(1.0)

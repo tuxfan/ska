@@ -5,11 +5,11 @@
 
 #include <iostream>
 
-#include <ViewPipeline.hh>
-#include <ViewCycle.hh>
-#include <ViewIssue.hh>
-#include <ViewInstruction.hh>
-#include <ViewHighlight.hh>
+#include "ViewPipeline.h"
+#include "ViewCycle.h"
+#include "ViewIssue.h"
+#include "ViewInstruction.h"
+#include "ViewHighlight.h"
 
 typedef viewhighlight_T<viewpipeline_t> viewhighlight_t;
 

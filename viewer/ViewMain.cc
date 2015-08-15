@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include <ViewMain.hh>
+#include "ViewMain.h"
 
 viewmain_t::viewmain_t()
 {

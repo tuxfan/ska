@@ -1,0 +1,158 @@
+#! /usr/bin/env bash
+#------------------------------------------------------------------------------#
+# Script to generate LLVM IR from input source.
+#------------------------------------------------------------------------------#
+
+#------------------------------------------------------------------------------#
+# Usage
+#------------------------------------------------------------------------------#
+
+usage() {
+cat << EOF
+Usage: $0 options <input file>
+
+This script compiles the given input file into LLVM IR.
+
+Options:
+   -h  Show this message.
+   -o  Specify the output file name (default is 'input'.ll).
+
+Pass-through compiler options:
+	-I  Specify the search path (multiple pathes may be specified)
+	-D  Specify a define (multiple defines may be specified)
+	-W  Specify a warning option (multiple options may be specified)
+	-m  Specify a machine option (multiple options may be specified)
+	-O  Specify the optimization level
+	-g  Enable debugging inforamtion
+
+Environment:
+   SKAIR_CPPFLAGS  Extra compile flags.
+EOF
+exit
+}
+
+output=""
+flags=""
+cxx=@CMAKE_CXX_COMPILER@
+cc=@CMAKE_C_COMPILER@
+fc=@CMAKE_Fortran_COMPILER@
+
+[ $# -lt 1 ] && usage
+
+#------------------------------------------------------------------------------#
+# Parse command line
+#------------------------------------------------------------------------------#
+
+OPTERR=0
+
+while getopts ":hI:D:W:m:O:g:o:" opt ; do
+	case $opt in
+	h)
+		usage
+	;;
+	O)
+		flags="$flags -O$OPTARG"
+	;;
+	I)
+		flags="$flags -I$OPTARG"
+	;;
+	D)
+		flags="$flags -D$OPTARG"
+	;;
+	W)
+		flags="$flags -W$OPTARG"
+	;;
+	m)
+		flags="$flags -m$OPTARG"
+	;;
+	g)
+		flags="$flags -g"
+	;;
+	o)
+		output=$OPTARG
+	;;
+	esac
+done
+
+# advance to first required argument
+shift $(($OPTIND - 1))
+
+#------------------------------------------------------------------------------#
+# Check for user-supplied compiler flags
+#------------------------------------------------------------------------------#
+
+if [ -n "$SKAIR_CPPFLAGS" ] ; then
+	flags=$SKAIR_CPPFLAGS
+elif [ -z "$flags" ] ; then
+	flags="-O2"
+fi
+
+flags=`echo $flags | sed 's,^ ,,'`
+
+#------------------------------------------------------------------------------#
+# Parse language type from file suffix.
+#------------------------------------------------------------------------------#
+
+ftype=`echo $1 | sed 's,.*\.,,g'`
+fbase=`basename $1 .$ftype`
+
+case $ftype in
+
+	f|F|f90|F90)
+		if [ -z $fc ] ; then
+			echo "You must enable Fortran support to process this file!!!"
+			exit 1
+		fi
+		cmd=$fc
+		emitflags="-fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir"
+	;;
+
+	c|C)
+		cmd=$cc
+
+		case $cc in
+
+			*gcc*)
+				emitflags="-fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir"
+			;;
+
+			*clang*)
+				emitflags="-emit-llvm"
+			;;
+
+		esac
+	;;
+
+	cc|CC|cxx)
+		cmd=$cxx
+
+		case $cxx in
+
+			*g++*)
+				emitflags="-fplugin=@DRAGONEGG@ -fplugin-arg-dragonegg-emit-ir"
+			;;
+
+			*clang++*)
+				emitflags="-emit-llvm"
+			;;
+
+		esac
+	;;
+
+esac
+
+#------------------------------------------------------------------------------#
+# Set the output if the user didn't supply a name
+#------------------------------------------------------------------------------#
+
+if [ -z "$output" ] ; then
+	output=$fbase.ll
+fi
+
+#------------------------------------------------------------------------------#
+# Call compiler with dragonegg plugin.
+#------------------------------------------------------------------------------#
+
+echo "Generating LLVM IR with:"
+echo "$cmd $flags $emitflags -o $output -S $1"
+$cmd $flags $emitflags -o $output -S $1

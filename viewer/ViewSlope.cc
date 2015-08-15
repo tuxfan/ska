@@ -3,17 +3,17 @@
  * All rights reserved
  *----------------------------------------------------------------------------*/
 
-#include<iostream>
+#include <iostream>
 
-#include<QtGui/QFrame>
-#include<qwt/qwt_plot.h>
-#include<qwt/qwt_plot_canvas.h>
-#include<qwt/qwt_plot_layout.h>
-#include<qwt/qwt_plot_curve.h>
-#include<qwt/qwt_scale_map.h>
+#include <QtGui/QFrame>
+#include <qwt/qwt_plot.h>
+#include <qwt/qwt_plot_canvas.h>
+#include <qwt/qwt_plot_layout.h>
+#include <qwt/qwt_plot_curve.h>
+#include <qwt/qwt_scale_map.h>
 
-#include<ViewSlope.hh>
-#include<ViewHighlight.hh>
+#include "ViewSlope.h"
+#include "ViewHighlight.h"
 
 typedef viewhighlight_T<viewslope_t> viewhighlight_t;
 

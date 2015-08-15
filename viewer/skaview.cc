@@ -6,7 +6,7 @@
 #include <iostream>
 #include <QtGui/QApplication>
 
-#include <ViewMain.hh>
+#include "ViewMain.h"
 
 int main(int argc, char ** argv) {
 
