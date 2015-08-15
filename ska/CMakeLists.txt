@@ -32,7 +32,7 @@ target_link_libraries(skabin ${CINCH_LINK_LIBRARIES}
 # Create skair script
 #------------------------------------------------------------------------------#
 
-endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   configure_file(${CMAKE_SOURCE_DIR}/ska/skair.in
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/skair)
   file(COPY ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/skair
