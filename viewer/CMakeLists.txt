@@ -36,6 +36,7 @@ add_executable(skaview
   ViewPipeline.cc
   ViewSlope.cc
   ${MOCSrcs}
+  ${RCSrcs}
 )
 
 target_link_libraries(skaview
