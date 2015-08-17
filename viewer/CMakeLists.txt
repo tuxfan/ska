@@ -23,9 +23,7 @@ QT4_ADD_RESOURCES(RCSrcs skaview.qrc)
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${QWT_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 #------------------------------------------------------------------------------#
 # Add a rule to build the executable
@@ -40,6 +38,17 @@ add_executable(skaview
   ${MOCSrcs}
   ${RCSrcs}
 )
+
+#------------------------------------------------------------------------------#
+# Add include dependencies
+#------------------------------------------------------------------------------#
+
+target_include_directories(skaview PRIVATE ${QWT_INCLUDE_DIRS})
+target_include_directories(skaview PRIVATE ${GRAPHVIZ_INCLUDE_DIRS})
+
+#------------------------------------------------------------------------------#
+# Add link dependencies
+#------------------------------------------------------------------------------#
 
 target_link_libraries(skaview
   ${QT_LIBRARIES}
