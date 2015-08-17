@@ -23,7 +23,9 @@ QT4_ADD_RESOURCES(RCSrcs skaview.qrc)
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${QWT_INCLUDE_DIRS})
 
 #------------------------------------------------------------------------------#
 # Add a rule to build the executable

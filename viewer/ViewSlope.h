@@ -6,8 +6,8 @@
 #ifndef ViewSlope_hh
 #define ViewSlope_hh
 
-#include <qwt/qwt_plot.h>
-#include <qwt/qwt_plot_curve.h>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
 
 #include "ViewHighlight.h"
 
