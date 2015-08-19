@@ -492,7 +492,6 @@ void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,
 	auto iita = begin;
 	while(iita != end || active.size() > 0) {
                 //iita -> dump();
-                
                 //printf ("Active size is %d \n",(int)active.size());
 		size_t issued(0);
 		bool issue(true);

@@ -117,10 +117,10 @@ void simplify_nodes::num_phys_regs( register_set_t **rs,
                                 //are assigned from a large pool of 
                                 //regs, this is a stopgap soln ...
 
-  for (int i=0; i <register_size; i++){
+  //for (int i=0; i <register_size; i++){
 
-      printf ("The register type %d has %d registers\n", i, reg_map[i]);
-  }
+      //printf ("The register type %d has %d registers\n", i, reg_map[i]);
+  //}
 
   //reg_map[0] = 100;  // 0 is of int type and has 100 registers
   //reg_map[1] = 100;  // 1 is of float type and has another 100 registers
