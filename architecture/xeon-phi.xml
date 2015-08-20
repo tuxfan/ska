@@ -38,6 +38,9 @@
 	<integer>2</integer>
 </value>
 
+<value key="core::issue_latency">
+	<integer>1</integer>
+</value>
 
 <value key="register_sets">
 	<size>3</size>

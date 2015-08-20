@@ -25,7 +25,7 @@
 <root label="1.0">
 
 <value key="name">
-	<string>Ivybridge</string>
+	<string>Xeon Phi</string>
 </value>
 
 <!--###########################################################################
@@ -35,18 +35,13 @@
  ############################################################################-->
 
 <value key="core::max_issue">
-	<size>6</size>
+	<integer>2</integer>
 </value>
 
 <value key="core::issue_latency">
-	<size>1</size>
+	<integer>1</integer>
 </value>
 
-<!--###########################################################################
- ##############################################################################
- # Logic Units
- ##############################################################################
- ############################################################################-->
 
 <value key="register_sets">
 	<size>3</size>
@@ -89,6 +84,7 @@
 </value>
 
 
+
 <!--###########################################################################
  ##############################################################################
  # Logic Units
@@ -96,16 +92,16 @@
  ############################################################################-->
 
 <value key="lus">
-	<size>6</size>
+	<integer>7</integer>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + Port 0
+ + LSU: ALU unit, all types
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- LSU: instructions -->
 <value key="lu::0::instructions">
-	<string> add sub mul udiv sdiv urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp ret br switch indirectbr invoke resume unreachable phi call select vaarg landingpad fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp  extractelement insertelement shufflevector extractvalue insertvalue  fence atomiccmpxchg atomicrmw  fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp </string>
+	<string>  add sub mul udiv sdiv urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp extractelement insertelement shufflevector extractvalue insertvalue  fence atomiccmpxchg atomicrmw </string>
 </value>
 
 <!-- LSU: types -->
@@ -114,42 +110,40 @@
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- +  Port 1 
+ + ALU: integer arithmetic logic unit
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- ALU: instructions -->
 <value key="lu::1::instructions">
-	<string> add sub mul udiv sdiv urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp ret br switch indirectbr invoke resume unreachable phi call select vaarg landingpad fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp  extractelement insertelement shufflevector extractvalue insertvalue  fence atomiccmpxchg atomicrmw  fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp  </string>
+	<string> add sub mul udiv sdiv urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp  fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp extractelement insertelement shufflevector extractvalue insertvalue  fence atomiccmpxchg atomicrmw </string>
 </value>
 
 <!-- ALU: types -->
 <value key="lu::1::types">
-	<string>integer float</string>
+	<string> any </string>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + Port 2 
+ + LSU: load store unit 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- ILU: instructions -->
-
 <value key="lu::2::instructions">
-	<string> alloca load store getelementptr</string>
+	<string> alloca load store getelementptr </string>
 </value>
 
 <!-- ILU: types -->
-
 <value key="lu::2::types">
-	<string>any</string>
+	<string> any </string>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + Port 3 
+ + LSU: load store unit
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- BRU: instructions -->
 <value key="lu::3::instructions">
-	<string>alloca load store getelementptr </string>
+	<string> alloca load store getelementptr </string>
 </value>
 
 <!-- BRU: types -->
@@ -158,12 +152,12 @@
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + Port 4 
+ + LSU: load store unit
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- FPU: instructions -->
 <value key="lu::4::instructions">
-	<string> store </string>
+	<string> alloca load store getelementptr </string>
 </value>
 
 <!-- FPU: types -->
@@ -172,17 +166,43 @@
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- + Port 5 
+ + VRU : vector unit  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 <!-- VU: instructions -->
 <value key="lu::5::instructions">
-	<string>add sub mul urem srem ashr shl lshr and or xor trunc zext sext ptrtoint inttoptr bitcast icmp ret fadd fsub fmul fdiv frem fptoui fptosi uitofp sitofp fptrunc fpext fcmp  extractelement insertelement extractvalue insertvalue  fence atomiccmpxchg atomicrmw </string>
+	<string>extractelement insertelement shufflevector exractvalue insertvalue</string>
 </value>
 
 <!-- VU: types -->
 <value key="lu::5::types">
-	<string>integer vector</string>
+	<string>vector</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + NOP: no-op unit
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- NOP: instructions -->
+<value key="lu::6::instructions">
+	<string>fence atomiccmpxchg atomicrmw</string>
+</value>
+
+<value key="lu::6::types">
+	<string>any</string>
+</value>
+
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ + BRU: branch unit
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- NOP: instructions -->
+<value key="lu::6::instructions">
+	<string> ret br switch indirectbr invoke resume unreachable phi call select vaarg landingpad  </string>
+</value>
+
+<value key="lu::6::types">
+	<string>any</string>
 </value>
 
 
@@ -205,7 +225,7 @@
 </value>
 
 <value key="reciprocal::ret">
-	<real>2</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -217,7 +237,19 @@
 </value>
 
 <value key="reciprocal::ret::int">
-	<real>2</real>
+	<real>1</real>
+</value>
+
+<!-- ==================================
+ = ret integer
+ =================================== -->
+
+<value key="latency::ret::float"> 
+	<size>1</size>
+</value>
+
+<value key="reciprocal::ret::float">
+	<real>1</real>
 </value>
 
 
@@ -226,73 +258,23 @@
  =================================== -->
 
 <value key="latency::br">
-	<size>0</size>
+	<size>1</size>
 </value>
 
 <value key="reciprocal::br">
-	<real>2</real>
+	<real>1</real>
 </value>
-
-
-<!-- ==================================
- = br
- =================================== -->
-
-<value key="latency::br::memory">
-	<size>0</size>
-</value>
-
-<value key="reciprocal::br::memory">
-	<real>2</real>
-</value>
-
-<!-- ==================================
- = br
- =================================== -->
-
-<value key="latency::br::memory">
-	<size>0</size>
-</value>
-
-<value key="reciprocal::br::memory">
-	<real>2</real>
-</value>
-
-<!-- ==================================
- = br
- =================================== -->
-
-<value key="latency::br::register">
-	<size>0</size>
-</value>
-
-<value key="reciprocal::br::memory">
-	<real>2</real>
-</value>
-
-<!-- ==================================
- = br
- =================================== -->
-
-<value key="latency::br::short_near">
-	<size>0</size>
-</value>
-
-<value key="reciprocal::br::short_near">
-	<real>2</real>
-</value>
-
 
 <!-- ==================================
  = switch
  =================================== -->
 
 <value key="latency::switch">
-	<size>0</size>
+	<size>1</size>
 </value>
 
 <value key="reciprocal::switch">
-	<real>2</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -300,11 +282,11 @@
  =================================== -->
 
 <value key="latency::indirectbr">
-	<size>0</size>
+	<size>1</size>
 </value>
 
 <value key="reciprocal::indirectbr">
-	<real>2</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -312,7 +294,7 @@
  =================================== -->
 
 <value key="latency::invoke">
-	<size>3</size>
+	<size>1</size>
 </value>
 
 <value key="reciprocal::invoke">
@@ -324,7 +306,7 @@
  =================================== -->
 
 <value key="latency::resume">
-	<size>0</size>
+	<size>1</size>
 </value>
 
 <value key="reciprocal::resume">
@@ -335,7 +317,7 @@
  = unreachable
  =================================== -->
 
-<value key="latency::unreachable"> <!-- does this really need latency ? -->
+<value key="latency::unreachable">
 	<size>1</size>
 </value>
 
@@ -351,23 +333,24 @@
  = add
  =================================== -->
 
+<!-- any -->
+<value key="latency::add">
+	<size>1</size>
+</value>
+
+<value key="reciprocal::add">
+	<real>1</real>
+</value>
+
 <!-- integer -->
 <value key="latency::add::integer">
 <size>1</size>
 </value>
 
 <value key="reciprocal::add::integer">
-<real>0.33</real>
+<real>1</real>
 </value>
 
-<!-- vector -->
-<value key="latency::add::vector::integer">
-<size>1</size>
-</value>
-
-<value key="reciprocal::add::vector::integer">
-<real>0.33</real>
-</value>
 
 <!-- ==================================
  = fadd
@@ -391,8 +374,16 @@
 	<real>1</real>
 </value>
 
+<!-- vector -->
+<value key="latency::fadd::vector::integer">
+	<size>1</size>
+</value>
 
-<!-- vector floating point -->
+<value key="reciprocal::fadd::vector::integer">
+	<real>0.5</real>
+</value>
+
+<!-- vector -->
 <value key="latency::fadd::vector::float">
 	<size>3</size>
 </value>
@@ -402,19 +393,26 @@
 </value>
 
 
-
 <!-- ==================================
  = sub
  =================================== -->
 
- <!-- int -->
- <value key="latency::sub::integer">
- <size>1</size>
- </value>
+<value key="latency::sub">
+	<size>1</size>
+</value>
 
- <value key="reciprocal::sub::integer">
- <real>0.25</real>
- </value>
+<value key="reciprocal::sub">
+	<real>1</real>
+</value>
+
+<!-- int -->
+<value key="latency::sub::integer">
+	<size>1</size>
+</value>
+
+<value key="reciprocal::sub::integer">
+	<real>1</real>
+</value>
 
  <!-- vector -->
  <value key="latency::sub::vector::integer">
@@ -447,38 +445,26 @@
 	<real>1</real>
 </value>
 
-
 <!-- vector -->
-<value key="latency::fsub::vector::float">
+<value key="latency::fsub::vector">
 	<size>3</size>
 </value>
 
-<value key="reciprocal::fsub::vector::float">
+<value key="reciprocal::fsub::vector">
 	<real>1</real>
 </value>
-
 
 <!-- ==================================
  = mul
  =================================== -->
 
- <!-- integer -->
- <value key="latency::mul::int">
- <size>3</size>
- </value>
+<value key="latency::mul">
+	<size>11</size>
+</value>
 
- <value key="reciprocal::mul::int">
- <real>1</real>
- </value>
-
- <!-- vector -->
- <value key="latency::mul::vector::int">
- <size>5</size>
- </value>
-
- <value key="reciprocal::mul::vector::int">
- <real>1</real>
- </value>
+<value key="reciprocal::mul">
+	<real>1</real>
+</value>
 
 <!-- ==================================
  = fmul
@@ -486,7 +472,7 @@
 
 <!-- float -->
 <value key="latency::fmul::float">
-	<size>5</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::fmul::float">
@@ -495,34 +481,32 @@
 
 <!-- double -->
 <value key="latency::fmul::double">
-	<size>5</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::fmul::double">
 	<real>1</real>
 </value>
 
-
 <!-- vector -->
-<value key="latency::fmul::vector::float">
-	<size>5</size>
+<value key="latency::fmul::vector">
+	<size>3</size>
 </value>
 
-<value key="reciprocal::fmul::vector::float">
+<value key="reciprocal::fmul::vector">
 	<real>1</real>
 </value>
-
 
 <!-- ==================================
  = udiv
  =================================== -->
 
 <value key="latency::udiv">
-	<size>64</size>
+	<size>41</size>
 </value>
 
 <value key="reciprocal::udiv">
-	<real>48</real>
+	<real>41</real>
 </value>
 
 <!-- ==================================
@@ -530,11 +514,11 @@
  =================================== -->
 
 <value key="latency::sdiv">
-	<size>71</size>
+	<size>41</size>
 </value>
 
 <value key="reciprocal::sdiv">
-	<real>50</real>
+	<real>41</real>
 </value>
 
 <!-- ==================================
@@ -543,42 +527,41 @@
 
 <!-- float -->
 <value key="latency::fdiv::float">
-	<size>17</size>
+	<size>33</size>
 </value>
 
 <value key="reciprocal::fdiv::float">
-	<real>13</real>
+	<real>33</real>
 </value>
 
 <!-- double -->
 <value key="latency::fdiv::double">
-	<size>17</size>
+	<size>33</size>
 </value>
 
 <value key="reciprocal::fdiv::double">
-	<real>13</real>
+	<real>33</real>
 </value>
 
-<!-- vector xmm-->
-<value key="latency::fdiv::vector::xmm">
-	<size>11.5</size>
+<!-- vector -->
+<value key="latency::fdiv::vector">
+	<size>33</size>
 </value>
 
-<value key="reciprocal::fdiv::vector::xmm">
-	<real>7</real>
+<value key="reciprocal::fdiv::vector">
+	<real>33</real>
 </value>
-
 
 <!-- ==================================
  = urem
  =================================== -->
 
 <value key="latency::urem">
-	<size>19</size>
+	<size>40</size>
 </value>
 
 <value key="reciprocal::urem">
-	<real>13</real>
+	<real>40</real>
 </value>
 
 <!-- ==================================
@@ -586,11 +569,11 @@
  =================================== -->
 
 <value key="latency::srem">
-	<size>19</size>
+	<size>40</size>
 </value>
 
 <value key="reciprocal::srem">
-	<real>13</real>
+	<real>40</real>
 </value>
 
 <!-- ==================================
@@ -599,29 +582,29 @@
 
 <!-- float -->
 <value key="latency::frem::float">
-	<size>23</size>
+	<size>40</size>
 </value>
 
 <value key="reciprocal::frem::float">
-	<real>13</real>
+	<real>40</real>
 </value>
 
 <!-- double -->
 <value key="latency::frem::double">
-	<size>23</size>
+	<size>40</size>
 </value>
 
 <value key="reciprocal::frem::double">
-	<real>13</real>
+	<real>40</real>
 </value>
 
 <!-- vector -->
 <value key="latency::frem::vector">
-	<size>23</size>
+	<size>2</size>
 </value>
 
 <value key="reciprocal::frem::vector">
-	<real>13</real>
+	<real>2</real>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -637,7 +620,7 @@
 </value>
 
 <value key="reciprocal::shl">
-	<real>0.5</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -649,7 +632,7 @@
 </value>
 
 <value key="reciprocal::lshr">
-	<real>0.5</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -661,7 +644,7 @@
 </value>
 
 <value key="reciprocal::ashr">
-	<real>0.5</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -674,7 +657,7 @@
 </value>
 
 <value key="reciprocal::and">
-	<real>0.33</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -686,7 +669,7 @@
 </value>
 
 <value key="reciprocal::or">
-	<real>0.33</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -698,7 +681,7 @@
 </value>
 
 <value key="reciprocal::xor">
-	<real>0.33</real>
+	<real>1</real>
 </value>
 
 <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -723,8 +706,8 @@
  =================================== -->
 
 <!-- load -->
-<value key="latency::load"> 
-	<size> 3 </size>
+<value key="latency::load">
+	<size>1</size>
 </value>
 
 <value key="reciprocal::load">
@@ -737,7 +720,7 @@
 
 <!-- store -->
 <value key="latency::store">
-	<size>3</size>
+	<size>1</size>
 </value>
 
 <value key="reciprocal::store">
@@ -750,7 +733,7 @@
 
 <!-- getelementptr -->
 <value key="latency::getelementptr">
-	<size>3</size>
+	<size>1</size>
 </value>
 
 <value key="reciprocal::getelementptr">
@@ -776,7 +759,7 @@
 
 <!-- atomiccmpxchg -->
 <value key="latency::atomiccmpxchg">
-	<size>7</size>
+	<size>1</size>
 </value>
 
 <value key="reciprocal::atomiccmpxchg">
@@ -789,7 +772,7 @@
 
 <!-- atomicrmw -->
 <value key="latency::atomicrmw">
-	<size>7</size>
+	<size>1</size>
 </value>
 
 <value key="reciprocal::atomicrmw">
@@ -957,7 +940,7 @@
 </value>
 
 <value key="reciprocal::icmp">
-	<real>0.33</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -969,7 +952,7 @@
 </value>
 
 <value key="reciprocal::fcmp">
-	<real>0.33</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -994,7 +977,7 @@
 </value>
 
 <value key="reciprocal::call">
-	<real>2</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -1006,7 +989,7 @@
 </value>
 
 <value key="reciprocal::select">
-	<real>0.5</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -1090,7 +1073,7 @@
 </value>
 
 <value key="reciprocal::extractvalue">
-	<real>0.33</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -1102,7 +1085,7 @@
 </value>
 
 <value key="reciprocal::insertvalue">
-	<real>0.33</real>
+	<real>1</real>
 </value>
 
 <!-- ==================================
@@ -1175,38 +1158,38 @@
 
 <!-- float -->
 <value key="latency::sqrt::float">
-	<size>16.5</size>
+	<size>70</size>
 </value>
 
 <value key="reciprocal::sqrt::float">
-	<real>12.5</real>
+	<real>70</real>
 </value>
 
 <!-- float -->
 <value key="latency::sqrtf::float">
-	<size>16.5</size>
+	<size>70</size>
 </value>
 
 <value key="reciprocal::sqrtf::float">
-	<real>12.5</real>
+	<real>70</real>
 </value>
 
 <!-- double -->
 <value key="latency::sqrt::double">
-	<size>16.5</size>
+	<size>70</size>
 </value>
 
 <value key="reciprocal::sqrt::double">
-	<real>12.5</real>
+	<real>70</real>
 </value>
 
 <!-- vector -->
 <value key="latency::sqrt::vector">
-	<size>11</size>
+	<size>26</size>
 </value>
 
 <value key="reciprocal::sqrt::vector">
-	<real>7</real>
+	<real>33</real>
 </value>
 
 <!-- ==================================
@@ -1215,29 +1198,29 @@
 
 <!-- float -->
 <value key="latency::rsqrt::float">
-	<size>16.5</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::rsqrt::float">
-	<real>12.5</real>
+	<real>2</real>
 </value>
 
 <!-- double -->
 <value key="latency::rsqrt::double">
-	<size>16.5</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::rsqrt::double">
-	<real>12.5</real>
+	<real>2</real>
 </value>
 
 <!-- vector -->
 <value key="latency::rsqrt::vector">
-	<size>11</size>
+	<size>3</size>
 </value>
 
 <value key="reciprocal::rsqrt::vector">
-	<real>7</real>
+	<real>2</real>
 </value>
 
 <!-- ==================================
@@ -1246,25 +1229,25 @@
 
 <!-- float -->
 <value key="latency::hadd::float">
-	<size>1</size>
+	<size>4</size>
 </value>
 
 <value key="reciprocal::hadd::float">
-	<real>0.25</real>
+	<real>2</real>
 </value>
 
 <!-- double -->
 <value key="latency::hadd::double">
-	<size>1</size>
+	<size>4</size>
 </value>
 
 <value key="reciprocal::hadd::double">
-	<real>0.25</real>
+	<real>2</real>
 </value>
 
 <!-- vector -->
 <value key="latency::hadd::vector">
-	<size>3</size>
+	<size>4</size>
 </value>
 
 <value key="reciprocal::hadd::vector">
@@ -1277,29 +1260,29 @@
 
 <!-- float -->
 <value key="latency::log::float">
-	<size>95</size>
+	<size>103</size>
 </value>
 
 <value key="reciprocal::log::float">
-	<real>1</real>
+	<real>103</real>
 </value>
 
 <!-- double -->
 <value key="latency::log::double">
-	<size>95</size>
+	<size>103</size>
 </value>
 
 <value key="reciprocal::log::double">
-	<real>1</real>
+	<real>103</real>
 </value>
 
 <!-- vector -->
 <value key="latency::log::vector">
-	<size>95</size>
+	<size>103</size>
 </value>
 
 <value key="reciprocal::log::vector">
-	<real>1</real>
+	<real>103</real>
 </value>
 
 <!-- ==================================
@@ -1308,29 +1291,29 @@
 
 <!-- float -->
 <value key="latency::pow::float">
-	<size>163</size>
+	<size>103</size>
 </value>
 
 <value key="reciprocal::pow::float">
-	<real>68</real>
+	<real>103</real>
 </value>
 
 <!-- double -->
 <value key="latency::pow::double">
-	<size>163</size>
+	<size>103</size>
 </value>
 
 <value key="reciprocal::pow::double">
-	<real>68</real>
+	<real>103</real>
 </value>
 
 <!-- vector -->
 <value key="latency::pow::vector">
-	<size>163</size>
+	<size>103</size>
 </value>
 
 <value key="reciprocal::pow::vector">
-	<real>68</real>
+	<real>103</real>
 </value>
 
 <!-- ==================================
@@ -1339,11 +1322,11 @@
 
 <!-- float -->
 <value key="latency::rand::integer">
-	<size>1</size>
+	<size>4</size>
 </value>
 
 <value key="reciprocal::rand::integer">
-	<real>109</real>
+	<real>2</real>
 </value>
 
 <!-- ==================================

@@ -11,6 +11,12 @@ add_executable(skabin ska.cc)
 set_target_properties(skabin PROPERTIES OUTPUT_NAME ska)
 
 #------------------------------------------------------------------------------#
+# Add preprocessor flags
+#------------------------------------------------------------------------------#
+
+target_compile_definitions(skabin PRIVATE GRAPHVIZ_FOUND=${GRAPHVIZ_FOUND})
+
+#------------------------------------------------------------------------------#
 # Add include dependencies
 #------------------------------------------------------------------------------#
 
