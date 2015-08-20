@@ -28,8 +28,9 @@ public:
 	 * Constructor.
 	 *-------------------------------------------------------------------------*/
 
-	core_t(size_t max_issue)
-		: max_issue_(max_issue) {}
+	core_t(size_t max_issue, size_t issue_latency)
+		: max_issue_(max_issue), issue_latency_(issue_latency),
+		in_issue_(false), last_issue_(0), machine_(machine_state_t::instance()) {}
 
 	/*-------------------------------------------------------------------------*
 	 * Destructor.
@@ -64,8 +65,18 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	int32_t accept(instruction_t * inst) {
+
+		// If this is true, the core can't issue because of issue latency
+		if(issue_latency_ > 1 &&
+			in_issue_ &&
+			last_issue_ != machine_.current()) {
+			return -1;
+		} // if
+
 		for(auto unit = units_.begin(); unit != units_.end(); ++unit) {
 			if((*unit)->issue(inst)) {
+				in_issue_ = true;
+				last_issue_ = machine_.current();
 				return (*unit)->id();
 			} // if
 		} // for
@@ -83,6 +94,11 @@ public:
 		} // for
 
 		machine_state_t::instance().advance();
+
+		// check to see if we are still within the latency window
+		if((machine_.current() - last_issue_) >= issue_latency_) {
+			in_issue_ = false;
+		} // if
 	} // advance
 
 	/*-------------------------------------------------------------------------*
@@ -90,6 +106,12 @@ public:
 	 *-------------------------------------------------------------------------*/
 
 	size_t max_issue() const { return max_issue_; }
+
+	/*-------------------------------------------------------------------------*
+	 * Return the issue latency of the core.
+	 *-------------------------------------------------------------------------*/
+
+	size_t issue_latency() const { return issue_latency_; }
 
 	/*-------------------------------------------------------------------------*
 	 * Release the current instruction stream.
@@ -104,6 +126,10 @@ private:
 	std::vector<lu_t *> units_;	
 	std::vector<register_set_t *> register_sets_;
 	size_t max_issue_;
+	size_t issue_latency_;
+	bool in_issue_;
+	size_t last_issue_;
+	machine_state_t & machine_;
 
 }; // class core_t
 

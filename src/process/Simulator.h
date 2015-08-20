@@ -132,11 +132,12 @@ simulator_t::simulator_t(const char * ir_file)
 	 * Initialize core.
 	 *-------------------------------------------------------------------------*/
 
-	size_t max_issue;
+	size_t max_issue, issue_latency;
 	arch.getval(max_issue, "core::max_issue");
+	arch.getval(issue_latency, "core::issue_latency");
 
 	log << " --- Creating Core ---" << std::endl;
-	core_ = new core_t(max_issue);
+	core_ = new core_t(max_issue, issue_latency);
 
 	arch.getval(register_sets, "register_sets");
 
@@ -411,6 +412,8 @@ simulator_t::simulator_t(const char * ir_file)
 		output << "KEYWORD_STORE_BYTES " << stats["store bytes"] << std::endl;
 		output << "# Derived Statistics" << std::endl;
 		output << "KEYWORD_CYCLES_PER_INSTRUCTION " <<
+			double(machine.current())/retired.size() << std::endl;
+		output << "KEYWORD_INSTRUCTIONS_PER_CYCLE " <<
 			retired.size()/double(machine.current()) << std::endl;
 
 		double balance = stats["load bytes"] == 0 ? 0.0 :
@@ -889,7 +892,7 @@ size_t simulator_t::bytes(llvm::Type * type) {
 			return sizeof(nullptr);
 
 		case llvm::Type::HalfTyID:
-			break;
+			return 2;
 
 		case llvm::Type::FloatTyID:
 			return 4;
@@ -898,13 +901,13 @@ size_t simulator_t::bytes(llvm::Type * type) {
 			return 8;
 
 		case llvm::Type::X86_FP80TyID:
-			break;
+			return 10;
 
 		case llvm::Type::FP128TyID:
-			break;
+			return 16;
 
 		case llvm::Type::PPC_FP128TyID:
-			break;
+			return 16;
 
 		case llvm::Type::LabelTyID:
 			break;
@@ -913,10 +916,10 @@ size_t simulator_t::bytes(llvm::Type * type) {
 			break;
 
 		case llvm::Type::X86_MMXTyID:
-			break;
+			return 8;
 
 		case llvm::Type::IntegerTyID:
-			break;
+			return 4;
 
 		case llvm::Type::FunctionTyID:
 			break;
@@ -932,7 +935,7 @@ size_t simulator_t::bytes(llvm::Type * type) {
 			return bytes(type->getPointerElementType());
 
 		case llvm::Type::VectorTyID:
-                        return bytes(type->getVectorElementType());
+  			return bytes(type->getVectorElementType());
 			break;
 
 		default:
