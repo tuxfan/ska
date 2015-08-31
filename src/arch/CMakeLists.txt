@@ -12,6 +12,11 @@ set(arch_HEADERS
   PARENT_SCOPE
 )
 
+if(ENABLE_UNIT_TESTS)
+  cinch_add_unit(register_set
+    SOURCES unit/register_set.cc)
+endif(ENABLE_UNIT_TESTS)
+
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.
 # vim: set tabstop=2 shiftwidth=2 expandtab :

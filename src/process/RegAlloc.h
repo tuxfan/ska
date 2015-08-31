@@ -1,3 +1,7 @@
+/*~--------------------------------------------------------------------------~*
+ * HEADER
+ *~--------------------------------------------------------------------------~*/
+
 #ifndef RegAlloc_h
 #define RegAlloc_h
 
@@ -47,16 +51,24 @@ namespace ska {
 
 // typedef std::map<llvm::Value *, dependency_t *> dependency_map_t;
 
-class flow_graph {
- private:
+/*----------------------------------------------------------------------------*
+ * Flow graph class.
+ *----------------------------------------------------------------------------*/
+
+class flow_graph
+{
+private:
+
   std::map<llvm::Value *, bool> regCover;  // indicate whether
+
   // value was covered
   // during liveness
   // analysis
-  typedef struct live_info {
+
+  struct live_info {
     std::map<llvm::Value *, bool> live_in;
     std::map<llvm::Value *, bool> live_out;
-  } live_info;  // typedef one row of the liveness table
+  };  // struct live_info
 
   std::map<llvm::Value *, live_info> live_tab;  // liveness table
 
@@ -76,20 +88,26 @@ class flow_graph {
 
   llvm::Module::iterator root_fita;
 
-  register_set_t **rs;
+  //register_set_t **rs;
+  std::vector<register_set_shared_t> rs_;
   size_t register_sets;
 
- public:
+public:
+
+  // Creates the CFG
   flow_graph(size_t register_sets, llvm::Module::iterator fita,
-             llvm::Module::iterator end, register_set_t ** rs);  // creates the CFG
+    llvm::Module::iterator end, std::vector<register_set_shared_t> & rs);
 
   int liveness_flow(llvm::Value *op,
-                    llvm::ilist_iterator<llvm::Instruction> iita,
-                    llvm::BasicBlock *bita);
+    llvm::ilist_iterator<llvm::Instruction> iita,
+    llvm::BasicBlock *bita);
+
   // populates liveness info
   void build_iGraph();  // interference
+
   // graph
   void traverse_list(std::map<llvm::Value *, bool> imap);
+
   // basically detects all pairs
   // and adds to the intf_table
   std::ofstream debug_liv;  // debug liveness info
@@ -100,28 +118,31 @@ class flow_graph {
   std::map<llvm::Value *, bool>  // a map of instructions
       BBLiveness(llvm::BasicBlock *bita, tree_list live_in);
 
-  void  // a map of instructions
-      all_BB_liveness(llvm::Function *bita);
+  // a map of instructions
+  void all_BB_liveness(llvm::Function *bita);
 
   bool check_livein(std::map<llvm::Value *, bool>,
-                    llvm::BasicBlock *bb);  // check if there
+    llvm::BasicBlock *bb);  // check if there
   // was any change in
   // live_in when
   // recursing over BBs
 
-  void simplify_iGraph() { simp_igraph = new simplify_nodes(intf_table,rs,
-                                                 register_sets); };
+  void simplify_iGraph() {
+    simp_igraph = new simplify_nodes(intf_table, rs, register_sets);
+  }
 
   bool select_regs(llvm::Module::iterator fita);
   void empty_the_maps();
 
-};  // flowgraph
+}; // class flow_graph
 
 flow_graph::flow_graph(size_t register_sets, llvm::Module::iterator fita,
-                       llvm::Module::iterator end, register_set_t ** rs){
+  llvm::Module::iterator end, std::vector<register_set_shared_t> & rs)
+{
 
   this->register_sets = register_sets;
-  this->rs = rs;
+  //this->rs = rs;
+  rs_ = rs;
 
   // rootBB = new node; //root basic block
   auto aita = fita->arg_begin();  // argument iterator
@@ -447,3 +468,7 @@ void flow_graph::empty_the_maps() {  // not needed if we make new flowgraph for
 }  // namespace ska
 
 #endif // RegAlloc_h
+
+/*~-------------------------------------------------------------------------~-*
+ * vim: set tabstop=2 shiftwidth=2 expandtab :
+ *~-------------------------------------------------------------------------~-*/

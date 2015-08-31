@@ -1,0 +1,143 @@
+#------------------------------------------------------------------------------#
+# Intel Xeon Phi Knight's Corner
+#------------------------------------------------------------------------------#
+
+name: Xeon Phi (KNC)
+
+core:
+    max_issue: 2
+    issue_latency: 2
+
+    register_sets:
+        - type: integer
+          registers: 23
+        - type: float
+          registers: 8
+        - type: vector
+          registers: 16
+
+    logical_units:
+
+        - name: ALU
+          types: any
+          instructions: >
+            add sub mul udiv sdiv urem srem ashr shl lshr and or xor trunc
+            zext sext ptrtoint inttoptr bitcast icmp fadd fsub fmul fdiv frem
+            fptouifptosi uitofp sitofp fptrunc fpext fcmp extractelement
+            insertelement shufflevector extractvalue insertvalue fence
+            atomiccmpxchg atomicrmw
+
+        - name: ALU
+          types: any
+          instructions: >
+            add sub mul udiv sdiv urem srem ashr shl lshr and or xor trunc
+            zext sext ptrtoint inttoptr bitcast icmp  fadd fsub fmul fdiv frem
+            fptoui fptosi uitofp sitofp fptrunc fpext fcmp extractelement
+            insertelement shufflevector extractvalue insertvalue fence
+            atomiccmpxchg atomicrmw
+
+        - name: LSU0
+          types: any
+          instructions: >
+            alloca load store getelementptr
+
+        - name: LSU1
+          types: any
+          instructions: >
+            alloca load store getelementptr
+
+        - name: LSU2
+          types: any
+          instructions: >
+            alloca load store getelementptr
+
+        - name: VU
+          types: vector
+          instructions: >
+            extractelement insertelement shufflevector exractvalue insertvalue
+
+        - name: NOP
+          types: any
+          instructions: >
+            fence atomiccmpxchg atomicrmw
+
+        - name: BRU
+          types: any
+          instructions: >
+            ret br switch indirectbr invoke resume unreachable phi call
+            select vaarg landingpad
+
+instructions:
+
+    - name: ret
+      types:
+        - type: any
+          latency: 1
+          reciprocal: 1
+        - type: integer
+          latency: 1
+          reciprocal: 1
+        - type: float
+          latency: 1
+          reciprocal: 1
+
+    - name: br
+      types:
+        - type: any
+          latency: 1
+          reciprocal: 1
+          
+    - name: switch
+      types:
+        - type: any
+          latency: 1
+          reciprocal: 1
+
+    - name: indirectbr
+      types:
+        - type: any
+          latency: 1
+          reciprocal: 1
+
+    - name: invoke
+      types:
+        - type: any
+          latency: 1
+          reciprocal: 1
+
+    - name: resume
+      types:
+        - type: any
+          latency: 1
+          reciprocal: 1
+
+    - name: unreachable
+      types:
+        - type: any
+          latency: 1
+          reciprocal: 1
+
+    - name: add
+      types:
+        - type: any
+          latency: 1
+          reciprocal: 1
+        - type: integer
+          latency: 1
+          reciprocal: 1
+
+    - name: fadd
+      types:
+        - type: integer
+          latency: 1
+          reciprocal: 0.5
+        - type: float
+          latency: 3
+          reciprocal: 1
+        - type: double
+          latency: 3
+          reciprocal: 1
+
+#------------------------------------------------------------------------------#
+# vim: set tabstop=4 shiftwidth=4 expandtab :
+#------------------------------------------------------------------------------#

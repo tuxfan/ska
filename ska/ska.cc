@@ -15,6 +15,7 @@
 #include <ska/params/Parameters.h>
 #include <ska/process/Simulator.h>
 #include <ska/io/FunctionList.h>
+#include <ska/io/Model.h>
 
 #define USAGE(s)																				\
 	std::cerr << "Usage: " << (s) << " -v [-l log file]" <<						\
@@ -77,6 +78,10 @@ int main(int argc, char ** argv) {
 
 	std::string archfile = ska::try_file(argv[0], "SKA_ARCH_PATH");
 	ska::parameters_t::instance().init(archfile.c_str(), false);
+
+	// TEMP: process 3rd argument as yaml input
+	std::string yamlfile = ska::try_file(argv[2], "SKA_ARCH_PATH");
+	ska::model_t::instance().init(yamlfile);
 
 	/*-------------------------------------------------------------------------*
 	 * Call simulator.

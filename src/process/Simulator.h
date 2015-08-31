@@ -12,6 +12,7 @@
 
 #include "RegAlloc.h" //contains other llvm includes
 #include "../io/FunctionList.h"
+#include "../io/Model.h"
 
 namespace ska {
 
@@ -66,11 +67,11 @@ private:
 	void update_opcount(llvm::Instruction * instruction);
 
 
-        /*-------------------------------------------------------------------------*
-         * Do register allocation
-         *-------------------------------------------------------------------------*/
+	/*-------------------------------------------------------------------------*
+	 * Do register allocation
+	 *-------------------------------------------------------------------------*/
 
-        void doRegAlloc (llvm::Module::iterator it, llvm::Module::iterator end );
+	void doRegAlloc (llvm::Module::iterator it, llvm::Module::iterator end);
 
 	/*-------------------------------------------------------------------------*
 	 * Compute the number of bytes associated with a given llvm::Type.  This
@@ -84,10 +85,11 @@ private:
 	llvm::LLVMContext llvm_context_;
 	std::unique_ptr<llvm::Module> llvm_module_;
 
-	core_t * core_;
+	core_shared_t core_;
 
-        register_set_t ** rs;
-        size_t register_sets;
+	register_set_t ** rs;
+	size_t register_sets;
+
 }; // class simulator_t
 
 /*----------------------------------------------------------------------------*
@@ -95,7 +97,7 @@ private:
  *----------------------------------------------------------------------------*/
 
 simulator_t::simulator_t(const char * ir_file)
-	: llvm_module_(nullptr), core_(nullptr)
+	: llvm_module_(nullptr)
 {
 	/*-------------------------------------------------------------------------*
 	 * Write header information.
@@ -114,6 +116,12 @@ simulator_t::simulator_t(const char * ir_file)
 	std::string architecture;
 	parameters_t & arch = parameters_t::instance();
 	arch.getval(architecture, "name");
+
+	// FIXME: YAML
+	model_t & model = model_t::instance();
+	//auto name = model("name");
+	std::cerr << model["name"] << std::endl;
+
 	output << "KEYWORD_ARCHITECTURE " << architecture <<
 		std::endl << std::endl;
 
@@ -132,17 +140,50 @@ simulator_t::simulator_t(const char * ir_file)
 	 * Initialize core.
 	 *-------------------------------------------------------------------------*/
 
+	// FIXME: YAML
+	auto core = model["core"];
+
 	size_t max_issue, issue_latency;
 	arch.getval(max_issue, "core::max_issue");
 	arch.getval(issue_latency, "core::issue_latency");
 
+	// FIXME: YAML
+	std::cerr << core["max_issue"] << std::endl;
+	std::cerr << core["issue_latency"] << std::endl;
+	
+
 	log << " --- Creating Core ---" << std::endl;
-	core_ = new core_t(max_issue, issue_latency);
+	core_ = std::make_shared<core_t>(core["max_issue"].as<size_t>(),
+		core["issue_latency"].as<size_t>());
 
-	arch.getval(register_sets, "register_sets");
+	//arch.getval(register_sets, "register_sets");
+	//rs = (register_set_t **)malloc(register_sets*sizeof(register_set_t * ));
 
-        rs = (register_set_t **)malloc(register_sets*sizeof(register_set_t * ));
+	// FIXME: change to C++
+	size_t i(0);
+	for(auto set: core["register_sets"]) {
+		rs[i] =
+			(set["type"].as<std::string>() == "integer") ?
+				new register_set_t(register_set_t::register_type_t::Integer,
+					set["registers"].as<size_t>()) :
+			(set["type"].as<std::string>() == "float") ?
+				new register_set_t(register_set_t::register_type_t::Float,
+					set["registers"].as<size_t>()) :
+			(set["type"].as<std::string>() == "vector") ?
+				new register_set_t(register_set_t::register_type_t::Vector,
+					set["registers"].as<size_t>()) :
+			// default
+				nullptr;
 
+		if(rs == nullptr) {
+			ExitOnError("Unknown register type", ska::UnknownCase);
+		} // if
+		
+		++i;
+	} // for
+
+#if 0
+	// FIXME: Re-implement
 	for(size_t i(0); i<register_sets; ++i) {
 		char key[256];
 		std::string type;
@@ -154,7 +195,7 @@ simulator_t::simulator_t(const char * ir_file)
 		sprintf(key, "rs::%d::registers", int(i));
 		arch.getval(registers, key);
 
-		     rs[i] =
+		rs[i] =
 			(type == "Integer") ?
 				new register_set_t(register_set_t::register_type_t::Integer,
 					registers) :
@@ -171,14 +212,31 @@ simulator_t::simulator_t(const char * ir_file)
 			ExitOnError("Unknown register type", ska::UnknownCase);
 		} // if
 	} // for
+#endif
 
-        //need to pull this into regalloc
+   //need to pull this into regalloc
+
+	size_t id(0);
+	for(auto unit: core["logical_units"]) {
+		lu_shared_t lu = std::make_shared<lu_t>(i++);
+
+		std::istringstream stream(unit["instructions"].as<std::string>());
+		std::string op;
+		while(getline(stream, op, ' ')) {
+			std::cerr << op << std::endl;
+		} // while
+
+	} // for
+
+std::exit(0);
 
 	size_t lus;
 	arch.getval(lus, "lus");
 
 	for(size_t i(0); i<lus; ++i) {
-		lu_t * lu = new lu_t(i);
+		lu_shared_t lu = std::make_shared<lu_t>(i);
+
+		
 
 		// parse instructions that this LU can handle
 		char key[256];
@@ -471,7 +529,6 @@ simulator_t::simulator_t(const char * ir_file)
 
 simulator_t::~simulator_t()
 {
-	delete core_;
 } // simulator_t::~simulator_t
 
 void simulator_t::process(llvm::inst_iterator begin, llvm::inst_iterator end,

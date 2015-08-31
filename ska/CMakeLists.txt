@@ -22,6 +22,7 @@ target_compile_definitions(skabin PRIVATE GRAPHVIZ_FOUND=${GRAPHVIZ_FOUND})
 
 target_include_directories(skabin PRIVATE ${LLVM_INCLUDE_DIRS})
 target_include_directories(skabin PRIVATE ${XercesC_INCLUDE_DIR})
+target_include_directories(skabin PRIVATE ${YAMLCPP_INCLUDE_DIR})
 target_include_directories(skabin PRIVATE ${GRAPHVIZ_INCLUDE_DIRS})
 
 #------------------------------------------------------------------------------#
@@ -31,6 +32,7 @@ target_include_directories(skabin PRIVATE ${GRAPHVIZ_INCLUDE_DIRS})
 target_link_libraries(skabin ${CINCH_LINK_LIBRARIES}
   ${LLVM_LIBRARIES} ${LLVM_SYSTEM_LIBS}
   ${XercesC_LIBRARY}
+  ${YAMLCPP_LIBRARY}
   ${GRAPHVIZ_LIBRARIES}
   )
 
